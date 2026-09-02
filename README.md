@@ -16,3 +16,24 @@ npm run dev
 - `src/styles.css`：响应式视觉样式
 
 当前语音使用浏览器 `SpeechSynthesis`，点击“听一听题目”即可播放。后续可在 `speak()` 中替换为云端 TTS 或本地音频播放。
+
+## 上传到 GitHub
+
+先在本机完成一次登录：
+
+```bash
+gh auth login
+```
+
+然后在项目目录执行（把 `your-name` 换成你的 GitHub 用户名）：
+
+```bash
+gh repo create little-fun-learning --public --source=. --remote=origin --push
+```
+
+如果你已经创建了空仓库，也可以直接设置远程地址后推送：
+
+```bash
+git remote add origin https://github.com/your-name/little-fun-learning.git
+git push -u origin master
+```
