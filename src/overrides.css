@@ -1,0 +1,17 @@
+.active-model{display:inline-flex;align-items:center;margin-top:9px;padding:4px 9px;border-radius:8px;background:#fff4e3;color:#b68b57;font-size:10px;font-weight:700}
+.model-chip{display:flex;align-items:center;gap:7px;margin-top:13px;color:#8aa095;font-size:10px}
+.model-chip b{border-radius:8px;background:#e7f4ea;padding:5px 8px;color:#51856d}
+.model-settings{display:grid;gap:11px;margin-top:18px}
+.model-setting{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px;border:1px solid #eee7db;border-radius:14px;background:#fffefa}
+.model-setting-label{display:flex;align-items:center;gap:10px;min-width:0}
+.model-setting-icon{width:30px;height:30px;display:grid;place-items:center;background:#fff2d8;border-radius:9px;font-size:16px}
+.model-setting-label b{display:block;font-size:12px}
+.model-setting-label small{display:block;margin-top:3px;color:#a3aaa7;font-size:10px}
+.model-setting select{max-width:195px;border:1px solid #e9e2d7;background:white;border-radius:9px;padding:8px;color:#5d706f;font-size:10px}
+.config-tip{margin:14px 0 2px;padding:10px 12px;border-radius:10px;background:#f2f7f1;color:#759083;font-size:10px;line-height:1.7}
+.config-tip b{color:#4e8068}
+.modal-actions{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:17px}
+.reset-btn{border:1px solid #eadfd2;background:white;color:#aa9880;border-radius:12px;padding:10px 13px;font-size:11px}
+.modal-actions .primary-btn{margin:0;padding:11px 14px;font-size:12px}
+.modal-actions .primary-btn .arrow{font-size:17px}
+@media(max-width:800px){.model-setting{align-items:flex-start;flex-direction:column}.model-setting select{max-width:none;width:100%}.active-model{font-size:9px}}
