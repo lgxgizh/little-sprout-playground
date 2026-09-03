@@ -2,6 +2,7 @@ const DB_NAME = "little-sprout-playground";
 const DB_VERSION = 2;
 const PROFILE_STORAGE_KEY = "little-sprout-profile";
 const LEGACY_PROFILE_KEY = "little-fun-profile";
+const CHILDREN_STORAGE_KEY = "little-sprout-children";
 const DEFAULT_PROFILE_ID = "default";
 
 export function createDefaultProfile() {
@@ -17,10 +18,33 @@ export function createDefaultProfile() {
       colors: { attempts: 0, correct: 0, lastPracticed: null },
       animals: { attempts: 0, correct: 0, lastPracticed: null },
       shapes: { attempts: 0, correct: 0, lastPracticed: null },
+      english: { attempts: 0, correct: 0, lastPracticed: null },
     },
     questionStats: {},
     events: [],
     awards: [],
+  };
+}
+
+export function createDefaultChild(options = {}) {
+  const now = new Date().toISOString();
+  return {
+    id:
+      options.id ||
+      `child-${globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(16).slice(2)}`}`,
+    nickname: options.nickname || "小朋友",
+    age: Number(options.age) || 3,
+    gender: options.gender || "unspecified",
+    englishLevel: options.englishLevel || "not-started",
+    baseline: options.baseline || {
+      status: "not-started",
+      score: null,
+      total: 3,
+      completedAt: null,
+      suggestedLevel: null,
+    },
+    createdAt: options.createdAt || now,
+    profile: options.profile || createDefaultProfile(),
   };
 }
 
@@ -38,6 +62,21 @@ function saveLocalStorage(key, value) {
   } catch {
     /* 无痕模式或存储空间不足时，内存中的会话仍然可用 */
   }
+}
+
+function mergeChild(saved) {
+  const child = createDefaultChild(saved || {});
+  return {
+    ...child,
+    ...saved,
+    profile: mergeProfile(saved?.profile || saved),
+    baseline: { ...child.baseline, ...(saved?.baseline || {}) },
+  };
+}
+
+function localChildrenValue() {
+  const saved = localStorageValue(CHILDREN_STORAGE_KEY);
+  return Array.isArray(saved) ? saved.map(mergeChild) : [];
 }
 
 function mergeProfile(saved) {
@@ -154,6 +193,72 @@ export async function saveProfile(profile) {
   }
 }
 
+export async function loadChildren() {
+  try {
+    const records = await withDatabase((db) =>
+      requestToPromise(
+        db.transaction("children", "readonly").objectStore("children").getAll(),
+      ),
+    );
+    if (records.length) {
+      const normalized = records.map(mergeChild);
+      saveLocalStorage(CHILDREN_STORAGE_KEY, normalized);
+      return normalized;
+    }
+  } catch {
+    const local = localChildrenValue();
+    if (local.length) return local;
+  }
+
+  const legacyProfile = await loadProfile();
+  const child = createDefaultChild({
+    id: "child-default",
+    nickname: "小朋友",
+    profile: legacyProfile,
+  });
+  await saveChild(child);
+  return [child];
+}
+
+export async function saveChild(child) {
+  const normalized = mergeChild(child);
+  const children = localChildrenValue().filter(
+    (item) => item.id !== normalized.id,
+  );
+  children.push(normalized);
+  saveLocalStorage(CHILDREN_STORAGE_KEY, children);
+  try {
+    await withDatabase((db) =>
+      requestToPromise(
+        db
+          .transaction("children", "readwrite")
+          .objectStore("children")
+          .put(normalized),
+      ),
+    );
+  } catch {
+    // localStorage backup above is the graceful fallback.
+  }
+  return normalized;
+}
+
+export async function deleteChild(childId) {
+  const children = localChildrenValue().filter((item) => item.id !== childId);
+  saveLocalStorage(CHILDREN_STORAGE_KEY, children);
+  try {
+    await withDatabase((db) =>
+      requestToPromise(
+        db
+          .transaction("children", "readwrite")
+          .objectStore("children")
+          .delete(childId),
+      ),
+    );
+  } catch {
+    // localStorage remains available if IndexedDB is unavailable.
+  }
+}
+
 export async function addLearningEvent(event) {
   try {
     await withDatabase((db) =>
@@ -225,6 +330,7 @@ export async function clearLearningData() {
           transaction.objectStore("sessions").clear();
           transaction.objectStore("attempts").clear();
           transaction.objectStore("rewards").clear();
+          transaction.objectStore("children").clear();
           transaction.oncomplete = resolve;
           transaction.onerror = () => reject(transaction.error);
         }),
@@ -235,6 +341,7 @@ export async function clearLearningData() {
   try {
     localStorage.removeItem(PROFILE_STORAGE_KEY);
     localStorage.removeItem(LEGACY_PROFILE_KEY);
+    localStorage.removeItem(CHILDREN_STORAGE_KEY);
   } catch {
     /* no-op */
   }

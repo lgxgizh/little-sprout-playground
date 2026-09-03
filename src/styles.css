@@ -331,6 +331,9 @@ button {
 .course-card.lavender .course-art {
   background: #ece5fa;
 }
+.course-card.sky .course-art {
+  background: #dff1f5;
+}
 .course-art > span {
   font-size: 76px;
   filter: drop-shadow(0 8px 6px rgba(80, 60, 40, 0.13));

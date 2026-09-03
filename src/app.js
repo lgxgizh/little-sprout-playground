@@ -4,9 +4,11 @@ import { requestNextQuestion } from "./ai.js";
 import {
   addLearningEvent,
   clearLearningData,
+  createDefaultChild,
   createDefaultProfile,
-  loadProfile,
+  loadChildren,
   saveAttempt,
+  saveChild,
   saveProfile,
   saveReward,
   saveSession,
@@ -39,6 +41,15 @@ const courses = [
     tone: "lavender",
     duration: "6 分钟",
     tag: "动手玩",
+  },
+  {
+    id: "english",
+    label: "英语小耳朵",
+    subtitle: "用图片和声音认识英文",
+    emoji: "🔤",
+    tone: "sky",
+    duration: "5 分钟",
+    tag: "基础测一测",
   },
 ];
 
@@ -140,6 +151,57 @@ const questionBank = {
       ],
     },
   ],
+  english: [
+    {
+      id: "english-apple",
+      difficulty: 1,
+      visual: "🍎",
+      prompt: "Which one is an apple? 找到 apple",
+      speech: "Which one is an apple?",
+      answer: "apple",
+      choices: [
+        { label: "苹果 apple", emoji: "🍎", value: "apple", color: "#ff6b5e" },
+        {
+          label: "香蕉 banana",
+          emoji: "🍌",
+          value: "banana",
+          color: "#f7c94b",
+        },
+        { label: "小猫 cat", emoji: "🐱", value: "cat", color: "#f3b56d" },
+      ],
+    },
+    {
+      id: "english-cat",
+      difficulty: 1,
+      visual: "🐱",
+      prompt: "Which one is a cat? 找到 cat",
+      speech: "Which one is a cat?",
+      answer: "cat",
+      choices: [
+        { label: "小狗 dog", emoji: "🐶", value: "dog", color: "#d9a66f" },
+        { label: "小猫 cat", emoji: "🐱", value: "cat", color: "#f3b56d" },
+        { label: "小鸭 duck", emoji: "🦆", value: "duck", color: "#f7c94b" },
+      ],
+    },
+    {
+      id: "english-red",
+      difficulty: 1,
+      visual: "🔴",
+      prompt: "Find the red one 找到 red",
+      speech: "Find the red one.",
+      answer: "red",
+      choices: [
+        { label: "蓝色 blue", emoji: "🔵", value: "blue", color: "#6db6e8" },
+        {
+          label: "黄色 yellow",
+          emoji: "🟡",
+          value: "yellow",
+          color: "#f7c94b",
+        },
+        { label: "红色 red", emoji: "🔴", value: "red", color: "#ff6b5e" },
+      ],
+    },
+  ],
 };
 
 const offlineTasks = {
@@ -154,6 +216,11 @@ const offlineTasks = {
     emoji: "🐾",
   },
   shapes: { title: "形状寻宝", prompt: "在家里找一个圆圆的东西", emoji: "🧺" },
+  english: {
+    title: "英语亲子小游戏",
+    prompt: "和家长一起说一说 apple、cat 或 red",
+    emoji: "🎈",
+  },
 };
 
 const modelCatalog = {
@@ -212,6 +279,22 @@ const models = {
 };
 
 let profile = createDefaultProfile();
+let children = [];
+let activeChildId = null;
+
+const childLabels = {
+  gender: {
+    unspecified: "不特别设置",
+    girl: "女孩",
+    boy: "男孩",
+  },
+  englishLevel: {
+    "not-started": "刚开始接触",
+    songs: "听过英文儿歌",
+    words: "认识一些英文单词",
+    conversation: "能听懂简单表达",
+  },
+};
 
 const state = {
   activeTab: "home",
@@ -231,6 +314,8 @@ const state = {
   sessionQuestionIds: [],
   selectedChoice: null,
   activityComplete: false,
+  baselineTest: false,
+  baselineCorrect: 0,
   aiQuestionId: null,
   aiPlanning: false,
   aiPlanSource: "local",
@@ -247,6 +332,48 @@ function todayKey(date = new Date()) {
       day: "2-digit",
     })
     .replaceAll("/", "-");
+}
+
+function activeChild() {
+  return children.find((child) => child.id === activeChildId) || children[0];
+}
+
+function persistActiveChild() {
+  const child = activeChild();
+  if (child) {
+    child.profile = profile;
+    void saveChild(child);
+  }
+  void saveProfile(profile);
+}
+
+function resetActiveActivity() {
+  state.aiPlanToken += 1;
+  state.aiPlanning = false;
+  state.aiQuestionId = null;
+  state.activeSession = null;
+  state.baselineTest = false;
+  state.baselineCorrect = 0;
+  state.offlineTaskDone = false;
+  state.answered = false;
+  state.correct = false;
+  state.selectedChoice = null;
+  state.activityComplete = false;
+  state.sessionQuestionIds = [];
+}
+
+function switchChild(childId) {
+  const next = children.find((child) => child.id === childId);
+  if (!next || next.id === activeChildId) return;
+  if (state.activeSession) completeSession("quit");
+  const current = activeChild();
+  if (current) {
+    current.profile = profile;
+    void saveChild(current);
+  }
+  activeChildId = next.id;
+  profile = next.profile;
+  resetActiveActivity();
 }
 
 function touchLearningDay() {
@@ -285,7 +412,7 @@ function makeId(prefix) {
   return `${prefix}-${globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(16).slice(2)}`}`;
 }
 
-function beginSession(courseId) {
+function beginSession(courseId, baselineTest = false) {
   if (state.activeSession?.courseId === courseId) return;
   if (state.activeSession) completeSession("quit");
   state.activityCourse = courseId;
@@ -296,6 +423,8 @@ function beginSession(courseId) {
   state.selectedChoice = null;
   state.activityComplete = false;
   state.offlineTaskDone = false;
+  state.baselineTest = baselineTest;
+  state.baselineCorrect = 0;
   state.aiQuestionId = null;
   state.aiPlanning = false;
   state.aiPlanSource = "local";
@@ -310,7 +439,7 @@ function beginSession(courseId) {
   };
   profile.events.push(event);
   profile.events = profile.events.slice(-60);
-  saveProfile(profile);
+  persistActiveChild();
   addLearningEvent(event);
   saveSession({
     id: state.activeSession.id,
@@ -342,7 +471,7 @@ function completeSession(status = "completed") {
   };
   profile.events.push(event);
   profile.events = profile.events.slice(-60);
-  saveProfile(profile);
+  persistActiveChild();
   addLearningEvent(event);
   saveSession({ ...session, completedAt, durationMs, status });
   state.activeSession = null;
@@ -391,7 +520,7 @@ function recordAnswer(courseId, correct, question) {
     state.sessionQuestionIds.push(question.id);
   profile.events.push(event);
   profile.events = profile.events.slice(-60);
-  saveProfile(profile);
+  persistActiveChild();
   addLearningEvent(event);
   saveAttempt({
     id: makeId("attempt"),
@@ -484,13 +613,25 @@ function profileSummary() {
   const coveredQuestions = Object.values(profile.questionStats || {}).filter(
     (stat) => stat.attempts,
   ).length;
+  const child = activeChild();
   const recommendationText = recommendation();
-  return `<div class="profile-summary"><div class="summary-head"><span>🌱</span><div><b>成长小档案</b><small>只保存在这台设备</small></div></div><div class="summary-stats"><div><strong>${profile.streak}</strong><small>连续学习天</small></div><div><strong>${profile.totalSessions}</strong><small>学习次数</small></div><div><strong>${accuracy}%</strong><small>答题正确率</small></div><div><strong>${profile.stars}</strong><small>收集星星</small></div></div><div class="question-coverage"><span>🧩</span><span>已经探索 <b>${coveredQuestions}</b> 个小题目</span><small>AI 和本地题库都会参考这些练习痕迹</small></div>${skillProgress()}${recentActivity()}<div class="summary-recommendation"><span>✨</span><span>下一步推荐：<b>${recommendationText.course.label}</b><small>${recommendationText.reason}</small></span></div><button class="clear-profile" id="clearProfile">清除本机学习记录</button></div>`;
+  return `<div class="profile-summary"><div class="summary-head"><span>🌱</span><div><b>${escapeHtml(child?.nickname || "小朋友")}的成长档案</b><small>只保存在这台设备</small></div></div><div class="summary-stats"><div><strong>${profile.streak}</strong><small>连续学习天</small></div><div><strong>${profile.totalSessions}</strong><small>学习次数</small></div><div><strong>${accuracy}%</strong><small>答题正确率</small></div><div><strong>${profile.stars}</strong><small>收集星星</small></div></div><div class="question-coverage"><span>🧩</span><span>已经探索 <b>${coveredQuestions}</b> 个小题目</span><small>AI 和本地题库都会参考这些练习痕迹</small></div>${skillProgress()}${recentActivity()}<div class="summary-recommendation"><span>✨</span><span>下一步推荐：<b>${recommendationText.course.label}</b><small>${recommendationText.reason}</small></span></div><button class="clear-profile" id="clearProfile">清除本机学习记录</button></div>`;
 }
 
 function offlineTaskMarkup(courseId) {
   const task = offlineTasks[courseId] || offlineTasks.colors;
   return `<div class="offline-task ${state.offlineTaskDone ? "done" : ""}"><span class="offline-task-emoji">${task.emoji}</span><span><b>${task.title}</b><small>${state.offlineTaskDone ? "完成啦，和家长击个掌！" : task.prompt}</small></span><button id="offlineDone" ${state.offlineTaskDone ? "disabled" : ""}>${state.offlineTaskDone ? "✓" : "完成"}</button></div>`;
+}
+
+function baselineResultMarkup() {
+  const score = state.baselineCorrect;
+  const suggestedLevel =
+    score >= 3
+      ? "可以开始图片单词"
+      : score === 2
+        ? "先从英文儿歌和图片词汇开始"
+        : "先从听声音、看图片开始";
+  return `<div class="baseline-result"><span class="baseline-result-icon">🎈</span><span><b>英语小测试完成啦！</b><small>答对 ${score} / 3 题 · 建议：${suggestedLevel}</small></span></div>`;
 }
 
 function familyTaskPanel() {
@@ -510,6 +651,55 @@ function modelName(type) {
     modelCatalog[type].find((item) => item.id === models[type])?.name ||
     models[type]
   );
+}
+
+function escapeHtml(value = "") {
+  return String(value).replace(
+    /[&<>"']/g,
+    (character) =>
+      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[
+        character
+      ],
+  );
+}
+
+function childProfileSettings() {
+  const child = activeChild() || createDefaultChild();
+  const baseline =
+    child.baseline?.status === "complete"
+      ? `已完成：${child.baseline.score} / ${child.baseline.total}`
+      : "还没有做过基础测评";
+  return `<div class="child-profile-settings"><div class="child-switch-row"><label><span>当前孩子</span><select id="childSelect">${children.map((item) => `<option value="${item.id}" ${item.id === child.id ? "selected" : ""}>${escapeHtml(item.nickname)}</option>`).join("")}</select></label><button class="small-action" id="addChild">＋ 添加孩子</button></div><div class="child-form-grid"><label><span>孩子昵称</span><input id="childNickname" maxlength="12" value="${escapeHtml(child.nickname)}" placeholder="例如：小米" /></label><label><span>年龄</span><select id="childAge">${[2, 3, 4, 5, 6].map((age) => `<option value="${age}" ${Number(child.age) === age ? "selected" : ""}>${age} 岁</option>`).join("")}</select></label><label><span>性别（可不填）</span><select id="childGender">${Object.entries(
+    childLabels.gender,
+  )
+    .map(
+      ([value, label]) =>
+        `<option value="${value}" ${child.gender === value ? "selected" : ""}>${label}</option>`,
+    )
+    .join(
+      "",
+    )}</select></label><label><span>英语基础</span><select id="childEnglishLevel">${Object.entries(
+    childLabels.englishLevel,
+  )
+    .map(
+      ([value, label]) =>
+        `<option value="${value}" ${child.englishLevel === value ? "selected" : ""}>${label}</option>`,
+    )
+    .join(
+      "",
+    )}</select></label></div><div class="baseline-row"><span>英语基础小测试：<b>${baseline}</b></span><button class="small-action" id="startBaseline">开始 3 题测评</button></div><button class="save-child-btn" id="saveChildProfile">保存孩子信息</button></div>`;
+}
+
+function saveChildForm() {
+  const child = activeChild();
+  if (!child) return;
+  const nickname = document.querySelector("#childNickname")?.value.trim();
+  child.nickname = nickname || "小朋友";
+  child.age = Number(document.querySelector("#childAge")?.value) || 3;
+  child.gender = document.querySelector("#childGender")?.value || "unspecified";
+  child.englishLevel =
+    document.querySelector("#childEnglishLevel")?.value || "not-started";
+  persistActiveChild();
 }
 
 function saveModels() {
@@ -560,6 +750,7 @@ async function planQuestionWithAI() {
     model: models.vocab,
     profile,
     activityCourse: courseId,
+    child: activeChild(),
     candidates,
   });
 
@@ -590,6 +781,7 @@ function render() {
   const activeCourse =
     courses.find((course) => course.id === state.activityCourse) || courses[0];
   const question = currentQuestion();
+  const childName = escapeHtml(activeChild()?.nickname || "小朋友");
   document.querySelector("#app").innerHTML = `
     <div class="app-shell">
       <header class="topbar">
@@ -606,7 +798,7 @@ function render() {
         <section class="hero">
           <div class="hero-copy">
             <div class="eyebrow"><span class="spark">✦</span> 今天的 5 分钟亲子时光</div>
-            <h1>和小栗子<br/><em>${activeCourse.label}</em></h1>
+            <h1>${childName} 和小栗子<br/><em>${activeCourse.label}</em></h1>
             <p>不用识字，看一看、听一听，<br/>${activeCourse.subtitle}，一起玩就会啦。</p>
             <button class="primary-btn" id="startLesson"><span>${state.activeSession ? "继续今天的学习" : "开始今天的学习"}</span><span class="arrow">→</span></button>
             <div class="streak"><span class="streak-icon">🔥</span><span><b>连续学习 ${profile.streak} 天</b><small>${profile.streak ? "每天玩一小会儿，成长会被记住" : "完成今天的学习，就能点亮第一颗星"}</small></span></div>
@@ -627,7 +819,7 @@ function render() {
             <div class="quiz-top"><span>第 ${state.questionIndex + 1} 题 / 3</span><span class="session-live">${state.activeSession ? "● 本次学习中" : ""}</span><div class="progress-dots">${[0, 1, 2].map((i) => `<i class="${i <= state.questionIndex ? "filled" : ""}"></i>`).join("")}</div></div>
             <div class="question-visual"><span class="question-emoji">${question.visual}</span><span class="question-bubble">${question.prompt}<br/><b>看图片来选择</b></span></div>
             <div class="choice-grid">${question.choices.map((choice) => `<button class="choice ${state.answered && choice.value === question.answer ? "correct" : ""} ${state.answered && state.selectedChoice === choice.value && choice.value !== question.answer ? "wrong" : ""}" data-choice="${choice.value}" aria-label="${question.prompt}：${choice.label}" style="--choice-color:${choice.color}" ${state.answered || state.aiPlanning ? "disabled" : ""}><span class="choice-emoji">${choice.emoji}</span><span>${choice.label}</span>${state.answered && choice.value === question.answer ? '<b class="check">✓</b>' : ""}</button>`).join("")}</div>
-            ${state.answered ? `<div class="feedback ${state.correct ? "good" : "try"}">${state.encouragement || (state.correct ? "太棒了！你发现啦 ✨" : "没关系，我们再看一眼吧～")}</div>${state.activityComplete ? offlineTaskMarkup(state.activityCourse) : `<button class="next-question" id="nextQuestion">${state.correct ? "继续下一题" : "再试下一题"} <span>→</span></button>`}` : '<div class="hint">点击图片来回答 · 答对会有小星星</div>'}
+            ${state.answered ? `<div class="feedback ${state.correct ? "good" : "try"}">${state.encouragement || (state.correct ? "太棒了！你发现啦 ✨" : "没关系，我们再看一眼吧～")}</div>${state.activityComplete ? (state.baselineTest ? baselineResultMarkup() : offlineTaskMarkup(state.activityCourse)) : `<button class="next-question" id="nextQuestion">${state.correct ? "继续下一题" : "再试下一题"} <span>→</span></button>`}` : '<div class="hint">点击图片来回答 · 答对会有小星星</div>'}
             ${state.activeSession ? `<button class="finish-btn" id="finishSession">${state.activityComplete ? "完成今天的学习" : "先结束，休息一下"}</button>` : ""}
           </div>
         </section>
@@ -654,7 +846,7 @@ function modelSettingsModal() {
   }
   const select = (type, label, icon) =>
     `<label class="model-setting"><span class="model-setting-label"><span class="model-setting-icon">${icon}</span><span><b>${label}</b><small>${type === "image" ? "生成学习插画与封面" : type === "voice" ? "朗读题目和鼓励语" : "选择题目难度与题库策略"}</small></span></span><select data-model="${type}">${modelCatalog[type].map((item) => `<option value="${item.id}" ${models[type] === item.id ? "selected" : ""}>${item.name} · ${item.note}</option>`).join("")}</select></label>`;
-  return `<div class="modal-backdrop" id="modalBackdrop"><div class="modal model-modal"><button class="modal-close" id="closeModal">×</button><div class="modal-icon">⚙️</div><h3>家长设置</h3>${profileSummary()}<div class="config-divider"><span>模型与能力</span></div><p>家长可以为每项能力选择模型。设置会保存在本机，下次打开仍然生效。</p><div class="model-settings">${select("image", "图片生成", "🖼️")}${select("voice", "语音提问", "🔊")}${select("vocab", "词汇量测试", "🧩")}</div><div class="config-tip">当前语音：<b>${modelName("voice")}</b> · 当前题目：<b>${modelName("vocab")}</b></div><div class="modal-actions"><button class="reset-btn" id="resetModels">恢复默认</button><button class="primary-btn" id="closeModal2">保存配置 <span class="arrow">→</span></button></div></div></div>`;
+  return `<div class="modal-backdrop" id="modalBackdrop"><div class="modal model-modal"><button class="modal-close" id="closeModal">×</button><div class="modal-icon">⚙️</div><h3>家长设置</h3>${profileSummary()}<div class="config-divider"><span>孩子档案</span></div>${childProfileSettings()}<div class="config-divider"><span>模型与能力</span></div><p>家长可以为每项能力选择模型。设置会保存在本机，下次打开仍然生效。</p><div class="model-settings">${select("image", "图片生成", "🖼️")}${select("voice", "语音提问", "🔊")}${select("vocab", "词汇量测试", "🧩")}</div><div class="config-tip">当前语音：<b>${modelName("voice")}</b> · 当前题目：<b>${modelName("vocab")}</b></div><div class="modal-actions"><button class="reset-btn" id="resetModels">恢复默认</button><button class="primary-btn" id="closeModal2">保存配置 <span class="arrow">→</span></button></div></div></div>`;
 }
 
 function bindEvents() {
@@ -703,7 +895,26 @@ function bindEvents() {
       state.selectedChoice = btn.dataset.choice;
       state.correct = btn.dataset.choice === question.answer;
       recordAnswer(state.activityCourse, state.correct, question);
+      if (state.baselineTest && state.correct) state.baselineCorrect += 1;
       if (state.questionIndex >= 2) state.activityComplete = true;
+      if (state.baselineTest && state.activityComplete) {
+        const child = activeChild();
+        const score = state.baselineCorrect;
+        const suggestedLevel =
+          score >= 3 ? "words" : score === 2 ? "songs" : "not-started";
+        if (child) {
+          child.baseline = {
+            status: "complete",
+            score,
+            total: 3,
+            completedAt: new Date().toISOString(),
+            suggestedLevel,
+          };
+          if (child.englishLevel === "not-started")
+            child.englishLevel = suggestedLevel;
+          persistActiveChild();
+        }
+      }
       const goodWords = [
         "太棒了！你发现啦 ✨",
         "小眼睛真会观察！收下这颗星星吧 🌟",
@@ -766,6 +977,40 @@ function bindEvents() {
       if (imageBadge) imageBadge.textContent = `图片：${modelName("image")}`;
     }),
   );
+  document
+    .querySelector("#childSelect")
+    ?.addEventListener("change", (event) => {
+      saveChildForm();
+      switchChild(event.target.value);
+      render();
+    });
+  document.querySelector("#saveChildProfile")?.addEventListener("click", () => {
+    saveChildForm();
+    render();
+    showToast("孩子信息已保存");
+  });
+  document.querySelector("#addChild")?.addEventListener("click", () => {
+    saveChildForm();
+    const child = createDefaultChild({ nickname: "新朋友" });
+    children.push(child);
+    activeChildId = child.id;
+    profile = child.profile;
+    resetActiveActivity();
+    void saveChild(child);
+    render();
+    showToast("已经添加一个新孩子");
+  });
+  document.querySelector("#startBaseline")?.addEventListener("click", () => {
+    saveChildForm();
+    state.modal = false;
+    state.parentGate = false;
+    beginSession("english", true);
+    render();
+    document
+      .querySelector("#quizPanel")
+      ?.scrollIntoView({ behavior: "smooth", block: "center" });
+    speak(currentQuestion().speech);
+  });
   document.querySelector("#resetModels")?.addEventListener("click", () => {
     models.image = "gpt-image-1";
     models.voice = "browser-speech";
@@ -777,6 +1022,8 @@ function bindEvents() {
     state.aiPlanToken += 1;
     state.aiPlanning = false;
     state.aiQuestionId = null;
+    state.baselineTest = false;
+    state.baselineCorrect = 0;
     completeSession(state.activityComplete ? "completed" : "quit");
     state.offlineTaskDone = false;
     state.answered = false;
@@ -801,7 +1048,7 @@ function bindEvents() {
     };
     profile.events.push(event);
     profile.events = profile.events.slice(-60);
-    saveProfile(profile);
+    persistActiveChild();
     addLearningEvent(event);
     saveReward({
       id: makeId("reward"),
@@ -827,11 +1074,16 @@ function bindEvents() {
   document.querySelector("#clearProfile")?.addEventListener("click", () => {
     if (!window.confirm("确定要清除这台设备上的学习记录吗？")) return;
     clearLearningData().then(() => {
-      profile = createDefaultProfile();
+      children = [createDefaultChild({ id: "child-default" })];
+      activeChildId = children[0].id;
+      profile = children[0].profile;
+      void saveChild(children[0]);
       state.aiPlanToken += 1;
       state.aiPlanning = false;
       state.aiQuestionId = null;
       state.aiPlanMessage = "";
+      state.baselineTest = false;
+      state.baselineCorrect = 0;
       state.sessionQuestionIds = [];
       state.answered = false;
       state.encouragement = "";
@@ -893,7 +1145,10 @@ function showToast(message) {
 async function init() {
   document.querySelector("#app").innerHTML =
     '<div class="loading-screen"><span>🦊</span><b>小栗子正在打开成长档案…</b></div>';
-  profile = await loadProfile();
+  children = await loadChildren();
+  if (!children.length) children = [createDefaultChild()];
+  activeChildId = children[0].id;
+  profile = children[0].profile;
   render();
 }
 

@@ -23,6 +23,8 @@
 - 图片生成、语音提问和词汇量测试分别配置 / Independent model settings for image, voice, and vocabulary features
 - IndexedDB 本地成长档案 / Local IndexedDB learning profile
 - 记录到具体题目的练习轨迹，并避开同一学习单元内的重复题目 / Per-question practice history with in-session repetition avoidance
+- 支持多个孩子的昵称、年龄、英语基础和独立学习档案 / Multiple child profiles with nickname, age, English background, and separate progress
+- 图片与听力优先的 3 题英语基础测评 / A three-question, picture-and-listening-first English baseline check
 - 根据最近表现给出下一步推荐，不给孩子贴标签、不展示排名 / Gentle, transparent recommendations with no rankings or labels
 - 3 题自适应微任务、完成/休息出口和屏幕外亲子小游戏 / Three-question adaptive micro-lessons with finish/rest exits and offline parent-child play
 - 独立的亲子任务区，鼓励把学习带到真实生活中 / A dedicated parent-child activity area that extends learning into daily life
@@ -60,9 +62,9 @@ npm run preview
 
 模型设置保存在 `localStorage` 的 `little-sprout-models` 项中。远程模型通过可选的服务端适配器调用；没有配置适配器、请求超时或返回内容不合规时，页面会自动回退到本地题库，不影响 GitHub Pages 演示。
 
-选择 **GPT-4o mini** 作为题目模型时，前端会把隐私最小化的学习摘要（年龄段、主题统计、正确率、连续学习天数和最近 8 条事件）发送到 `VITE_API_BASE_URL`，请模型只从当前主题的审核候选题中选择一个 `questionId`。前端不会发送姓名、照片、音频、自由文本或原始答案；API Key 必须只保存在服务端。
+选择 **GPT-4o mini** 作为题目模型时，前端会把隐私最小化的学习摘要（年龄、可选的性别、英语基础、基础测评结果、主题统计、正确率、连续学习天数和最近 8 条事件）发送到 `VITE_API_BASE_URL`，请模型只从当前主题的审核候选题中选择一个 `questionId`。前端不会发送姓名、照片、音频、自由文本或原始答案；API Key 必须只保存在服务端。
 
-When **GPT-4o mini** is selected for vocabulary testing, the browser sends a privacy-minimised learning summary (age range, topic aggregates, accuracy, streak, and the latest eight events) to `VITE_API_BASE_URL`. The model must choose one `questionId` from the approved candidates for the current topic. Names, photos, audio, free text, and raw answers are not sent; provider API keys must stay on the server.
+When **GPT-4o mini** is selected for vocabulary testing, the browser sends a privacy-minimised learning summary (age, optional gender, English background, baseline result, topic aggregates, accuracy, streak, and the latest eight events) to `VITE_API_BASE_URL`. The model must choose one `questionId` from the approved candidates for the current topic. Names, photos, audio, free text, and raw answers are not sent; provider API keys must stay on the server.
 
 ### 题目规划适配器 / Question-planning adapter
 
@@ -75,6 +77,12 @@ When **GPT-4o mini** is selected for vocabulary testing, the browser sends a pri
     "ageRange": "3",
     "canReadText": false,
     "currentCourse": "colors",
+    "childContext": {
+      "age": 3,
+      "gender": null,
+      "englishLevel": "songs",
+      "baselineScore": 2
+    },
     "totals": {
       "sessions": 2,
       "answers": 5,

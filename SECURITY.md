@@ -17,4 +17,4 @@
 
 ## Children’s privacy
 
-By default, this project keeps learning data on the device. When the optional question-planning adapter is enabled, only a minimised summary is sent: age range, topic aggregates, streak/accuracy, and a small set of recent event types. Names, photos, audio, free text, and raw answers are excluded. Obtain guardian consent, document retention and deletion, keep provider keys on the server, and do not use children’s data for advertising profiles or unauthorised training.
+By default, this project keeps learning data on the device. When the optional question-planning adapter is enabled, only a minimised summary is sent: age, optional gender, English background, baseline result, topic aggregates, streak/accuracy, and a small set of recent event types. Names, photos, audio, free text, and raw answers are excluded. Obtain guardian consent, document retention and deletion, keep provider keys on the server, and do not use children’s data for advertising profiles or unauthorised training.

@@ -14,11 +14,18 @@ function compactSkill(skill) {
  * Build a privacy-minimised context for a planning adapter.
  * It intentionally excludes names, audio, photos, free-text, and raw answers.
  */
-export function buildLearningContext(profile, activityCourse) {
+export function buildLearningContext(profile, activityCourse, child = null) {
   return {
     ageRange: "3",
     canReadText: false,
     currentCourse: activityCourse,
+    childContext: {
+      age: child?.age || 3,
+      gender: child?.gender === "unspecified" ? null : child?.gender || null,
+      englishLevel: child?.englishLevel || "not-started",
+      baselineScore:
+        child?.baseline?.status === "complete" ? child.baseline.score : null,
+    },
     totals: {
       sessions: profile.totalSessions,
       answers: profile.totalAnswers,
@@ -70,6 +77,7 @@ export async function requestNextQuestion({
   model,
   profile,
   activityCourse,
+  child,
   candidates,
 }) {
   if (!apiBaseUrl || model !== "gpt-4o-mini") return null;
@@ -82,7 +90,7 @@ export async function requestNextQuestion({
       signal: controller.signal,
       body: JSON.stringify({
         model,
-        learningContext: buildLearningContext(profile, activityCourse),
+        learningContext: buildLearningContext(profile, activityCourse, child),
         candidates: candidates.map(({ id, difficulty, prompt }) => ({
           id,
           difficulty,
