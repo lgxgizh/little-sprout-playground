@@ -1,19 +1,19 @@
-# 小栗子乐园 / Little Fun Learning
+# 小栗子乐园 / Little Sprout Playground
 
-[![CI](https://github.com/lgxgizh/little-fun-learning/actions/workflows/ci.yml/badge.svg)](https://github.com/lgxgizh/little-fun-learning/actions/workflows/ci.yml)
-[![Deploy GitHub Pages](https://github.com/lgxgizh/little-fun-learning/actions/workflows/pages.yml/badge.svg)](https://github.com/lgxgizh/little-fun-learning/actions/workflows/pages.yml)
+[![CI](https://github.com/lgxgizh/little-sprout-playground/actions/workflows/ci.yml/badge.svg)](https://github.com/lgxgizh/little-sprout-playground/actions/workflows/ci.yml)
+[![Deploy GitHub Pages](https://github.com/lgxgizh/little-sprout-playground/actions/workflows/pages.yml/badge.svg)](https://github.com/lgxgizh/little-sprout-playground/actions/workflows/pages.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 **中文** · [English](#english)
 
 一个面向学龄前儿童的图片优先、语音辅助学习网页。孩子无需识字，可以通过图片选择和语音提示完成简短的启蒙活动；家长可以分别选择图片、语音和词汇测试所使用的模型。
 
-**[在线体验](https://lgxgizh.github.io/little-fun-learning/)** · [报告问题](https://github.com/lgxgizh/little-fun-learning/issues)
+**[在线体验](https://lgxgizh.github.io/little-sprout-playground/)** · [报告问题](https://github.com/lgxgizh/little-sprout-playground/issues)
 
 ![小栗子乐园示例插画](public/assets/fox-hero.png)
 
 > [!IMPORTANT]
-> 这是一个独立的开源学习项目，不是“小小优趣”或任何商业产品的官方版本，也不存在隶属、授权或合作关系。仓库不提供第三方动画、题目、商标或其他受版权保护的资源。
+> 这是一个独立的开源学习项目。仓库不提供第三方动画、题目、商标或其他受版权保护的资源。
 
 ## 功能 / Features
 
@@ -31,8 +31,8 @@
 需要 Node.js 20 或更高版本。 / Requires Node.js 20 or newer.
 
 ```bash
-git clone https://github.com/lgxgizh/little-fun-learning.git
-cd little-fun-learning
+git clone https://github.com/lgxgizh/little-sprout-playground.git
+cd little-sprout-playground
 npm install
 npm run dev
 ```
@@ -60,9 +60,9 @@ Model choices are stored in `localStorage` under `little-fun-models`. Remote mod
 
 ## 本地学习记录与个性化推荐 / Local learning records
 
-学习档案以 IndexedDB 的 `little-fun-learning` 数据库为主，包含 `profile` 和 `events` 对象仓库；浏览器不支持 IndexedDB 时会降级到 `localStorage`。默认只记录完成次数、题目结果、主题和时间，不上传到服务器。
+学习档案以 IndexedDB 的 `little-sprout-playground` 数据库为主，包含 `profile` 和 `events` 对象仓库；浏览器不支持 IndexedDB 时会降级到 `localStorage`。默认只记录完成次数、题目结果、主题和时间，不上传到服务器。
 
-The primary store is an IndexedDB database named `little-fun-learning` with `profile` and `events` object stores. Browsers without IndexedDB fall back to `localStorage`. Only study counts, answers, topics, and timestamps are recorded locally by default.
+The primary store is an IndexedDB database named `little-sprout-playground` with `profile` and `events` object stores. Browsers without IndexedDB fall back to `localStorage`. Only study counts, answers, topics, and timestamps are recorded locally by default.
 
 系统会优先推荐孩子较少练习或正确率较低的主题，并用鼓励式语言提示下一步内容；家长可以在「家长设置」中查看统计、主题进度、最近足迹或清除本机记录。
 
@@ -115,6 +115,6 @@ The code is released under the [MIT License](LICENSE). Media added by contributo
 
 ## English summary
 
-Little Fun Learning is an independent, picture-first learning web app for preschool children. It includes voice-assisted picture quizzes, local progress tracking, gentle recommendations, and configurable adapters for image generation, voice prompts, and vocabulary testing.
+Little Sprout Playground is an independent, picture-first learning web app for preschool children. It includes voice-assisted picture quizzes, local progress tracking, gentle recommendations, and configurable adapters for image generation, voice prompts, and vocabulary testing.
 
-The project is not affiliated with any commercial children’s app. It ships only with an original demo illustration and does not include third-party copyrighted media. Learning data stays on the device by default. See [SECURITY.md](SECURITY.md) for privacy guidance.
+It ships only with an original demo illustration and does not include third-party copyrighted media. Learning data stays on the device by default. See [SECURITY.md](SECURITY.md) for privacy guidance.

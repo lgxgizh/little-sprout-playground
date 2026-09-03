@@ -1,4 +1,4 @@
-const DB_NAME = "little-fun-learning";
+const DB_NAME = "little-sprout-playground";
 const DB_VERSION = 1;
 const PROFILE_KEY = "default";
 

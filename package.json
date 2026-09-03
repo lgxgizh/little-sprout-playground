@@ -1,14 +1,14 @@
 {
-  "name": "little-fun-learning",
+  "name": "little-sprout-playground",
   "version": "0.1.0",
   "private": true,
   "description": "A picture-first, voice-assisted learning web app for preschool children.",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/lgxgizh/little-fun-learning.git"
+    "url": "https://github.com/lgxgizh/little-sprout-playground.git"
   },
-  "homepage": "https://lgxgizh.github.io/little-fun-learning/",
+  "homepage": "https://lgxgizh.github.io/little-sprout-playground/",
   "engines": {
     "node": ">=20"
   },
