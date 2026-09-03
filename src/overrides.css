@@ -529,6 +529,12 @@
 .baseline-row b {
   color: #5c7969;
 }
+.baseline-row small {
+  display: block;
+  margin-top: 3px;
+  color: #a1aaa1;
+  font-size: 9px;
+}
 .baseline-result {
   display: flex;
   align-items: center;
@@ -555,6 +561,96 @@
   color: #a09277;
   font-size: 10px;
   line-height: 1.45;
+}
+.weekly-growth {
+  margin: 16px 0 4px;
+  padding: 14px;
+  border: 1px solid #e9eee7;
+  border-radius: 15px;
+  background: #f7fbf4;
+}
+.weekly-growth-head,
+.weekly-growth-detail {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.weekly-growth-head {
+  position: relative;
+}
+.weekly-growth-icon {
+  font-size: 22px;
+}
+.weekly-growth-head b,
+.weekly-growth-head small,
+.weekly-growth-detail b,
+.weekly-growth-detail small {
+  display: block;
+}
+.weekly-growth-head b {
+  color: #567463;
+  font-size: 12px;
+}
+.weekly-growth-head small,
+.weekly-growth-detail small {
+  margin-top: 3px;
+  color: #9aa89d;
+  font-size: 9px;
+}
+.stage-pill {
+  margin-left: auto;
+  padding: 5px 8px;
+  border-radius: 999px;
+  background: #e8f3e5;
+  color: #5c896a;
+  font-size: 9px;
+  white-space: nowrap;
+}
+.weekly-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 7px;
+  margin: 13px 0;
+}
+.weekly-stats div {
+  padding: 8px 5px;
+  border-radius: 10px;
+  background: white;
+  text-align: center;
+}
+.weekly-stats strong,
+.weekly-stats small {
+  display: block;
+}
+.weekly-stats strong {
+  color: #5f796d;
+  font-size: 15px;
+}
+.weekly-stats small {
+  margin-top: 3px;
+  color: #a0aaa1;
+  font-size: 8px;
+}
+.weekly-growth-detail {
+  padding: 9px 10px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.75);
+  color: #7d8e83;
+  font-size: 10px;
+}
+.weekly-growth-suggestion {
+  margin: 10px 2px 0;
+  color: #718b78;
+  font-size: 10px;
+  line-height: 1.5;
+}
+.data-tools {
+  display: flex;
+  gap: 8px;
+  margin-top: 14px;
+}
+.data-tools .small-action {
+  flex: 1;
 }
 .modal-actions {
   display: flex;
@@ -702,6 +798,9 @@
   }
   .child-form-grid {
     grid-template-columns: 1fr;
+  }
+  .weekly-stats {
+    gap: 5px;
   }
   .model-setting {
     align-items: flex-start;

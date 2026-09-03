@@ -15,6 +15,10 @@
 
 当前前端示例将模型选择保存在浏览器 `localStorage`，不包含身份信息。
 
+导出的学习档案 JSON 可能包含昵称、年龄、学习结果和模型设置。请把导出文件当作私人文件保存，不要上传到公开 Issue、公开仓库或不受信任的第三方服务。
+
 ## Children’s privacy
 
 By default, this project keeps learning data on the device. When the optional question-planning adapter is enabled, only a minimised summary is sent: age, optional gender, English background, baseline result, topic aggregates, streak/accuracy, and a small set of recent event types. Names, photos, audio, free text, and raw answers are excluded. Obtain guardian consent, document retention and deletion, keep provider keys on the server, and do not use children’s data for advertising profiles or unauthorised training.
+
+Exported JSON files may contain nicknames, ages, learning results, and model settings. Treat them as private files and do not upload them to public issues, repositories, or untrusted services.

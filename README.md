@@ -25,6 +25,8 @@
 - 记录到具体题目的练习轨迹，并避开同一学习单元内的重复题目 / Per-question practice history with in-session repetition avoidance
 - 支持多个孩子的昵称、年龄、英语基础和独立学习档案 / Multiple child profiles with nickname, age, English background, and separate progress
 - 图片与听力优先的 3 题英语基础测评 / A three-question, picture-and-listening-first English baseline check
+- 英语四阶段学习路径、错题间隔复习和家长周成长卡 / Four-stage English path, spaced review, and a weekly parent growth card
+- 学习档案 JSON 导出与导入，方便本地备份和换设备迁移 / Local JSON export and import for backup and device migration
 - 根据最近表现给出下一步推荐，不给孩子贴标签、不展示排名 / Gentle, transparent recommendations with no rankings or labels
 - 3 题自适应微任务、完成/休息出口和屏幕外亲子小游戏 / Three-question adaptive micro-lessons with finish/rest exits and offline parent-child play
 - 独立的亲子任务区，鼓励把学习带到真实生活中 / A dedicated parent-child activity area that extends learning into daily life
@@ -48,6 +50,12 @@ npm run dev
 ```bash
 npm run check
 npm run preview
+```
+
+运行学习规则测试 / Run the learning-rule tests:
+
+```bash
+npm test
 ```
 
 ## 模型配置 / Model configuration
@@ -82,6 +90,12 @@ When **GPT-4o mini** is selected for vocabulary testing, the browser sends a pri
       "gender": null,
       "englishLevel": "songs",
       "baselineScore": 2
+    },
+    "learningPlan": {
+      "stage": 1,
+      "goal": "听懂简单英文词汇，并和图片匹配",
+      "reviewQuestionIds": ["english-apple"],
+      "weakConcepts": ["english-apple"]
     },
     "totals": {
       "sessions": 2,
@@ -128,7 +142,9 @@ The primary store is an IndexedDB database named `little-sprout-playground` with
 
 The recommendation rule prioritizes topics that are new or need gentle practice and avoids repeating completed questions within one micro-lesson. Parents can view statistics, topic progress, recent activity, or clear local records from **Parent settings**.
 
-一次学习会区分“开始、答题、完成、退出”和“屏幕外亲子任务”，避免把误触或反复点击当成学习成果。/ A learning session distinguishes **started**, **answer submitted**, **completed**, **quit**, and **offline parent-child activity** events, so accidental taps are not counted as completed learning.
+一次学习会区分“开始、答题、完成、退出”和“屏幕外亲子任务”，避免把误触或反复点击当成学习成果。英语学习还会为每个孩子维护阶段目标和错题复习队列。/ A learning session distinguishes **started**, **answer submitted**, **completed**, **quit**, and **offline parent-child activity** events, so accidental taps are not counted as completed learning. Each child also has an English stage goal and a spaced-review queue.
+
+家长设置中的「导出学习档案」会生成一个本地 JSON 文件；「导入学习档案」会在确认后替换本机的全部孩子档案。导入前会校验版本、孩子数量、昵称、年龄和学习数据结构。/ **Export learning data** creates a local JSON file. **Import learning data** replaces all child profiles on this device after confirmation and validates the schema before changing anything.
 
 ## 项目结构 / Project structure
 
@@ -139,6 +155,7 @@ The recommendation rule prioritizes topics that are new or need gentle practice 
 ├── src/
 │   ├── app.js               # 页面、内容、交互和模型配置 / UI and model settings
 │   ├── ai.js                # 隐私最小化学习摘要与 AI 选题适配器 / AI planner adapter
+│   ├── learning-plan.js     # 英语阶段、复习规则和周统计 / English stages, review rules, weekly stats
 │   ├── storage.js           # IndexedDB 存储、迁移和降级 / persistence and migration
 │   ├── styles.css           # 基础响应式样式 / base responsive styles
 │   └── overrides.css        # 配置和成长档案样式 / settings and profile styles

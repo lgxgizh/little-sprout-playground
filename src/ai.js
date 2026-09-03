@@ -1,3 +1,5 @@
+import { stageDefinition } from "./learning-plan.js";
+
 const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL || "").replace(/\/$/, "");
 
 function compactSkill(skill) {
@@ -15,8 +17,29 @@ function compactSkill(skill) {
  * It intentionally excludes names, audio, photos, free-text, and raw answers.
  */
 export function buildLearningContext(profile, activityCourse, child = null) {
+  const plan = child?.englishPlan || { stage: 1, reviewQueue: [] };
+  const stage = stageDefinition(plan.stage);
+  const weakConcepts = Object.entries(profile.questionStats || {})
+    .filter(
+      ([questionId, stat]) =>
+        questionId.startsWith("english-") &&
+        stat.attempts &&
+        stat.correct / stat.attempts < 0.8,
+    )
+    .sort(
+      ([, left], [, right]) =>
+        left.correct / left.attempts - right.correct / right.attempts,
+    )
+    .slice(0, 3)
+    .map(([questionId]) => questionId);
+  const reviewQuestionIds = (plan.reviewQueue || [])
+    .filter(
+      (item) => !item.dueAt || new Date(item.dueAt).getTime() <= Date.now(),
+    )
+    .slice(0, 8)
+    .map((item) => item.questionId);
   return {
-    ageRange: "3",
+    ageRange: String(child?.age || 3),
     canReadText: false,
     currentCourse: activityCourse,
     childContext: {
@@ -25,6 +48,12 @@ export function buildLearningContext(profile, activityCourse, child = null) {
       englishLevel: child?.englishLevel || "not-started",
       baselineScore:
         child?.baseline?.status === "complete" ? child.baseline.score : null,
+    },
+    learningPlan: {
+      stage: stage.id,
+      goal: stage.goal,
+      reviewQuestionIds,
+      weakConcepts,
     },
     totals: {
       sessions: profile.totalSessions,

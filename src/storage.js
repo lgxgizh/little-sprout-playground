@@ -1,3 +1,5 @@
+import { createEnglishPlan, normalizeEnglishPlan } from "./learning-plan.js";
+
 const DB_NAME = "little-sprout-playground";
 const DB_VERSION = 2;
 const PROFILE_STORAGE_KEY = "little-sprout-profile";
@@ -36,6 +38,9 @@ export function createDefaultChild(options = {}) {
     age: Number(options.age) || 3,
     gender: options.gender || "unspecified",
     englishLevel: options.englishLevel || "not-started",
+    englishPlan: normalizeEnglishPlan(
+      options.englishPlan || createEnglishPlan(),
+    ),
     baseline: options.baseline || {
       status: "not-started",
       score: null,
@@ -71,6 +76,7 @@ function mergeChild(saved) {
     ...saved,
     profile: mergeProfile(saved?.profile || saved),
     baseline: { ...child.baseline, ...(saved?.baseline || {}) },
+    englishPlan: normalizeEnglishPlan(saved?.englishPlan),
   };
 }
 
@@ -205,6 +211,8 @@ export async function loadChildren() {
       saveLocalStorage(CHILDREN_STORAGE_KEY, normalized);
       return normalized;
     }
+    const local = localChildrenValue();
+    if (local.length) return local;
   } catch {
     const local = localChildrenValue();
     if (local.length) return local;
@@ -257,6 +265,92 @@ export async function deleteChild(childId) {
   } catch {
     // localStorage remains available if IndexedDB is unavailable.
   }
+}
+
+export function serializeLearningData(children, modelSettings = {}) {
+  return JSON.stringify(
+    {
+      schemaVersion: 1,
+      exportedAt: new Date().toISOString(),
+      children: children.map((child) => mergeChild(child)),
+      modelSettings: {
+        image: modelSettings.image,
+        voice: modelSettings.voice,
+        vocab: modelSettings.vocab,
+      },
+    },
+    null,
+    2,
+  );
+}
+
+export function parseLearningData(input) {
+  let payload;
+  try {
+    payload = typeof input === "string" ? JSON.parse(input) : input;
+  } catch {
+    throw new Error("学习档案不是有效的 JSON 文件");
+  }
+  if (!payload || payload.schemaVersion !== 1)
+    throw new Error("学习档案版本不受支持");
+  if (!Array.isArray(payload.children) || payload.children.length < 1)
+    throw new Error("至少需要一个孩子档案");
+  if (payload.children.length > 8) throw new Error("孩子档案最多支持 8 个");
+  const childIds = new Set();
+  const children = payload.children.map((saved) => {
+    if (!saved || typeof saved !== "object")
+      throw new Error("孩子档案格式不正确");
+    if (typeof saved.nickname !== "string" || !saved.nickname.trim())
+      throw new Error("孩子昵称不能为空");
+    if (saved.nickname.trim().length > 12)
+      throw new Error("孩子昵称不能超过 12 个字");
+    if (
+      !Number.isInteger(Number(saved.age)) ||
+      Number(saved.age) < 2 ||
+      Number(saved.age) > 6
+    )
+      throw new Error("孩子年龄必须在 2 到 6 岁之间");
+    if (saved.gender && !["unspecified", "girl", "boy"].includes(saved.gender))
+      throw new Error("孩子性别字段不受支持");
+    if (
+      saved.englishLevel &&
+      !["not-started", "songs", "words", "conversation"].includes(
+        saved.englishLevel,
+      )
+    )
+      throw new Error("英语基础字段不受支持");
+    if (saved.id && childIds.has(saved.id))
+      throw new Error("孩子档案 ID 不能重复");
+    if (saved.id) childIds.add(saved.id);
+    if (!saved.profile || typeof saved.profile !== "object")
+      throw new Error("学习档案数据不完整");
+    return mergeChild({
+      ...saved,
+      nickname: saved.nickname.trim(),
+      profile: {
+        ...saved.profile,
+        events: Array.isArray(saved.profile.events)
+          ? saved.profile.events.slice(-60)
+          : [],
+        awards: Array.isArray(saved.profile.awards)
+          ? saved.profile.awards.slice(-100)
+          : [],
+      },
+    });
+  });
+  const modelSettings = {};
+  for (const key of ["image", "voice", "vocab"]) {
+    if (typeof payload.modelSettings?.[key] === "string")
+      modelSettings[key] = payload.modelSettings[key].slice(0, 80);
+  }
+  return { schemaVersion: 1, children, modelSettings };
+}
+
+export async function replaceLearningData(payload) {
+  const parsed = parseLearningData(payload);
+  await clearLearningData();
+  for (const child of parsed.children) await saveChild(child);
+  return parsed;
 }
 
 export async function addLearningEvent(event) {

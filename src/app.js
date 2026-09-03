@@ -2,16 +2,26 @@ import "./styles.css";
 import "./overrides.css";
 import { requestNextQuestion } from "./ai.js";
 import {
+  chooseQuestionCandidates,
+  stageDefinition,
+  stageFromBaseline,
+  summarizeWeek,
+  updateEnglishPlan,
+} from "./learning-plan.js";
+import {
   addLearningEvent,
   clearLearningData,
   createDefaultChild,
   createDefaultProfile,
   loadChildren,
+  parseLearningData,
   saveAttempt,
   saveChild,
   saveProfile,
   saveReward,
   saveSession,
+  replaceLearningData,
+  serializeLearningData,
 } from "./storage.js";
 
 const courses = [
@@ -392,6 +402,22 @@ function currentQuestion() {
     (question) => question.id === state.aiQuestionId,
   );
   if (aiQuestion) return aiQuestion;
+  if (state.activityCourse === "english") {
+    const child = activeChild();
+    const candidates = state.baselineTest
+      ? questions
+      : chooseQuestionCandidates({
+          questions,
+          plan: child?.englishPlan,
+          questionStats: profile.questionStats,
+          sessionQuestionIds: state.sessionQuestionIds,
+        });
+    const unseen = candidates.filter(
+      (question) => !state.sessionQuestionIds.includes(question.id),
+    );
+    const pool = unseen.length ? unseen : candidates;
+    return pool[state.questionIndex % pool.length] || questions[0];
+  }
   const skill = profile.skills[state.activityCourse] || {
     attempts: 0,
     correct: 0,
@@ -516,6 +542,16 @@ function recordAnswer(courseId, correct, question) {
   questionStat.lastPracticed = event.at;
   questionStat.lastCorrect = correct;
   profile.questionStats[question.id] = questionStat;
+  if (courseId === "english" && !state.baselineTest) {
+    const child = activeChild();
+    if (child)
+      child.englishPlan = updateEnglishPlan(
+        child.englishPlan,
+        question.id,
+        correct,
+        event.at,
+      );
+  }
   if (!state.sessionQuestionIds.includes(question.id))
     state.sessionQuestionIds.push(question.id);
   profile.events.push(event);
@@ -618,6 +654,20 @@ function profileSummary() {
   return `<div class="profile-summary"><div class="summary-head"><span>🌱</span><div><b>${escapeHtml(child?.nickname || "小朋友")}的成长档案</b><small>只保存在这台设备</small></div></div><div class="summary-stats"><div><strong>${profile.streak}</strong><small>连续学习天</small></div><div><strong>${profile.totalSessions}</strong><small>学习次数</small></div><div><strong>${accuracy}%</strong><small>答题正确率</small></div><div><strong>${profile.stars}</strong><small>收集星星</small></div></div><div class="question-coverage"><span>🧩</span><span>已经探索 <b>${coveredQuestions}</b> 个小题目</span><small>AI 和本地题库都会参考这些练习痕迹</small></div>${skillProgress()}${recentActivity()}<div class="summary-recommendation"><span>✨</span><span>下一步推荐：<b>${recommendationText.course.label}</b><small>${recommendationText.reason}</small></span></div><button class="clear-profile" id="clearProfile">清除本机学习记录</button></div>`;
 }
 
+function weeklyGrowthCard() {
+  const child = activeChild();
+  const plan = child?.englishPlan;
+  const stage = stageDefinition(plan?.stage);
+  const week = summarizeWeek(profile.events, profile.questionStats);
+  const weakLabels = week.weakConcepts.map((id) => id.replace(/^english-/, ""));
+  const suggestion = weakLabels.length
+    ? `下周可以再和 ${weakLabels.join("、")} 见面几次`
+    : week.answers
+      ? "保持每次 5 分钟的小步练习"
+      : "选一个轻松的英语小游戏开始吧";
+  return `<section class="weekly-growth"><div class="weekly-growth-head"><span class="weekly-growth-icon">🌤️</span><div><b>本周成长卡</b><small>最近 7 天 · ${escapeHtml(child?.nickname || "小朋友")}</small></div><span class="stage-pill">第 ${stage.id} 阶段</span></div><div class="weekly-stats"><div><strong>${week.studyDays}</strong><small>学习天数</small></div><div><strong>${week.completedSessions}</strong><small>完成次数</small></div><div><strong>${week.answers}</strong><small>答题数量</small></div><div><strong>${week.accuracy === null ? "—" : `${week.accuracy}%`}</strong><small>本周正确率</small></div></div><div class="weekly-growth-detail"><span>🔤</span><span>英语路径：<b>${stage.label}</b><small>已探索 ${week.englishConcepts} 个英语小概念</small></span></div><p class="weekly-growth-suggestion">✨ ${suggestion}</p></section>`;
+}
+
 function offlineTaskMarkup(courseId) {
   const task = offlineTasks[courseId] || offlineTasks.colors;
   return `<div class="offline-task ${state.offlineTaskDone ? "done" : ""}"><span class="offline-task-emoji">${task.emoji}</span><span><b>${task.title}</b><small>${state.offlineTaskDone ? "完成啦，和家长击个掌！" : task.prompt}</small></span><button id="offlineDone" ${state.offlineTaskDone ? "disabled" : ""}>${state.offlineTaskDone ? "✓" : "完成"}</button></div>`;
@@ -669,12 +719,13 @@ function childProfileSettings() {
     child.baseline?.status === "complete"
       ? `已完成：${child.baseline.score} / ${child.baseline.total}`
       : "还没有做过基础测评";
-  return `<div class="child-profile-settings"><div class="child-switch-row"><label><span>当前孩子</span><select id="childSelect">${children.map((item) => `<option value="${item.id}" ${item.id === child.id ? "selected" : ""}>${escapeHtml(item.nickname)}</option>`).join("")}</select></label><button class="small-action" id="addChild">＋ 添加孩子</button></div><div class="child-form-grid"><label><span>孩子昵称</span><input id="childNickname" maxlength="12" value="${escapeHtml(child.nickname)}" placeholder="例如：小米" /></label><label><span>年龄</span><select id="childAge">${[2, 3, 4, 5, 6].map((age) => `<option value="${age}" ${Number(child.age) === age ? "selected" : ""}>${age} 岁</option>`).join("")}</select></label><label><span>性别（可不填）</span><select id="childGender">${Object.entries(
+  const stage = stageDefinition(child.englishPlan?.stage);
+  return `<div class="child-profile-settings"><div class="child-switch-row"><label><span>当前孩子</span><select id="childSelect">${children.map((item) => `<option value="${escapeHtml(item.id)}" ${item.id === child.id ? "selected" : ""}>${escapeHtml(item.nickname)}</option>`).join("")}</select></label><button class="small-action" id="addChild">＋ 添加孩子</button></div><div class="child-form-grid"><label><span>孩子昵称</span><input id="childNickname" maxlength="12" value="${escapeHtml(child.nickname)}" placeholder="例如：小米" /></label><label><span>年龄</span><select id="childAge">${[2, 3, 4, 5, 6].map((age) => `<option value="${age}" ${Number(child.age) === age ? "selected" : ""}>${age} 岁</option>`).join("")}</select></label><label><span>性别（可不填）</span><select id="childGender">${Object.entries(
     childLabels.gender,
   )
     .map(
       ([value, label]) =>
-        `<option value="${value}" ${child.gender === value ? "selected" : ""}>${label}</option>`,
+        `<option value="${escapeHtml(value)}" ${child.gender === value ? "selected" : ""}>${label}</option>`,
     )
     .join(
       "",
@@ -683,11 +734,11 @@ function childProfileSettings() {
   )
     .map(
       ([value, label]) =>
-        `<option value="${value}" ${child.englishLevel === value ? "selected" : ""}>${label}</option>`,
+        `<option value="${escapeHtml(value)}" ${child.englishLevel === value ? "selected" : ""}>${label}</option>`,
     )
     .join(
       "",
-    )}</select></label></div><div class="baseline-row"><span>英语基础小测试：<b>${baseline}</b></span><button class="small-action" id="startBaseline">开始 3 题测评</button></div><button class="save-child-btn" id="saveChildProfile">保存孩子信息</button></div>`;
+    )}</select></label></div><div class="baseline-row"><span>当前英语路径：<b>第 ${stage.id} 阶段 · ${stage.label}</b><small>${baseline}</small></span><button class="small-action" id="startBaseline">开始 3 题测评</button></div><button class="save-child-btn" id="saveChildProfile">保存孩子信息</button></div>`;
 }
 
 function saveChildForm() {
@@ -736,7 +787,15 @@ async function planQuestionWithAI() {
   const courseId = state.activityCourse;
   const sessionId = state.activeSession.id;
   const token = ++state.aiPlanToken;
-  const allCandidates = questionBank[courseId] || questionBank.colors;
+  const allCandidates =
+    courseId === "english"
+      ? chooseQuestionCandidates({
+          questions: questionBank.english,
+          plan: activeChild()?.englishPlan,
+          questionStats: profile.questionStats,
+          sessionQuestionIds: state.sessionQuestionIds,
+        })
+      : questionBank[courseId] || questionBank.colors;
   const unseenCandidates = allCandidates.filter(
     (question) => !state.sessionQuestionIds.includes(question.id),
   );
@@ -846,7 +905,7 @@ function modelSettingsModal() {
   }
   const select = (type, label, icon) =>
     `<label class="model-setting"><span class="model-setting-label"><span class="model-setting-icon">${icon}</span><span><b>${label}</b><small>${type === "image" ? "生成学习插画与封面" : type === "voice" ? "朗读题目和鼓励语" : "选择题目难度与题库策略"}</small></span></span><select data-model="${type}">${modelCatalog[type].map((item) => `<option value="${item.id}" ${models[type] === item.id ? "selected" : ""}>${item.name} · ${item.note}</option>`).join("")}</select></label>`;
-  return `<div class="modal-backdrop" id="modalBackdrop"><div class="modal model-modal"><button class="modal-close" id="closeModal">×</button><div class="modal-icon">⚙️</div><h3>家长设置</h3>${profileSummary()}<div class="config-divider"><span>孩子档案</span></div>${childProfileSettings()}<div class="config-divider"><span>模型与能力</span></div><p>家长可以为每项能力选择模型。设置会保存在本机，下次打开仍然生效。</p><div class="model-settings">${select("image", "图片生成", "🖼️")}${select("voice", "语音提问", "🔊")}${select("vocab", "词汇量测试", "🧩")}</div><div class="config-tip">当前语音：<b>${modelName("voice")}</b> · 当前题目：<b>${modelName("vocab")}</b></div><div class="modal-actions"><button class="reset-btn" id="resetModels">恢复默认</button><button class="primary-btn" id="closeModal2">保存配置 <span class="arrow">→</span></button></div></div></div>`;
+  return `<div class="modal-backdrop" id="modalBackdrop"><div class="modal model-modal"><button class="modal-close" id="closeModal">×</button><div class="modal-icon">⚙️</div><h3>家长设置</h3>${profileSummary()}${weeklyGrowthCard()}<div class="config-divider"><span>孩子档案</span></div>${childProfileSettings()}<div class="config-divider"><span>模型与能力</span></div><p>家长可以为每项能力选择模型。设置会保存在本机，下次打开仍然生效。</p><div class="model-settings">${select("image", "图片生成", "🖼️")}${select("voice", "语音提问", "🔊")}${select("vocab", "词汇量测试", "🧩")}</div><div class="config-tip">当前语音：<b>${modelName("voice")}</b> · 当前题目：<b>${modelName("vocab")}</b></div><div class="data-tools"><button class="small-action" id="exportData">导出学习档案</button><button class="small-action" id="importData">导入学习档案</button><input id="importFile" type="file" accept="application/json,.json" hidden /></div><div class="modal-actions"><button class="reset-btn" id="resetModels">恢复默认</button><button class="primary-btn" id="closeModal2">保存配置 <span class="arrow">→</span></button></div></div></div>`;
 }
 
 function bindEvents() {
@@ -909,6 +968,13 @@ function bindEvents() {
             total: 3,
             completedAt: new Date().toISOString(),
             suggestedLevel,
+          };
+          child.englishPlan = {
+            ...child.englishPlan,
+            stage: stageFromBaseline(score),
+            stageStartedAt: new Date().toISOString(),
+            masteredConcepts: [],
+            reviewQueue: [],
           };
           if (child.englishLevel === "not-started")
             child.englishLevel = suggestedLevel;
@@ -1011,6 +1077,49 @@ function bindEvents() {
       ?.scrollIntoView({ behavior: "smooth", block: "center" });
     speak(currentQuestion().speech);
   });
+  document.querySelector("#exportData")?.addEventListener("click", () => {
+    const content = serializeLearningData(children, models);
+    const blob = new Blob([content], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `little-sprout-learning-${todayKey()}.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+    showToast("学习档案已导出");
+  });
+  document.querySelector("#importData")?.addEventListener("click", () => {
+    document.querySelector("#importFile")?.click();
+  });
+  document
+    .querySelector("#importFile")
+    ?.addEventListener("change", async (event) => {
+      const file = event.target.files?.[0];
+      event.target.value = "";
+      if (!file) return;
+      try {
+        const parsed = parseLearningData(await file.text());
+        if (!window.confirm("导入会替换这台设备上的全部孩子档案，确定继续吗？"))
+          return;
+        const imported = await replaceLearningData(parsed);
+        children = imported.children;
+        activeChildId = children[0].id;
+        profile = children[0].profile;
+        for (const type of ["image", "voice", "vocab"]) {
+          const modelId = imported.modelSettings[type];
+          if (modelId && modelCatalog[type].some((item) => item.id === modelId))
+            models[type] = modelId;
+        }
+        saveModels();
+        resetActiveActivity();
+        state.modal = true;
+        state.parentUnlocked = true;
+        render();
+        showToast("学习档案已导入");
+      } catch (error) {
+        showToast(error.message || "学习档案导入失败");
+      }
+    });
   document.querySelector("#resetModels")?.addEventListener("click", () => {
     models.image = "gpt-image-1";
     models.voice = "browser-speech";
