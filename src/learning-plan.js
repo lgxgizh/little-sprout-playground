@@ -74,7 +74,8 @@ function dueAt(days, timestamp) {
 
 function reviewRank(item, now) {
   const due = item?.dueAt ? new Date(item.dueAt).getTime() : Infinity;
-  return due <= now ? 0 : 1;
+  // 只把到期复习提到最前；尚未到期的题目不应抢占新概念。
+  return due <= now ? 0 : 2;
 }
 
 export function chooseQuestionCandidates({

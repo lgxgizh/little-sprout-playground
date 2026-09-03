@@ -416,7 +416,14 @@ export async function clearLearningData() {
       (db) =>
         new Promise((resolve, reject) => {
           const transaction = db.transaction(
-            ["profile", "events", "sessions", "attempts", "rewards"],
+            [
+              "profile",
+              "events",
+              "sessions",
+              "attempts",
+              "rewards",
+              "children",
+            ],
             "readwrite",
           );
           transaction.objectStore("profile").clear();
