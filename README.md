@@ -134,9 +134,9 @@ Model choices are stored in `localStorage` under `little-sprout-models`. Remote 
 
 ## 本地学习记录与个性化推荐 / Local learning records
 
-学习档案以 IndexedDB 的 `little-sprout-playground` 数据库为主，包含 `profile`、`events`、`sessions`、`attempts` 和 `rewards` 对象仓库；浏览器不支持 IndexedDB 时会降级到 `localStorage`。默认只记录完成次数、具体题目结果、主题和时间，不上传到服务器。
+学习档案以 IndexedDB 的 `little-sprout-playground` 数据库为主，包含 `profile`、`children`、`events`、`sessions`、`attempts` 和 `rewards` 对象仓库；浏览器不支持 IndexedDB 时会降级到 `localStorage`。默认只记录完成次数、具体题目结果、主题和时间，不上传到服务器。
 
-The primary store is an IndexedDB database named `little-sprout-playground` with `profile`, `events`, `sessions`, `attempts`, and `rewards` object stores. Browsers without IndexedDB fall back to `localStorage`. Study counts, per-question results, topics, and timestamps are recorded locally by default.
+The primary store is an IndexedDB database named `little-sprout-playground` with `profile`, `children`, `events`, `sessions`, `attempts`, and `rewards` object stores. Browsers without IndexedDB fall back to `localStorage`. Study counts, per-question results, topics, and timestamps are recorded locally by default.
 
 系统会优先推荐孩子较少练习或正确率较低的主题，并在一次学习单元中尽量避免重复已经完成的题目；家长可以在「家长设置」中查看统计、主题进度、最近足迹或清除本机记录。
 
@@ -145,6 +145,21 @@ The recommendation rule prioritizes topics that are new or need gentle practice 
 一次学习会区分“开始、答题、完成、退出”和“屏幕外亲子任务”，避免把误触或反复点击当成学习成果。英语学习还会为每个孩子维护阶段目标和错题复习队列。/ A learning session distinguishes **started**, **answer submitted**, **completed**, **quit**, and **offline parent-child activity** events, so accidental taps are not counted as completed learning. Each child also has an English stage goal and a spaced-review queue.
 
 家长设置中的「导出学习档案」会生成一个本地 JSON 文件；「导入学习档案」会在确认后替换本机的全部孩子档案。导入前会校验版本、孩子数量、昵称、年龄和学习数据结构。/ **Export learning data** creates a local JSON file. **Import learning data** replaces all child profiles on this device after confirmation and validates the schema before changing anything.
+
+导出文件使用版本化结构，便于未来迁移：/ Exports use a versioned shape for future migrations:
+
+```json
+{
+  "schemaVersion": 1,
+  "exportedAt": "2026-09-03T08:00:00.000Z",
+  "children": [],
+  "modelSettings": {
+    "image": "gpt-image-1",
+    "voice": "browser-speech",
+    "vocab": "adaptive-picture"
+  }
+}
+```
 
 ## 项目结构 / Project structure
 
