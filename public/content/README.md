@@ -48,7 +48,7 @@
 - `ageMin` and `ageMax`: optional inclusive age range from `2` to `6`. Questions outside the child’s range are skipped / 可选的适龄范围（含边界，`2`–`6` 岁）；超出孩子年龄的题目会自动跳过。
 - `concept`: optional stable English concept key such as `apple` or `greeting`; keep it short and reuse it for related questions / 可选的稳定概念标识，如 `apple` 或 `greeting`；请保持简短，相关题目复用同一个标识。
 - `baseline`: set `true` only for the three starter-check questions / 只有基础测评的 3 道题设置为 `true`。新增题目一般填 `false`。
-- `visual`: one emoji or a short local image token / 一个 emoji 或短图片标记。
+- `visual`: one emoji for the question hero (the current renderer is emoji-first). Use the picture-story shelf for local image/video cards / 题目主视觉使用一个 emoji（当前渲染器以 emoji 为主）；本地图片或视频请接入下方的故事卡片。
 - `prompt` and `speech`: child-facing English only. Keep them short and concrete / 面向孩子的英文短句，尽量短、具体。
 - `answer`: must exactly match one choice `value` / 必须与某个选项的 `value` 完全一致。
 - `choices`: 2–4 choices; every choice needs `label`, `emoji`, `value`, and a six-digit hex `color` / 2–4 个选项，每个选项都需要这些字段。
