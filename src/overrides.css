@@ -141,6 +141,92 @@
   color: #a5a69b;
   font-size: 9px;
 }
+.skill-progress {
+  display: grid;
+  gap: 8px;
+  margin-top: 13px;
+}
+.skill-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 5px 8px;
+  align-items: center;
+}
+.skill-name {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+.skill-name span {
+  font-size: 14px;
+}
+.skill-name b {
+  font-size: 10px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.skill-score {
+  color: #769282;
+  font-size: 10px;
+  font-weight: 700;
+}
+.skill-bar {
+  grid-column: 1 / -1;
+  height: 5px;
+  overflow: hidden;
+  border-radius: 6px;
+  background: #e5eee5;
+}
+.skill-bar i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #9dd6ad, #6fbf91);
+}
+.recent-activity {
+  display: grid;
+  gap: 8px;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid #e1ece1;
+}
+.recent-activity > b {
+  color: #789282;
+  font-size: 10px;
+}
+.activity-row {
+  display: grid;
+  grid-template-columns: 23px 1fr auto;
+  align-items: center;
+  gap: 7px;
+}
+.activity-row > span:first-child {
+  font-size: 15px;
+}
+.activity-row b {
+  display: block;
+  font-size: 10px;
+}
+.activity-row small {
+  display: block;
+  color: #99a69c;
+  font-size: 9px;
+}
+.activity-row time {
+  color: #adb4ac;
+  font-size: 9px;
+  white-space: nowrap;
+}
+.recent-empty {
+  margin-top: 13px;
+  padding-top: 12px;
+  border-top: 1px solid #e1ece1;
+  color: #9aa89e;
+  font-size: 10px;
+}
 .clear-profile {
   display: block;
   margin: 11px auto 0;
@@ -193,6 +279,10 @@
   display: grid;
   gap: 11px;
   margin-top: 18px;
+}
+.model-modal {
+  max-height: calc(100vh - 28px);
+  overflow-y: auto;
 }
 .model-setting {
   display: flex;

@@ -201,12 +201,55 @@ function recommendation() {
   return { course, reason, accuracy };
 }
 
+function relativeTime(iso) {
+  if (!iso) return "还没开始";
+  const minutes = Math.floor((Date.now() - new Date(iso).getTime()) / 60000);
+  if (minutes < 1) return "刚刚";
+  if (minutes < 60) return `${minutes} 分钟前`;
+  if (minutes < 1440) return `${Math.floor(minutes / 60)} 小时前`;
+  return new Date(iso).toLocaleDateString("zh-CN", {
+    month: "numeric",
+    day: "numeric",
+  });
+}
+
+function skillProgress() {
+  return `<div class="skill-progress">${courses
+    .map((course) => {
+      const skill = profile.skills[course.id];
+      const accuracy = skill?.attempts
+        ? Math.round((skill.correct / skill.attempts) * 100)
+        : 0;
+      return `<div class="skill-row"><span class="skill-name"><span>${course.emoji}</span><b>${course.label}</b></span><span class="skill-score">${skill?.attempts ? `${accuracy}%` : "未开始"}</span><div class="skill-bar"><i style="width:${accuracy}%"></i></div></div>`;
+    })
+    .join("")}</div>`;
+}
+
+function recentActivity() {
+  const recent = profile.events.slice(-4).reverse();
+  if (!recent.length)
+    return `<div class="recent-empty">完成一次游戏后，这里会出现成长足迹 🌱</div>`;
+  return `<div class="recent-activity"><b>最近足迹</b>${recent
+    .map((event) => {
+      const course =
+        courses.find((item) => item.id === event.courseId) || courses[0];
+      const copy =
+        event.type === "answer"
+          ? event.correct
+            ? "答对了一题，收集到一颗星"
+            : "再试一次，继续加油"
+          : "完成了一次学习";
+      return `<div class="activity-row"><span>${course.emoji}</span><span><b>${course.label}</b><small>${copy}</small></span><time>${relativeTime(event.at)}</time></div>`;
+    })
+    .join("")}</div>`;
+}
+
 function profileSummary() {
   const accuracy = profile.totalAnswers
     ? Math.round((profile.correctAnswers / profile.totalAnswers) * 100)
     : 0;
   const recommendationText = recommendation();
-  return `<div class="profile-summary"><div class="summary-head"><span>🌱</span><div><b>成长小档案</b><small>只保存在这台设备</small></div></div><div class="summary-stats"><div><strong>${profile.streak}</strong><small>连续学习天</small></div><div><strong>${profile.totalSessions}</strong><small>学习次数</small></div><div><strong>${accuracy}%</strong><small>答题正确率</small></div><div><strong>${profile.stars}</strong><small>收集星星</small></div></div><div class="summary-recommendation"><span>✨</span><span>下一步推荐：<b>${recommendationText.course.label}</b><small>${recommendationText.reason}</small></span></div><button class="clear-profile" id="clearProfile">清除本机学习记录</button></div>`;
+  return `<div class="profile-summary"><div class="summary-head"><span>🌱</span><div><b>成长小档案</b><small>只保存在这台设备</small></div></div><div class="summary-stats"><div><strong>${profile.streak}</strong><small>连续学习天</small></div><div><strong>${profile.totalSessions}</strong><small>学习次数</small></div><div><strong>${accuracy}%</strong><small>答题正确率</small></div><div><strong>${profile.stars}</strong><small>收集星星</small></div></div>${skillProgress()}${recentActivity()}<div class="summary-recommendation"><span>✨</span><span>下一步推荐：<b>${recommendationText.course.label}</b><small>${recommendationText.reason}</small></span></div><button class="clear-profile" id="clearProfile">清除本机学习记录</button></div>`;
 }
 
 function modelName(type) {
