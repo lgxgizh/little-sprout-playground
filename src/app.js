@@ -63,7 +63,7 @@ const courses = [
   },
 ];
 
-const questionBank = {
+let questionBank = {
   colors: [
     {
       id: "color-blue-fruit",
@@ -679,6 +679,24 @@ function recordAnswer(courseId, correct, question) {
 
 function recommendation() {
   const preferenceOrder = ["english", "colors", "animals", "shapes"];
+  const child = activeChild();
+  const dueReviews = (child?.englishPlan?.reviewQueue || []).filter(
+    (item) => !item.dueAt || new Date(item.dueAt).getTime() <= Date.now(),
+  );
+  if (dueReviews.length) {
+    const stage = stageDefinition(child.englishPlan.stage);
+    return {
+      course: courses.find((course) => course.id === "english") || courses[0],
+      reason: `${dueReviews.length} review ${dueReviews.length === 1 ? "word" : "words"} are ready`,
+      accuracy: profile.skills.english?.attempts
+        ? Math.round(
+            (profile.skills.english.correct / profile.skills.english.attempts) *
+              100,
+          )
+        : 0,
+      stage,
+    };
+  }
   const ranked = Object.entries(profile.skills).sort(
     ([a, left], [b, right]) => {
       const leftScore = left.attempts ? left.correct / left.attempts : -1;
@@ -703,6 +721,19 @@ function recommendation() {
       ? "A few more tries will build confidence"
       : "Great work—let's keep it fresh";
   return { course, reason, accuracy };
+}
+
+function englishPlanCard() {
+  const child = activeChild();
+  const plan = child?.englishPlan;
+  const stage = stageDefinition(plan?.stage);
+  const dueReviews = (plan?.reviewQueue || []).filter(
+    (item) => !item.dueAt || new Date(item.dueAt).getTime() <= Date.now(),
+  ).length;
+  const detail = dueReviews
+    ? `${dueReviews} review ${dueReviews === 1 ? "word" : "words"} ready`
+    : "A fresh little step is ready";
+  return `<div class="english-plan-card"><div class="english-plan-icon">🔤</div><div><span>ENGLISH PATH · STAGE ${stage.id}</span><b>${stage.labelEn}</b><small>${detail}</small></div><i aria-hidden="true">→</i></div>`;
 }
 
 function relativeTime(iso) {
@@ -825,6 +856,73 @@ function escapeHtml(value = "") {
         character
       ],
   );
+}
+
+function normalizeContentQuestion(question) {
+  if (!question || typeof question !== "object") return null;
+  const clean = (value, max = 160) =>
+    String(value || "")
+      .replace(/[<>]/g, "")
+      .trim()
+      .slice(0, max);
+  const choices = Array.isArray(question.choices)
+    ? question.choices
+        .map((choice) => ({
+          label: clean(choice?.label, 40),
+          emoji: clean(choice?.emoji, 8),
+          value: clean(choice?.value, 40),
+          color: /^#[0-9a-f]{6}$/i.test(choice?.color)
+            ? choice.color
+            : "#9ed9c4",
+        }))
+        .filter((choice) => choice.label && choice.value && choice.emoji)
+        .slice(0, 4)
+    : [];
+  const normalized = {
+    id: clean(question.id, 80),
+    difficulty: Math.min(3, Math.max(1, Number(question.difficulty) || 1)),
+    baseline: Boolean(question.baseline),
+    visual: clean(question.visual, 8),
+    prompt: clean(question.prompt),
+    speech: clean(question.speech),
+    answer: clean(question.answer, 40),
+    choices,
+  };
+  if (
+    !normalized.id ||
+    !normalized.visual ||
+    !normalized.prompt ||
+    !normalized.speech ||
+    !normalized.answer ||
+    choices.length < 2 ||
+    !choices.some((choice) => choice.value === normalized.answer)
+  )
+    return null;
+  return normalized;
+}
+
+async function loadQuestionPack() {
+  try {
+    const response = await fetch(`${assetBase}content/questions.en.json`, {
+      cache: "no-store",
+    });
+    if (!response.ok) return;
+    const payload = await response.json();
+    if (payload?.schemaVersion !== 1 || !Array.isArray(payload.questions))
+      return;
+    const additions = payload.questions
+      .map(normalizeContentQuestion)
+      .filter(Boolean);
+    const existing = new Set(
+      questionBank.english.map((question) => question.id),
+    );
+    questionBank.english = [
+      ...questionBank.english,
+      ...additions.filter((question) => !existing.has(question.id)),
+    ];
+  } catch {
+    // The built-in question bank keeps the app fully usable offline.
+  }
 }
 
 function childProfileSettings() {
@@ -1040,6 +1138,7 @@ function render() {
             <div class="streak"><span class="streak-icon">🔥</span><span><b>${profile.streak} days in a row</b><small>${profile.streak ? "A little play every day helps" : "Finish today to light your first star"}</small></span></div>
             <div class="star-badge">⭐ ${profile.stars} stars collected</div>
             <div class="daily-goal"><div class="daily-goal-top"><span>Today's 3-question adventure</span><b>${dailyProgress.answers}/${dailyProgress.target}</b></div><div class="daily-goal-track"><i style="width:${Math.round((dailyProgress.answers / dailyProgress.target) * 100)}%"></i></div><small>${dailyProgress.answers >= dailyProgress.target ? "Today is complete—come back tomorrow!" : `${dailyProgress.target - dailyProgress.answers} more to go`}</small></div>
+            ${englishPlanCard()}
           </div>
           <div class="hero-art"><img src="${assetBase}assets/fox-hero.png" alt="A little fox reads a picture book by a tent"/><div class="floating-pill pill-one">Have fun today!</div><div class="floating-pill pill-two">⭐ +1</div></div>
         </section>
@@ -1054,8 +1153,8 @@ function render() {
           <div class="panel-intro"><span class="section-kicker">MINI QUEST · ${String(state.questionIndex + 1).padStart(2, "0")}</span><h2>${activeCourse.label}</h2><p>${question.prompt}<br/>Let's try it together!</p><div class="speech-actions"><button class="voice-btn" id="voicePrompt"><span>🔊</span> Listen</button>${activeCourse.id === "english" ? `<button class="say-btn ${state.speechPractice === "listening" ? "is-listening" : ""}" id="sayIt" aria-label="Say the answer aloud" ${state.aiPlanning ? "disabled" : ""}><span>🎙️</span> ${state.speechPractice === "listening" ? "Listening…" : "Say it"}</button><span class="speech-feedback ${state.speechPractice === "success" ? "is-success" : ""}" aria-live="polite">${state.speechFeedback}</span>` : ""}</div><div class="model-chip"><span>Question model</span><b>${modelName("vocab")}</b></div>${state.aiPlanning ? '<div class="ai-plan-note is-loading">🪄 Choosing a question for you…</div>' : state.aiPlanMessage ? `<div class="ai-plan-note ${state.aiPlanSource === "ai" ? "is-ai" : "is-local"}">${state.aiPlanSource === "ai" ? "✨" : "🌱"} ${state.aiPlanMessage}</div>` : ""}</div>
           <div class="quiz-card">
             <div class="quiz-top"><span>Question ${state.questionIndex + 1} / 3</span><span class="session-live">${state.activeSession ? "● Playing now" : ""}</span><div class="progress-dots">${[0, 1, 2].map((i) => `<i class="${i <= state.questionIndex ? "filled" : ""}"></i>`).join("")}</div></div>
-            <div class="question-visual"><span class="question-emoji">${question.visual}</span><span class="question-bubble">${question.prompt}<br/><b>Look and choose</b></span></div>
-            <div class="choice-grid">${question.choices.map((choice) => `<button class="choice ${state.answered && choice.value === question.answer ? "correct" : ""} ${state.answered && state.selectedChoice === choice.value && choice.value !== question.answer ? "wrong" : ""}" data-choice="${choice.value}" aria-label="${question.prompt}: ${choice.label}" style="--choice-color:${choice.color}" ${state.answered || state.aiPlanning ? "disabled" : ""}><span class="choice-emoji">${choice.emoji}</span><span>${choice.label}</span>${state.answered && choice.value === question.answer ? '<b class="check">✓</b>' : ""}</button>`).join("")}</div>
+            <div class="question-visual"><span class="question-emoji">${escapeHtml(question.visual)}</span><span class="question-bubble">${escapeHtml(question.prompt)}<br/><b>Look and choose</b></span></div>
+            <div class="choice-grid">${question.choices.map((choice) => `<button class="choice ${state.answered && choice.value === question.answer ? "correct" : ""} ${state.answered && state.selectedChoice === choice.value && choice.value !== question.answer ? "wrong" : ""}" data-choice="${escapeHtml(choice.value)}" aria-label="${escapeHtml(question.prompt)}: ${escapeHtml(choice.label)}" style="--choice-color:${choice.color}" ${state.answered || state.aiPlanning ? "disabled" : ""}><span class="choice-emoji">${escapeHtml(choice.emoji)}</span><span>${escapeHtml(choice.label)}</span>${state.answered && choice.value === question.answer ? '<b class="check">✓</b>' : ""}</button>`).join("")}</div>
             ${state.answered ? `<div class="feedback ${state.correct ? "good" : "try"}">${state.encouragement || (state.correct ? "You found it! ✨" : "That's okay—let's look again")}</div>${state.activityComplete ? (state.baselineTest ? baselineResultMarkup() : offlineTaskMarkup(state.activityCourse)) : `<button class="next-question" id="nextQuestion">${state.correct ? "Next one" : "Try another"} <span>→</span></button>`}` : '<div class="hint">Tap a picture to answer · Find a star!</div>'}
             ${state.activeSession ? `<button class="finish-btn" id="finishSession">${state.activityComplete ? "Finish today" : "Take a break"}</button>` : ""}
           </div>
@@ -1459,6 +1558,7 @@ async function init() {
   document.querySelector("#app").innerHTML =
     '<div class="loading-screen"><span>🦊</span><b>Little Sprout is getting ready…</b></div>';
   children = await loadChildren();
+  await loadQuestionPack();
   if (!children.length) children = [createDefaultChild()];
   activeChildId = children[0].id;
   profile = children[0].profile;

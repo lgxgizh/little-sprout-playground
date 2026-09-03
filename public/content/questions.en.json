@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "locale": "en-US",
+  "title": "Little Sprout English starter pack",
+  "questions": [
+    {
+      "id": "english-hello",
+      "difficulty": 1,
+      "visual": "👋",
+      "prompt": "Which one says hello?",
+      "speech": "Which one says hello?",
+      "answer": "hello",
+      "choices": [
+        {
+          "label": "Hello",
+          "emoji": "👋",
+          "value": "hello",
+          "color": "#9ed9c4"
+        },
+        { "label": "Bye", "emoji": "👋", "value": "bye", "color": "#6db6e8" },
+        {
+          "label": "Sleep",
+          "emoji": "😴",
+          "value": "sleep",
+          "color": "#c9b9d9"
+        }
+      ]
+    },
+    {
+      "id": "english-open",
+      "difficulty": 2,
+      "visual": "🚪",
+      "prompt": "Open the door, please",
+      "speech": "Open the door, please.",
+      "answer": "door",
+      "choices": [
+        { "label": "Door", "emoji": "🚪", "value": "door", "color": "#d9a66f" },
+        { "label": "Cup", "emoji": "🥤", "value": "cup", "color": "#6db6e8" },
+        { "label": "Book", "emoji": "📘", "value": "book", "color": "#9ed9c4" }
+      ]
+    }
+  ]
+}
