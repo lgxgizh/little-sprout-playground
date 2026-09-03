@@ -786,6 +786,10 @@ function familyTaskPanel() {
     )}</div><p class="family-task-note">You do not need to finish every task. Looking, listening, and playing with a grown-up is wonderful learning.</p></section>`;
 }
 
+function mediaShelf() {
+  return `<section class="media-shelf" id="mediaShelf"><div class="section-heading"><div><span class="section-kicker">PICTURE STORIES · 1 MINUTE</span><h2>Play shelf</h2><span class="active-model">Short, calm, repeatable</span></div><span class="shelf-note">No scores here</span></div><div class="media-grid"><article class="media-card media-card-featured"><div class="media-thumb"><img src="${assetBase}assets/fox-hero.png" alt="A fox reads a picture book"/><span class="media-duration">1 min</span></div><div class="media-card-copy"><span class="media-type">Picture story</span><h3>Fox says hello</h3><p>Look, listen, and say hello together.</p><button class="media-play" data-story="fox-hello">▶ Play story</button></div></article><article class="media-card media-card-empty"><div class="media-empty-icon">🎬</div><div><span class="media-type">Your local video</span><h3>Add a favorite clip</h3><p>Place an MP4 in <code>public/assets/media</code> to make it part of the shelf.</p><span class="media-status">Ready for your content</span></div></article><article class="media-card media-card-empty"><div class="media-empty-icon">🎧</div><div><span class="media-type">Your local audio</span><h3>Add a listening moment</h3><p>Place an MP3 in <code>public/assets/audio</code> for English listening play.</p><span class="media-status">English audio only</span></div></article></div></section>`;
+}
+
 function modelName(type) {
   return (
     modelCatalog[type].find((item) => item.id === models[type])?.name ||
@@ -981,6 +985,8 @@ function render() {
           </div>
         </section>
 
+        ${mediaShelf()}
+
         ${familyTaskPanel()}
 
         <section class="parent-note"><div class="note-icon">💛</div><div><b>Grown-up note</b><p>Five to eight minutes is plenty. Follow your child's curiosity.</p></div><button class="round-arrow" id="openParent2" aria-label="Open parent settings">→</button></section>
@@ -1014,7 +1020,7 @@ function bindEvents() {
       render();
       const targetId =
         state.activeTab === "library"
-          ? "#lessonArea"
+          ? "#mediaShelf"
           : state.activeTab === "tasks"
             ? "#familyTasks"
             : "#quizPanel";
@@ -1112,6 +1118,14 @@ function bindEvents() {
         if (state.activeSession)
           speak(`Let's play. ${currentQuestion().speech}`);
       });
+    }),
+  );
+  document.querySelectorAll("[data-story]").forEach((btn) =>
+    btn.addEventListener("click", () => {
+      if (btn.dataset.story === "fox-hello") {
+        speak("Hello! I am Fox. Let's say hello together.");
+        showToast("Picture story is playing");
+      }
     }),
   );
   document

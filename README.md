@@ -32,6 +32,7 @@
 - 独立的亲子任务区，鼓励把学习带到真实生活中 / A dedicated parent-child activity area that extends learning into daily life
 - 家长入口长按保护 / Long-press protection for parent settings
 - 可替换的本地图片、音频和题库资源 / Replaceable local media and question banks
+- 图片故事架与本地视频/音频占位入口 / Picture-story shelf with local video/audio slots
 - GitHub Actions 自动构建和 Pages 部署 / Automated CI and GitHub Pages deployment
 
 ## 快速开始 / Quick start
@@ -183,6 +184,7 @@ The recommendation rule prioritizes topics that are new or need gentle practice 
 
 - 图片或封面放入 `public/assets/`，在 `src/app.js` 中引用。 / Put images in `public/assets/` and reference them from `src/app.js`.
 - 本地音频建议放入 `public/assets/audio/`，在 `speak()` 的适配分支中播放。 / Put local audio in `public/assets/audio/` and handle it in the `speak()` adapter.
+- 本地视频可放入 `public/assets/media/`，并在 Play shelf 中替换对应卡片。 / Put local videos in `public/assets/media/` and wire them to a Play shelf card.
 - 自定义题目可以抽取为 JSON，由本地题库适配器加载。 / Store custom questions as JSON and load them through a local question-bank adapter.
 - 远程模型应由后端保存密钥并提供受控 API。 / Keep provider secrets on a backend and expose a controlled API.
 
