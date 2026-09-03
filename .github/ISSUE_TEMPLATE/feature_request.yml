@@ -1,0 +1,23 @@
+name: 功能建议
+description: 提议新的学习内容、交互或模型适配器
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: need
+    attributes:
+      label: 使用场景
+      description: 这个功能解决家长或孩子的什么问题？
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: 建议方案
+    validations:
+      required: true
+  - type: dropdown
+    id: age
+    attributes:
+      label: 适用年龄
+      options: ["3 岁", "4–5 岁", "6 岁以上", "家长功能"]

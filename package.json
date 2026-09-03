@@ -2,13 +2,27 @@
   "name": "little-fun-learning",
   "version": "0.1.0",
   "private": true,
+  "description": "A picture-first, voice-assisted learning web app for preschool children.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lgxgizh/little-fun-learning.git"
+  },
+  "homepage": "https://lgxgizh.github.io/little-fun-learning/",
+  "engines": {
+    "node": ">=20"
+  },
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "check": "npm run format:check && node --check src/app.js && vite build"
   },
   "devDependencies": {
+    "prettier": "^3.9.6",
     "vite": "^6.1.0"
   }
 }
