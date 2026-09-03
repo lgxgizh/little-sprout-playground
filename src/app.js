@@ -856,6 +856,10 @@ function speak(text) {
   window.speechSynthesis.cancel();
   const utterance = new SpeechSynthesisUtterance(text);
   utterance.lang = "en-US";
+  const englishVoice = window.speechSynthesis
+    .getVoices()
+    .find((voice) => /^en(-|_)/i.test(voice.lang));
+  if (englishVoice) utterance.voice = englishVoice;
   utterance.rate = 0.82;
   utterance.pitch = 1.15;
   window.speechSynthesis.speak(utterance);
