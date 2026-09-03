@@ -120,11 +120,17 @@ export async function requestNextQuestion({
       body: JSON.stringify({
         model,
         learningContext: buildLearningContext(profile, activityCourse, child),
-        candidates: candidates.map(({ id, difficulty, prompt }) => ({
-          id,
-          difficulty,
-          prompt,
-        })),
+        candidates: candidates.map(
+          ({ id, difficulty, stage, ageMin, ageMax, concept, prompt }) => ({
+            id,
+            difficulty,
+            stage,
+            ageMin,
+            ageMax,
+            concept,
+            prompt,
+          }),
+        ),
       }),
     });
     if (!response.ok) return null;

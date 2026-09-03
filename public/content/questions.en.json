@@ -6,6 +6,10 @@
     {
       "id": "english-hello",
       "difficulty": 1,
+      "stage": 1,
+      "ageMin": 2,
+      "ageMax": 4,
+      "concept": "greeting",
       "visual": "👋",
       "prompt": "Which one says hello?",
       "speech": "Which one says hello?",
@@ -29,6 +33,10 @@
     {
       "id": "english-open",
       "difficulty": 2,
+      "stage": 3,
+      "ageMin": 3,
+      "ageMax": 6,
+      "concept": "daily action",
       "visual": "🚪",
       "prompt": "Open the door, please",
       "speech": "Open the door, please.",

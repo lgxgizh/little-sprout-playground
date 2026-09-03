@@ -13,6 +13,22 @@ test("English content pack follows the safe question schema", async () => {
   for (const question of pack.questions) {
     assert.match(question.id, /^english-/);
     assert.ok([1, 2, 3].includes(question.difficulty));
+    assert.ok(
+      Number.isInteger(question.stage) &&
+        question.stage >= 1 &&
+        question.stage <= 4,
+    );
+    assert.ok(
+      Number.isInteger(question.ageMin) &&
+        question.ageMin >= 2 &&
+        question.ageMin <= 6,
+    );
+    assert.ok(
+      Number.isInteger(question.ageMax) &&
+        question.ageMax >= question.ageMin &&
+        question.ageMax <= 6,
+    );
+    assert.equal(typeof question.concept, "string");
     assert.equal(typeof question.prompt, "string");
     assert.equal(typeof question.speech, "string");
     assert.equal(typeof question.answer, "string");

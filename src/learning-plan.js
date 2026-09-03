@@ -91,13 +91,21 @@ export function chooseQuestionCandidates({
   plan,
   questionStats = {},
   sessionQuestionIds = [],
+  age = null,
   now = Date.now(),
 }) {
   const currentPlan = normalizeEnglishPlan(plan);
   const definition = stageDefinition(currentPlan.stage);
-  const eligible = questions.filter(
-    (question) => question.difficulty <= definition.maxDifficulty,
-  );
+  const eligible = questions.filter((question) => {
+    const questionStage = Number(question.stage) || question.difficulty || 1;
+    const minAge = Number(question.ageMin) || 0;
+    const maxAge = Number(question.ageMax) || Infinity;
+    return (
+      question.difficulty <= definition.maxDifficulty &&
+      questionStage <= currentPlan.stage &&
+      (age === null || (age >= minAge && age <= maxAge))
+    );
+  });
   const unseen = eligible.filter(
     (question) => !sessionQuestionIds.includes(question.id),
   );

@@ -517,6 +517,7 @@ function currentQuestion() {
           plan: child?.englishPlan,
           questionStats: profile.questionStats,
           sessionQuestionIds: state.sessionQuestionIds,
+          age: child?.age,
         });
     const unseen = candidates.filter(
       (question) => !state.sessionQuestionIds.includes(question.id),
@@ -878,9 +879,19 @@ function normalizeContentQuestion(question) {
         .filter((choice) => choice.label && choice.value && choice.emoji)
         .slice(0, 4)
     : [];
+  const ageMin = Math.min(6, Math.max(2, Number(question.ageMin) || 2));
+  const ageMax = Math.min(6, Math.max(2, Number(question.ageMax) || 6));
+  if (ageMin > ageMax) return null;
   const normalized = {
     id: clean(question.id, 80),
     difficulty: Math.min(3, Math.max(1, Number(question.difficulty) || 1)),
+    stage: Math.min(
+      4,
+      Math.max(1, Number(question.stage) || Number(question.difficulty) || 1),
+    ),
+    ageMin,
+    ageMax,
+    concept: clean(question.concept, 60),
     baseline: Boolean(question.baseline),
     visual: clean(question.visual, 8),
     prompt: clean(question.prompt),
@@ -1068,6 +1079,7 @@ async function planQuestionWithAI() {
             plan: activeChild()?.englishPlan,
             questionStats: profile.questionStats,
             sessionQuestionIds: state.sessionQuestionIds,
+            age: activeChild()?.age,
           })
       : questionBank[courseId] || questionBank.colors;
   const unseenCandidates = allCandidates.filter(

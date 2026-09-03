@@ -188,6 +188,7 @@ The recommendation rule prioritizes topics that are new or need gentle practice 
 - 本地视频可放入 `public/assets/media/`，并在 Play shelf 中替换对应卡片。 / Put local videos in `public/assets/media/` and wire them to a Play shelf card.
 - 自定义题目可以抽取为 JSON，由本地题库适配器加载。 / Store custom questions as JSON and load them through a local question-bank adapter.
 - 直接编辑 `public/content/questions.en.json` 即可追加英语题目；字段和教材建议见 [`public/content/README.md`](public/content/README.md)。 / Add English questions by editing `public/content/questions.en.json`; see [`public/content/README.md`](public/content/README.md) for the schema and curriculum guidance.
+- 每道题可用 `stage`、`ageMin`、`ageMax` 和 `concept` 控制阶段、适龄范围与复习归类；应用会在本地自动过滤不适合当前孩子的题目。 / Use `stage`, `ageMin`, `ageMax`, and `concept` to control level, age fit, and review grouping; the app filters unsuitable questions locally.
 - 远程模型应由后端保存密钥并提供受控 API。 / Keep provider secrets on a backend and expose a controlled API.
 
 涉及儿童数据时，请阅读 [SECURITY.md](SECURITY.md)。新增素材前请确认它允许公开再分发。/ Read [SECURITY.md](SECURITY.md) before handling children’s data, and verify redistribution rights for every new asset.

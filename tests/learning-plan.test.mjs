@@ -58,6 +58,22 @@ test("candidate ordering prioritizes due reviews and avoids session repeats", ()
   );
 });
 
+test("candidate selection respects stage and age metadata", () => {
+  const candidates = chooseQuestionCandidates({
+    questions: [
+      { id: "english-apple", difficulty: 1, stage: 1, ageMin: 2, ageMax: 4 },
+      { id: "english-sentence", difficulty: 2, stage: 3, ageMin: 3, ageMax: 6 },
+      { id: "english-baby", difficulty: 1, stage: 1, ageMin: 2, ageMax: 2 },
+    ],
+    plan: { ...createEnglishPlan(), stage: 1 },
+    age: 3,
+  });
+  assert.deepEqual(
+    candidates.map((question) => question.id),
+    ["english-apple"],
+  );
+});
+
 test("weekly summary only counts the latest seven days", () => {
   const events = [
     {
