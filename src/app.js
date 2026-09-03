@@ -164,6 +164,7 @@ const questionBank = {
   english: [
     {
       id: "english-apple",
+      baseline: true,
       difficulty: 1,
       visual: "🍎",
       prompt: "Which one is an apple?",
@@ -182,6 +183,7 @@ const questionBank = {
     },
     {
       id: "english-cat",
+      baseline: true,
       difficulty: 1,
       visual: "🐱",
       prompt: "Which one is a cat?",
@@ -195,6 +197,7 @@ const questionBank = {
     },
     {
       id: "english-red",
+      baseline: true,
       difficulty: 1,
       visual: "🔴",
       prompt: "Find the red one",
@@ -209,6 +212,81 @@ const questionBank = {
           color: "#f7c94b",
         },
         { label: "Red", emoji: "🔴", value: "red", color: "#ff6b5e" },
+      ],
+    },
+    {
+      id: "english-dog",
+      difficulty: 1,
+      visual: "🐶",
+      prompt: "Which one is a dog?",
+      speech: "Which one is a dog?",
+      answer: "dog",
+      choices: [
+        { label: "Dog", emoji: "🐶", value: "dog", color: "#d9a66f" },
+        { label: "Fish", emoji: "🐟", value: "fish", color: "#6db6e8" },
+        { label: "Bird", emoji: "🐦", value: "bird", color: "#9ed9c4" },
+      ],
+    },
+    {
+      id: "english-yellow",
+      difficulty: 1,
+      visual: "⭐",
+      prompt: "Find the yellow one",
+      speech: "Can you find the yellow one?",
+      answer: "yellow",
+      choices: [
+        { label: "Green", emoji: "🟢", value: "green", color: "#9ed9c4" },
+        { label: "Yellow", emoji: "⭐", value: "yellow", color: "#f7c94b" },
+        { label: "Blue", emoji: "🔵", value: "blue", color: "#6db6e8" },
+      ],
+    },
+    {
+      id: "english-ball",
+      difficulty: 2,
+      visual: "⚽",
+      prompt: "Touch the big red ball",
+      speech: "Touch the big red ball.",
+      answer: "red-ball",
+      choices: [
+        {
+          label: "Big red ball",
+          emoji: "🔴",
+          value: "red-ball",
+          color: "#ff6b5e",
+        },
+        { label: "Blue hat", emoji: "🧢", value: "blue-hat", color: "#6db6e8" },
+        {
+          label: "Yellow star",
+          emoji: "⭐",
+          value: "yellow-star",
+          color: "#f7c94b",
+        },
+      ],
+    },
+    {
+      id: "english-big",
+      difficulty: 2,
+      visual: "🐘",
+      prompt: "Which animal is big?",
+      speech: "Which animal is big?",
+      answer: "elephant",
+      choices: [
+        { label: "Mouse", emoji: "🐭", value: "mouse", color: "#c9b9d9" },
+        { label: "Elephant", emoji: "🐘", value: "elephant", color: "#9da9b6" },
+        { label: "Ant", emoji: "🐜", value: "ant", color: "#d9a66f" },
+      ],
+    },
+    {
+      id: "english-wash",
+      difficulty: 2,
+      visual: "🧼",
+      prompt: "What do we use to wash our hands?",
+      speech: "What do we use to wash our hands?",
+      answer: "soap",
+      choices: [
+        { label: "Soap", emoji: "🧼", value: "soap", color: "#9ed9c4" },
+        { label: "Shoe", emoji: "👟", value: "shoe", color: "#d9a66f" },
+        { label: "Ball", emoji: "⚽", value: "ball", color: "#6db6e8" },
       ],
     },
   ],
@@ -413,7 +491,7 @@ function currentQuestion() {
   if (state.activityCourse === "english") {
     const child = activeChild();
     const candidates = state.baselineTest
-      ? questions
+      ? questions.filter((question) => question.baseline).slice(0, 3)
       : chooseQuestionCandidates({
           questions,
           plan: child?.englishPlan,
@@ -801,12 +879,16 @@ async function planQuestionWithAI() {
   const token = ++state.aiPlanToken;
   const allCandidates =
     courseId === "english"
-      ? chooseQuestionCandidates({
-          questions: questionBank.english,
-          plan: activeChild()?.englishPlan,
-          questionStats: profile.questionStats,
-          sessionQuestionIds: state.sessionQuestionIds,
-        })
+      ? state.baselineTest
+        ? questionBank.english
+            .filter((question) => question.baseline)
+            .slice(0, 3)
+        : chooseQuestionCandidates({
+            questions: questionBank.english,
+            plan: activeChild()?.englishPlan,
+            questionStats: profile.questionStats,
+            sessionQuestionIds: state.sessionQuestionIds,
+          })
       : questionBank[courseId] || questionBank.colors;
   const unseenCandidates = allCandidates.filter(
     (question) => !state.sessionQuestionIds.includes(question.id),
