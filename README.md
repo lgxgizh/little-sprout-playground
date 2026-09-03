@@ -6,6 +6,8 @@
 
 一个面向学龄前儿童的图片优先、语音辅助学习网页。孩子无需识字，可以通过图片选择和语音提示完成简短的启蒙活动；家长可以分别选择图片、语音和词汇测试所使用的模型。
 
+**[在线体验](https://lgxgizh.github.io/little-fun-learning/)** · [报告问题](https://github.com/lgxgizh/little-fun-learning/issues)
+
 ![小栗子乐园示例插画](public/assets/fox-hero.png)
 
 > [!IMPORTANT]
