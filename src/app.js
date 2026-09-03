@@ -492,7 +492,11 @@ function speak(text) {
 }
 
 async function planQuestionWithAI() {
-  if (models.vocab !== "gpt-4o-mini" || !state.activeSession) {
+  if (
+    models.vocab !== "gpt-4o-mini" ||
+    !state.activeSession ||
+    state.answered
+  ) {
     state.aiPlanning = false;
     state.aiQuestionId = null;
     state.aiPlanSource = "local";
