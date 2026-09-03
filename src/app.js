@@ -649,6 +649,7 @@ function bindEvents() {
   document.querySelector("#offlineDone")?.addEventListener("click", () => {
     if (state.offlineTaskDone) return;
     state.offlineTaskDone = true;
+    touchLearningDay();
     profile.stars += 1;
     profile.awards.push({
       id: makeId("offline"),
