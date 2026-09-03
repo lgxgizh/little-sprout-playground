@@ -34,9 +34,25 @@ export function buildLearningContext(profile, activityCourse) {
         compactSkill(value),
       ]),
     ),
+    questionStats: Object.fromEntries(
+      Object.entries(profile.questionStats || {}).map(([questionId, value]) => [
+        questionId,
+        {
+          attempts: value.attempts || 0,
+          accuracy: value.attempts
+            ? Math.round((value.correct / value.attempts) * 100)
+            : null,
+          lastPracticed: value.lastPracticed || null,
+          lastCorrect:
+            typeof value.lastCorrect === "boolean" ? value.lastCorrect : null,
+        },
+      ]),
+    ),
     recentActivity: profile.events.slice(-8).map((event) => ({
       type: event.type,
       courseId: event.courseId,
+      questionId: event.questionId,
+      difficulty: event.difficulty,
       correct: typeof event.correct === "boolean" ? event.correct : undefined,
       at: event.at,
     })),

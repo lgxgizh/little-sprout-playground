@@ -242,6 +242,29 @@
   color: #a5a69b;
   font-size: 9px;
 }
+.question-coverage {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 2px 8px;
+  align-items: center;
+  margin: 14px 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #f8f5eb;
+  color: #75847e;
+  font-size: 11px;
+}
+.question-coverage > span:first-child {
+  grid-row: span 2;
+  font-size: 18px;
+}
+.question-coverage b {
+  color: #4e8068;
+}
+.question-coverage small {
+  color: #a1a59d;
+  font-size: 9px;
+}
 .skill-progress {
   display: grid;
   gap: 8px;
@@ -501,6 +524,73 @@
   background: #f4f5ee;
   color: #708172;
 }
+.family-tasks {
+  width: min(1120px, calc(100% - 48px));
+  margin: 18px auto 0;
+  padding: 28px 30px 24px;
+  border: 1px solid #eee8df;
+  border-radius: 22px;
+  background: #fffefa;
+  box-shadow: 0 10px 30px rgba(82, 66, 47, 0.04);
+}
+.family-tasks .section-heading {
+  margin-bottom: 17px;
+}
+.family-task-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+.family-task-card {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  min-height: 94px;
+  padding: 15px;
+  border: 1px solid rgba(125, 112, 92, 0.1);
+  border-radius: 16px;
+  background: #fffaf3;
+}
+.family-task-card.is-recommended {
+  border-color: #f1c36f;
+  box-shadow: inset 0 0 0 1px rgba(241, 195, 111, 0.28);
+}
+.family-task-icon {
+  display: grid;
+  flex: 0 0 34px;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border-radius: 11px;
+  background: #fff;
+  font-size: 20px;
+}
+.family-task-card b {
+  display: block;
+  color: #546664;
+  font-size: 12px;
+}
+.family-task-card p {
+  margin: 6px 0 0;
+  color: #919b96;
+  font-size: 11px;
+  line-height: 1.55;
+}
+.family-task-tag {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  color: #b3884d;
+  font-size: 9px;
+  font-weight: 700;
+}
+.family-task-note {
+  margin: 16px 0 0;
+  color: #9a9f99;
+  font-size: 11px;
+  line-height: 1.6;
+}
 @keyframes plan-pulse {
   0%,
   100% {
@@ -511,6 +601,13 @@
   }
 }
 @media (max-width: 800px) {
+  .family-tasks {
+    width: calc(100% - 28px);
+    padding: 22px 17px 18px;
+  }
+  .family-task-grid {
+    grid-template-columns: 1fr;
+  }
   .model-setting {
     align-items: flex-start;
     flex-direction: column;

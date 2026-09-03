@@ -228,6 +228,7 @@ const state = {
   offlineTaskDone: false,
   activityCourse: "colors",
   questionIndex: 0,
+  sessionQuestionIds: [],
   selectedChoice: null,
   activityComplete: false,
   aiQuestionId: null,
@@ -273,7 +274,11 @@ function currentQuestion() {
   const available = questions.filter(
     (question) => question.difficulty <= targetDifficulty,
   );
-  return available[state.questionIndex % available.length] || questions[0];
+  const unseen = available.filter(
+    (question) => !state.sessionQuestionIds.includes(question.id),
+  );
+  const pool = unseen.length ? unseen : available;
+  return pool[state.questionIndex % pool.length] || questions[0];
 }
 
 function makeId(prefix) {
@@ -285,6 +290,7 @@ function beginSession(courseId) {
   if (state.activeSession) completeSession("quit");
   state.activityCourse = courseId;
   state.questionIndex = 0;
+  state.sessionQuestionIds = [];
   state.answered = false;
   state.correct = false;
   state.selectedChoice = null;
@@ -342,7 +348,7 @@ function completeSession(status = "completed") {
   state.activeSession = null;
 }
 
-function recordAnswer(courseId, correct) {
+function recordAnswer(courseId, correct, question) {
   touchLearningDay();
   profile.totalAnswers += 1;
   if (correct) profile.correctAnswers += 1;
@@ -365,9 +371,24 @@ function recordAnswer(courseId, correct) {
   const event = {
     type: "answer",
     courseId,
+    questionId: question.id,
+    difficulty: question.difficulty,
     correct,
     at: new Date().toISOString(),
   };
+  const questionStat = profile.questionStats[question.id] || {
+    attempts: 0,
+    correct: 0,
+    lastPracticed: null,
+    lastCorrect: null,
+  };
+  questionStat.attempts += 1;
+  if (correct) questionStat.correct += 1;
+  questionStat.lastPracticed = event.at;
+  questionStat.lastCorrect = correct;
+  profile.questionStats[question.id] = questionStat;
+  if (!state.sessionQuestionIds.includes(question.id))
+    state.sessionQuestionIds.push(question.id);
   profile.events.push(event);
   profile.events = profile.events.slice(-60);
   saveProfile(profile);
@@ -378,6 +399,9 @@ function recordAnswer(courseId, correct) {
     courseId,
     correct,
     at: event.at,
+    questionId: question.id,
+    difficulty: question.difficulty,
+    selectedChoice: state.selectedChoice,
     hintUsed: false,
   });
 }
@@ -457,13 +481,28 @@ function profileSummary() {
   const accuracy = profile.totalAnswers
     ? Math.round((profile.correctAnswers / profile.totalAnswers) * 100)
     : 0;
+  const coveredQuestions = Object.values(profile.questionStats || {}).filter(
+    (stat) => stat.attempts,
+  ).length;
   const recommendationText = recommendation();
-  return `<div class="profile-summary"><div class="summary-head"><span>🌱</span><div><b>成长小档案</b><small>只保存在这台设备</small></div></div><div class="summary-stats"><div><strong>${profile.streak}</strong><small>连续学习天</small></div><div><strong>${profile.totalSessions}</strong><small>学习次数</small></div><div><strong>${accuracy}%</strong><small>答题正确率</small></div><div><strong>${profile.stars}</strong><small>收集星星</small></div></div>${skillProgress()}${recentActivity()}<div class="summary-recommendation"><span>✨</span><span>下一步推荐：<b>${recommendationText.course.label}</b><small>${recommendationText.reason}</small></span></div><button class="clear-profile" id="clearProfile">清除本机学习记录</button></div>`;
+  return `<div class="profile-summary"><div class="summary-head"><span>🌱</span><div><b>成长小档案</b><small>只保存在这台设备</small></div></div><div class="summary-stats"><div><strong>${profile.streak}</strong><small>连续学习天</small></div><div><strong>${profile.totalSessions}</strong><small>学习次数</small></div><div><strong>${accuracy}%</strong><small>答题正确率</small></div><div><strong>${profile.stars}</strong><small>收集星星</small></div></div><div class="question-coverage"><span>🧩</span><span>已经探索 <b>${coveredQuestions}</b> 个小题目</span><small>AI 和本地题库都会参考这些练习痕迹</small></div>${skillProgress()}${recentActivity()}<div class="summary-recommendation"><span>✨</span><span>下一步推荐：<b>${recommendationText.course.label}</b><small>${recommendationText.reason}</small></span></div><button class="clear-profile" id="clearProfile">清除本机学习记录</button></div>`;
 }
 
 function offlineTaskMarkup(courseId) {
   const task = offlineTasks[courseId] || offlineTasks.colors;
   return `<div class="offline-task ${state.offlineTaskDone ? "done" : ""}"><span class="offline-task-emoji">${task.emoji}</span><span><b>${task.title}</b><small>${state.offlineTaskDone ? "完成啦，和家长击个掌！" : task.prompt}</small></span><button id="offlineDone" ${state.offlineTaskDone ? "disabled" : ""}>${state.offlineTaskDone ? "✓" : "完成"}</button></div>`;
+}
+
+function familyTaskPanel() {
+  const recommendedId = recommendation().course.id;
+  return `<section class="family-tasks" id="familyTasks"><div class="section-heading"><div><span class="section-kicker">TOGETHER · 亲子时光</span><h2>屏幕外也能玩</h2></div><span class="active-model">每天选一个就好</span></div><div class="family-task-grid">${courses
+    .map((course) => {
+      const task = offlineTasks[course.id];
+      return `<article class="family-task-card ${course.tone} ${course.id === recommendedId ? "is-recommended" : ""}"><span class="family-task-icon">${task.emoji}</span><div><b>${task.title}</b><p>${task.prompt}</p></div>${course.id === recommendedId ? '<span class="family-task-tag">今日推荐</span>' : ""}</article>`;
+    })
+    .join(
+      "",
+    )}</div><p class="family-task-note">小朋友不需要完成全部任务，和家长一起开心观察、说一说，就是很棒的学习。</p></section>`;
 }
 
 function modelName(type) {
@@ -507,7 +546,11 @@ async function planQuestionWithAI() {
   const courseId = state.activityCourse;
   const sessionId = state.activeSession.id;
   const token = ++state.aiPlanToken;
-  const candidates = questionBank[courseId] || questionBank.colors;
+  const allCandidates = questionBank[courseId] || questionBank.colors;
+  const unseenCandidates = allCandidates.filter(
+    (question) => !state.sessionQuestionIds.includes(question.id),
+  );
+  const candidates = unseenCandidates.length ? unseenCandidates : allCandidates;
   state.aiPlanning = true;
   state.aiPlanSource = "ai";
   state.aiPlanMessage = "小栗子正在根据最近的学习情况想题目…";
@@ -583,16 +626,18 @@ function render() {
           <div class="quiz-card">
             <div class="quiz-top"><span>第 ${state.questionIndex + 1} 题 / 3</span><span class="session-live">${state.activeSession ? "● 本次学习中" : ""}</span><div class="progress-dots">${[0, 1, 2].map((i) => `<i class="${i <= state.questionIndex ? "filled" : ""}"></i>`).join("")}</div></div>
             <div class="question-visual"><span class="question-emoji">${question.visual}</span><span class="question-bubble">${question.prompt}<br/><b>看图片来选择</b></span></div>
-            <div class="choice-grid">${question.choices.map((choice) => `<button class="choice ${state.answered && choice.value === question.answer ? "correct" : ""} ${state.answered && state.selectedChoice === choice.value && choice.value !== question.answer ? "wrong" : ""}" data-choice="${choice.value}" style="--choice-color:${choice.color}" ${state.answered || state.aiPlanning ? "disabled" : ""}><span class="choice-emoji">${choice.emoji}</span><span>${choice.label}</span>${state.answered && choice.value === question.answer ? '<b class="check">✓</b>' : ""}</button>`).join("")}</div>
+            <div class="choice-grid">${question.choices.map((choice) => `<button class="choice ${state.answered && choice.value === question.answer ? "correct" : ""} ${state.answered && state.selectedChoice === choice.value && choice.value !== question.answer ? "wrong" : ""}" data-choice="${choice.value}" aria-label="${question.prompt}：${choice.label}" style="--choice-color:${choice.color}" ${state.answered || state.aiPlanning ? "disabled" : ""}><span class="choice-emoji">${choice.emoji}</span><span>${choice.label}</span>${state.answered && choice.value === question.answer ? '<b class="check">✓</b>' : ""}</button>`).join("")}</div>
             ${state.answered ? `<div class="feedback ${state.correct ? "good" : "try"}">${state.encouragement || (state.correct ? "太棒了！你发现啦 ✨" : "没关系，我们再看一眼吧～")}</div>${state.activityComplete ? offlineTaskMarkup(state.activityCourse) : `<button class="next-question" id="nextQuestion">${state.correct ? "继续下一题" : "再试下一题"} <span>→</span></button>`}` : '<div class="hint">点击图片来回答 · 答对会有小星星</div>'}
             ${state.activeSession ? `<button class="finish-btn" id="finishSession">${state.activityComplete ? "完成今天的学习" : "先结束，休息一下"}</button>` : ""}
           </div>
         </section>
 
+        ${familyTaskPanel()}
+
         <section class="parent-note"><div class="note-icon">💛</div><div><b>给家长的小提示</b><p>3 岁宝宝每次专注 5–8 分钟就很棒啦，跟着兴趣慢慢来。</p></div><button class="round-arrow" id="openParent2">→</button></section>
       </main>
 
-      <nav class="mobile-nav"><button class="mobile-nav-item active">⌂<span>今天</span></button><button class="mobile-nav-item">▶<span>动画</span></button><button class="mobile-nav-item">♡<span>任务</span></button><button class="mobile-nav-item" id="openParent3">☼<span>家长</span></button></nav>
+      <nav class="mobile-nav"><button class="mobile-nav-item ${state.activeTab === "home" ? "active" : ""}" data-tab="home">⌂<span>今天</span></button><button class="mobile-nav-item ${state.activeTab === "library" ? "active" : ""}" data-tab="library">▶<span>动画</span></button><button class="mobile-nav-item ${state.activeTab === "tasks" ? "active" : ""}" data-tab="tasks">♡<span>任务</span></button><button class="mobile-nav-item" id="openParent3">☼<span>家长</span></button></nav>
       ${state.modal ? modelSettingsModal() : ""}
       <div class="toast" id="toast">已切换内容</div>
     </div>`;
@@ -600,7 +645,7 @@ function render() {
 }
 
 function courseCard(course, recommended = false) {
-  return `<article class="course-card ${course.tone} ${recommended ? "is-recommended" : ""}" data-course="${course.id}"><div class="course-art"><span>${course.emoji}</span><b>${recommended ? "为你推荐" : course.tag}</b><button class="play-fab" data-play="${course.id}">▶</button></div><div class="course-meta"><div><h3>${course.label}</h3><p>${course.subtitle}</p></div><span class="duration">◷ ${course.duration}</span></div></article>`;
+  return `<article class="course-card ${course.tone} ${recommended ? "is-recommended" : ""}" data-course="${course.id}"><div class="course-art"><span>${course.emoji}</span><b>${recommended ? "为你推荐" : course.tag}</b><button class="play-fab" data-play="${course.id}" aria-label="开始${course.label}">▶</button></div><div class="course-meta"><div><h3>${course.label}</h3><p>${course.subtitle}</p></div><span class="duration">◷ ${course.duration}</span></div></article>`;
 }
 
 function modelSettingsModal() {
@@ -618,6 +663,17 @@ function bindEvents() {
       state.activeTab = btn.dataset.tab;
       showToast(btn.textContent);
       render();
+      const targetId =
+        state.activeTab === "library"
+          ? "#lessonArea"
+          : state.activeTab === "tasks"
+            ? "#familyTasks"
+            : "#quizPanel";
+      requestAnimationFrame(() =>
+        document
+          .querySelector(targetId)
+          ?.scrollIntoView({ behavior: "smooth", block: "start" }),
+      );
     }),
   );
   document.querySelector("#soundToggle")?.addEventListener("click", () => {
@@ -646,7 +702,7 @@ function bindEvents() {
       state.answered = true;
       state.selectedChoice = btn.dataset.choice;
       state.correct = btn.dataset.choice === question.answer;
-      recordAnswer(state.activityCourse, state.correct);
+      recordAnswer(state.activityCourse, state.correct, question);
       if (state.questionIndex >= 2) state.activityComplete = true;
       const goodWords = [
         "太棒了！你发现啦 ✨",
@@ -776,6 +832,7 @@ function bindEvents() {
       state.aiPlanning = false;
       state.aiQuestionId = null;
       state.aiPlanMessage = "";
+      state.sessionQuestionIds = [];
       state.answered = false;
       state.encouragement = "";
       render();

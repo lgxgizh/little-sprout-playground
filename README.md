@@ -22,8 +22,10 @@
 - 适配桌面端与移动端 / Responsive desktop and mobile layouts
 - 图片生成、语音提问和词汇量测试分别配置 / Independent model settings for image, voice, and vocabulary features
 - IndexedDB 本地成长档案 / Local IndexedDB learning profile
+- 记录到具体题目的练习轨迹，并避开同一学习单元内的重复题目 / Per-question practice history with in-session repetition avoidance
 - 根据最近表现给出下一步推荐，不给孩子贴标签、不展示排名 / Gentle, transparent recommendations with no rankings or labels
 - 3 题自适应微任务、完成/休息出口和屏幕外亲子小游戏 / Three-question adaptive micro-lessons with finish/rest exits and offline parent-child play
+- 独立的亲子任务区，鼓励把学习带到真实生活中 / A dedicated parent-child activity area that extends learning into daily life
 - 家长入口长按保护 / Long-press protection for parent settings
 - 可替换的本地图片、音频和题库资源 / Replaceable local media and question banks
 - GitHub Actions 自动构建和 Pages 部署 / Automated CI and GitHub Pages deployment
@@ -110,13 +112,13 @@ Model choices are stored in `localStorage` under `little-sprout-models`. Remote 
 
 ## 本地学习记录与个性化推荐 / Local learning records
 
-学习档案以 IndexedDB 的 `little-sprout-playground` 数据库为主，包含 `profile` 和 `events` 对象仓库；浏览器不支持 IndexedDB 时会降级到 `localStorage`。默认只记录完成次数、题目结果、主题和时间，不上传到服务器。
+学习档案以 IndexedDB 的 `little-sprout-playground` 数据库为主，包含 `profile`、`events`、`sessions`、`attempts` 和 `rewards` 对象仓库；浏览器不支持 IndexedDB 时会降级到 `localStorage`。默认只记录完成次数、具体题目结果、主题和时间，不上传到服务器。
 
-The primary store is an IndexedDB database named `little-sprout-playground` with `profile` and `events` object stores. Browsers without IndexedDB fall back to `localStorage`. Only study counts, answers, topics, and timestamps are recorded locally by default.
+The primary store is an IndexedDB database named `little-sprout-playground` with `profile`, `events`, `sessions`, `attempts`, and `rewards` object stores. Browsers without IndexedDB fall back to `localStorage`. Study counts, per-question results, topics, and timestamps are recorded locally by default.
 
-系统会优先推荐孩子较少练习或正确率较低的主题，并用鼓励式语言提示下一步内容；家长可以在「家长设置」中查看统计、主题进度、最近足迹或清除本机记录。
+系统会优先推荐孩子较少练习或正确率较低的主题，并在一次学习单元中尽量避免重复已经完成的题目；家长可以在「家长设置」中查看统计、主题进度、最近足迹或清除本机记录。
 
-The recommendation rule prioritizes topics that are new or need gentle practice. Parents can view statistics, topic progress, recent activity, or clear local records from **Parent settings**.
+The recommendation rule prioritizes topics that are new or need gentle practice and avoids repeating completed questions within one micro-lesson. Parents can view statistics, topic progress, recent activity, or clear local records from **Parent settings**.
 
 一次学习会区分“开始、答题、完成、退出”和“屏幕外亲子任务”，避免把误触或反复点击当成学习成果。/ A learning session distinguishes **started**, **answer submitted**, **completed**, **quit**, and **offline parent-child activity** events, so accidental taps are not counted as completed learning.
 

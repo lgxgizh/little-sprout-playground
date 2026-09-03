@@ -18,6 +18,7 @@ export function createDefaultProfile() {
       animals: { attempts: 0, correct: 0, lastPracticed: null },
       shapes: { attempts: 0, correct: 0, lastPracticed: null },
     },
+    questionStats: {},
     events: [],
     awards: [],
   };
@@ -46,6 +47,7 @@ function mergeProfile(saved) {
     ...(saved || {}),
     id: DEFAULT_PROFILE_ID,
     skills: { ...defaults.skills, ...(saved?.skills || {}) },
+    questionStats: { ...(saved?.questionStats || {}) },
     events: saved?.events || [],
     awards: saved?.awards || [],
   };
