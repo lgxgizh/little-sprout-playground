@@ -34,7 +34,7 @@ export function createDefaultChild(options = {}) {
     id:
       options.id ||
       `child-${globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(16).slice(2)}`}`,
-    nickname: options.nickname || "小朋友",
+    nickname: options.nickname || "Sunny",
     age: Number(options.age) || 3,
     gender: options.gender || "unspecified",
     englishLevel: options.englishLevel || "not-started",
@@ -221,7 +221,7 @@ export async function loadChildren() {
   const legacyProfile = await loadProfile();
   const child = createDefaultChild({
     id: "child-default",
-    nickname: "小朋友",
+    nickname: "Sunny",
     profile: legacyProfile,
   });
   await saveChild(child);

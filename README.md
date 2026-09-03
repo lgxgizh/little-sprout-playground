@@ -18,7 +18,7 @@
 ## 功能 / Features
 
 - 图片优先的大尺寸儿童交互界面 / Picture-first, touch-friendly UI
-- 中文题目朗读、答题反馈和语音开关 / Chinese prompts, feedback, and voice toggle
+- 英文题目朗读、答题反馈和语音开关 / English prompts, feedback, and voice toggle
 - 适配桌面端与移动端 / Responsive desktop and mobile layouts
 - 图片生成、语音提问和词汇量测试分别配置 / Independent model settings for image, voice, and vocabulary features
 - IndexedDB 本地成长档案 / Local IndexedDB learning profile

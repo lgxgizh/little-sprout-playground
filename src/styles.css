@@ -1,6 +1,6 @@
-@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700;800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700;800&family=Nunito:wght@400;500;600;700;800&display=swap");
 :root {
-  font-family: "Noto Sans SC", ui-sans-serif, system-ui, sans-serif;
+  font-family: "Nunito", "Noto Sans SC", ui-sans-serif, system-ui, sans-serif;
   color: #30444b;
   background: #fffaf1;
   font-synthesis: none;
@@ -465,7 +465,8 @@ button {
   border: 1px solid #f2e7d6;
   border-radius: 16px;
   padding: 11px 16px;
-  font-size: 13px;
+  font-size: 16px;
+  font-weight: 700;
   line-height: 1.6;
   color: #7d8681;
 }
@@ -487,7 +488,8 @@ button {
   flex-direction: column;
   align-items: center;
   gap: 4px;
-  font-size: 12px;
+  font-size: 15px;
+  font-weight: 700;
   position: relative;
   transition:
     transform 0.18s,
