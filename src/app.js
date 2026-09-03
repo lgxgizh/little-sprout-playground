@@ -88,6 +88,36 @@ const models = {
   vocab: savedModels.vocab || "adaptive-picture",
 };
 
+const profileDefaults = {
+  totalSessions: 0,
+  totalAnswers: 0,
+  correctAnswers: 0,
+  streak: 0,
+  lastActive: null,
+  skills: {
+    colors: { attempts: 0, correct: 0, lastPracticed: null },
+    animals: { attempts: 0, correct: 0, lastPracticed: null },
+    shapes: { attempts: 0, correct: 0, lastPracticed: null },
+  },
+  events: [],
+};
+
+const profile = (() => {
+  try {
+    const saved = JSON.parse(
+      localStorage.getItem("little-fun-profile") || "null",
+    );
+    return {
+      ...profileDefaults,
+      ...saved,
+      skills: { ...profileDefaults.skills, ...(saved?.skills || {}) },
+      events: saved?.events || [],
+    };
+  } catch {
+    return JSON.parse(JSON.stringify(profileDefaults));
+  }
+})();
+
 const state = {
   activeTab: "home",
   playing: null,
@@ -98,6 +128,100 @@ const state = {
   modal: false,
 };
 const assetBase = import.meta.env.BASE_URL;
+
+function todayKey(date = new Date()) {
+  return date
+    .toLocaleDateString("zh-CN", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    })
+    .replaceAll("/", "-");
+}
+
+function saveProfile() {
+  try {
+    localStorage.setItem("little-fun-profile", JSON.stringify(profile));
+  } catch {
+    /* 本地存储不可用时，当前会话仍可正常学习 */
+  }
+}
+
+function touchLearningDay() {
+  const today = todayKey();
+  if (profile.lastActive === today) return;
+  const previous = new Date();
+  previous.setDate(previous.getDate() - 1);
+  profile.streak =
+    profile.lastActive === todayKey(previous) ? profile.streak + 1 : 1;
+  profile.lastActive = today;
+}
+
+function recordSession(courseId) {
+  touchLearningDay();
+  profile.totalSessions += 1;
+  if (profile.skills[courseId])
+    profile.skills[courseId].lastPracticed = new Date().toISOString();
+  profile.events.push({
+    type: "session",
+    courseId,
+    at: new Date().toISOString(),
+  });
+  profile.events = profile.events.slice(-60);
+  saveProfile();
+}
+
+function recordAnswer(courseId, correct) {
+  touchLearningDay();
+  profile.totalAnswers += 1;
+  if (correct) profile.correctAnswers += 1;
+  const skill = profile.skills[courseId];
+  if (skill) {
+    skill.attempts += 1;
+    if (correct) skill.correct += 1;
+    skill.lastPracticed = new Date().toISOString();
+  }
+  profile.events.push({
+    type: "answer",
+    courseId,
+    correct,
+    at: new Date().toISOString(),
+  });
+  profile.events = profile.events.slice(-60);
+  saveProfile();
+}
+
+function recommendation() {
+  const ranked = Object.entries(profile.skills).sort(
+    ([a, left], [b, right]) => {
+      const leftScore = left.attempts ? left.correct / left.attempts : -1;
+      const rightScore = right.attempts ? right.correct / right.attempts : -1;
+      if (leftScore !== rightScore) return leftScore - rightScore;
+      return (left.lastPracticed || "").localeCompare(
+        right.lastPracticed || "",
+      );
+    },
+  );
+  const [courseId, skill] = ranked[0];
+  const course = courses.find((item) => item.id === courseId) || courses[0];
+  const accuracy = skill.attempts
+    ? Math.round((skill.correct / skill.attempts) * 100)
+    : 0;
+  const reason = !skill.attempts
+    ? "还没有玩过，我们从这里开始吧"
+    : accuracy < 70
+      ? "再玩几次，熟悉之后会更有信心"
+      : "已经很棒啦，换个角度再巩固一下";
+  return { course, reason, accuracy };
+}
+
+function profileSummary() {
+  const accuracy = profile.totalAnswers
+    ? Math.round((profile.correctAnswers / profile.totalAnswers) * 100)
+    : 0;
+  const recommendationText = recommendation();
+  return `<div class="profile-summary"><div class="summary-head"><span>🌱</span><div><b>成长小档案</b><small>只保存在这台设备</small></div></div><div class="summary-stats"><div><strong>${profile.streak}</strong><small>连续学习天</small></div><div><strong>${profile.totalSessions}</strong><small>学习次数</small></div><div><strong>${accuracy}%</strong><small>答题正确率</small></div></div><div class="summary-recommendation"><span>✨</span><span>下一步推荐：<b>${recommendationText.course.label}</b><small>${recommendationText.reason}</small></span></div><button class="clear-profile" id="clearProfile">清除本机学习记录</button></div>`;
+}
 
 function modelName(type) {
   return (
@@ -125,6 +249,7 @@ function speak(text) {
 }
 
 function render() {
+  const next = recommendation();
   document.querySelector("#app").innerHTML = `
     <div class="app-shell">
       <header class="topbar">
@@ -144,14 +269,15 @@ function render() {
             <h1>和小栗子<br/><em>一起发现颜色</em></h1>
             <p>不用识字，看一看、听一听，<br/>小眼睛也能学会新本领。</p>
             <button class="primary-btn" id="startLesson"><span>开始今天的学习</span><span class="arrow">→</span></button>
-            <div class="streak"><span class="streak-icon">🔥</span><span><b>连续学习 3 天</b><small>再坚持 2 天就能点亮小星星</small></span></div>
+            <div class="streak"><span class="streak-icon">🔥</span><span><b>连续学习 ${profile.streak} 天</b><small>${profile.streak ? "每天玩一小会儿，成长会被记住" : "完成今天的学习，就能点亮第一颗星"}</small></span></div>
           </div>
           <div class="hero-art"><img src="${assetBase}assets/fox-hero.png" alt="小狐狸坐在帐篷旁读图画书"/><div class="floating-pill pill-one">今天也要玩得开心</div><div class="floating-pill pill-two">⭐ +1</div></div>
         </section>
 
         <section class="section-block" id="lessonArea">
           <div class="section-heading"><div><span class="section-kicker">PLAY · LEARN · GROW</span><h2>今天玩什么？</h2><span class="active-model">图片：${modelName("image")}</span></div><button class="text-btn" id="viewAll">查看全部 <span>→</span></button></div>
-          <div class="course-grid">${courses.map(courseCard).join("")}</div>
+          <div class="course-grid">${courses.map((course) => courseCard(course, course.id === next.course.id)).join("")}</div>
+          <div class="recommendation-strip"><span class="recommendation-mascot">🦊</span><div><span class="section-kicker">为你准备</span><b>${next.course.label}</b><small>${next.reason}</small></div><button class="mini-cta" data-recommend="${next.course.id}">去玩 <span>→</span></button></div>
         </section>
 
         <section class="learning-panel" id="quizPanel">
@@ -174,14 +300,14 @@ function render() {
   bindEvents();
 }
 
-function courseCard(course) {
-  return `<article class="course-card ${course.tone}" data-course="${course.id}"><div class="course-art"><span>${course.emoji}</span><b>${course.tag}</b><button class="play-fab" data-play="${course.id}">▶</button></div><div class="course-meta"><div><h3>${course.label}</h3><p>${course.subtitle}</p></div><span class="duration">◷ ${course.duration}</span></div></article>`;
+function courseCard(course, recommended = false) {
+  return `<article class="course-card ${course.tone} ${recommended ? "is-recommended" : ""}" data-course="${course.id}"><div class="course-art"><span>${course.emoji}</span><b>${recommended ? "为你推荐" : course.tag}</b><button class="play-fab" data-play="${course.id}">▶</button></div><div class="course-meta"><div><h3>${course.label}</h3><p>${course.subtitle}</p></div><span class="duration">◷ ${course.duration}</span></div></article>`;
 }
 
 function modelSettingsModal() {
   const select = (type, label, icon) =>
     `<label class="model-setting"><span class="model-setting-label"><span class="model-setting-icon">${icon}</span><span><b>${label}</b><small>${type === "image" ? "生成学习插画与封面" : type === "voice" ? "朗读题目和鼓励语" : "选择题目难度与题库策略"}</small></span></span><select data-model="${type}">${modelCatalog[type].map((item) => `<option value="${item.id}" ${models[type] === item.id ? "selected" : ""}>${item.name} · ${item.note}</option>`).join("")}</select></label>`;
-  return `<div class="modal-backdrop" id="modalBackdrop"><div class="modal model-modal"><button class="modal-close" id="closeModal">×</button><div class="modal-icon">⚙️</div><h3>模型与能力配置</h3><p>家长可以为每项能力选择模型。设置会保存在本机，下次打开仍然生效。</p><div class="model-settings">${select("image", "图片生成", "🖼️")}${select("voice", "语音提问", "🔊")}${select("vocab", "词汇量测试", "🧩")}</div><div class="config-tip">当前语音：<b>${modelName("voice")}</b> · 当前题目：<b>${modelName("vocab")}</b></div><div class="modal-actions"><button class="reset-btn" id="resetModels">恢复默认</button><button class="primary-btn" id="closeModal2">保存配置 <span class="arrow">→</span></button></div></div></div>`;
+  return `<div class="modal-backdrop" id="modalBackdrop"><div class="modal model-modal"><button class="modal-close" id="closeModal">×</button><div class="modal-icon">⚙️</div><h3>家长设置</h3>${profileSummary()}<div class="config-divider"><span>模型与能力</span></div><p>家长可以为每项能力选择模型。设置会保存在本机，下次打开仍然生效。</p><div class="model-settings">${select("image", "图片生成", "🖼️")}${select("voice", "语音提问", "🔊")}${select("vocab", "词汇量测试", "🧩")}</div><div class="config-tip">当前语音：<b>${modelName("voice")}</b> · 当前题目：<b>${modelName("vocab")}</b></div><div class="modal-actions"><button class="reset-btn" id="resetModels">恢复默认</button><button class="primary-btn" id="closeModal2">保存配置 <span class="arrow">→</span></button></div></div></div>`;
 }
 
 function bindEvents() {
@@ -197,6 +323,7 @@ function bindEvents() {
     render();
   });
   document.querySelector("#startLesson")?.addEventListener("click", () => {
+    recordSession("colors");
     document
       .querySelector("#quizPanel")
       .scrollIntoView({ behavior: "smooth", block: "center" });
@@ -211,6 +338,7 @@ function bindEvents() {
     btn.addEventListener("click", () => {
       state.answered = true;
       state.correct = btn.dataset.choice === "blue";
+      recordAnswer("colors", state.correct);
       if (state.correct) speak("太棒了，蓝莓是蓝色的");
       else speak("再试一次，蓝色");
       render();
@@ -220,6 +348,7 @@ function bindEvents() {
     btn.addEventListener("click", (e) => {
       e.stopPropagation();
       state.playing = btn.dataset.play;
+      recordSession(state.playing);
       showToast(
         state.playing === "animals" ? "动物来唱歌准备中" : "播放预览中",
       );
@@ -229,6 +358,15 @@ function bindEvents() {
   document
     .querySelector("#viewAll")
     ?.addEventListener("click", () => showToast("更多内容正在准备中"));
+  document.querySelector("[data-recommend]")?.addEventListener("click", () => {
+    const courseId =
+      document.querySelector("[data-recommend]").dataset.recommend;
+    recordSession(courseId);
+    showToast("小栗子已经为你打开啦");
+    document
+      .querySelector(`[data-course="${courseId}"]`)
+      ?.scrollIntoView({ behavior: "smooth", block: "center" });
+  });
   document.querySelectorAll("[data-model]").forEach((select) =>
     select.addEventListener("change", () => {
       models[select.dataset.model] = select.value;
@@ -247,6 +385,12 @@ function bindEvents() {
     models.voice = "browser-speech";
     models.vocab = "adaptive-picture";
     saveModels();
+    render();
+  });
+  document.querySelector("#clearProfile")?.addEventListener("click", () => {
+    if (!window.confirm("确定要清除这台设备上的学习记录吗？")) return;
+    Object.assign(profile, JSON.parse(JSON.stringify(profileDefaults)));
+    saveProfile();
     render();
   });
   ["openParent", "openParent2", "openParent3"].forEach((id) =>
