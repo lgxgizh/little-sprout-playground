@@ -74,6 +74,29 @@ test("candidate selection respects stage and age metadata", () => {
   );
 });
 
+test("candidate selection has a gentle age-safe fallback for sparse packs", () => {
+  const candidates = chooseQuestionCandidates({
+    questions: [
+      { id: "english-advanced", difficulty: 2, stage: 4, ageMin: 3, ageMax: 6 },
+      { id: "english-gentle", difficulty: 1, stage: 2, ageMin: 3, ageMax: 6 },
+      {
+        id: "english-too-young",
+        difficulty: 1,
+        stage: 1,
+        ageMin: 2,
+        ageMax: 2,
+      },
+    ],
+    plan: { ...createEnglishPlan(), stage: 1 },
+    age: 3,
+  });
+  assert.equal(candidates[0].id, "english-gentle");
+  assert.equal(
+    candidates.some((question) => question.id === "english-too-young"),
+    false,
+  );
+});
+
 test("weekly summary only counts the latest seven days", () => {
   const events = [
     {

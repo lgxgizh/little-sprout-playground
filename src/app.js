@@ -861,6 +861,7 @@ function escapeHtml(value = "") {
 
 function normalizeContentQuestion(question) {
   if (!question || typeof question !== "object") return null;
+  const containsCjk = (value) => /[\u3400-\u9fff]/u.test(String(value || ""));
   const clean = (value, max = 160) =>
     String(value || "")
       .replace(/[<>]/g, "")
@@ -899,6 +900,12 @@ function normalizeContentQuestion(question) {
     answer: clean(question.answer, 40),
     choices,
   };
+  const visibleText = [
+    normalized.visual,
+    normalized.prompt,
+    normalized.speech,
+    ...choices.flatMap((choice) => [choice.label, choice.value]),
+  ];
   if (
     !normalized.id ||
     !normalized.visual ||
@@ -906,7 +913,9 @@ function normalizeContentQuestion(question) {
     !normalized.speech ||
     !normalized.answer ||
     choices.length < 2 ||
-    !choices.some((choice) => choice.value === normalized.answer)
+    !choices.some((choice) => choice.value === normalized.answer) ||
+    new Set(choices.map((choice) => choice.value)).size !== choices.length ||
+    visibleText.some(containsCjk)
   )
     return null;
   return normalized;

@@ -96,20 +96,33 @@ export function chooseQuestionCandidates({
 }) {
   const currentPlan = normalizeEnglishPlan(plan);
   const definition = stageDefinition(currentPlan.stage);
-  const eligible = questions.filter((question) => {
-    const questionStage = Number(question.stage) || question.difficulty || 1;
+  const ageCompatible = questions.filter((question) => {
     const minAge = Number(question.ageMin) || 0;
     const maxAge = Number(question.ageMax) || Infinity;
+    return age === null || (age >= minAge && age <= maxAge);
+  });
+  const eligible = ageCompatible.filter((question) => {
+    const questionStage = Number(question.stage) || question.difficulty || 1;
     return (
       question.difficulty <= definition.maxDifficulty &&
-      questionStage <= currentPlan.stage &&
-      (age === null || (age >= minAge && age <= maxAge))
+      questionStage <= currentPlan.stage
     );
   });
-  const unseen = eligible.filter(
+  // If a custom pack has no question for the current stage yet, stay age-safe
+  // and choose the gentlest available question instead of jumping to an
+  // arbitrary first item or leaving the child at a dead end.
+  const safePool = eligible.length
+    ? eligible
+    : [...ageCompatible].sort((left, right) => {
+        const stageDelta =
+          (Number(left.stage) || left.difficulty || 1) -
+          (Number(right.stage) || right.difficulty || 1);
+        return stageDelta || (left.difficulty || 1) - (right.difficulty || 1);
+      });
+  const unseen = safePool.filter(
     (question) => !sessionQuestionIds.includes(question.id),
   );
-  const pool = unseen.length ? unseen : eligible;
+  const pool = unseen.length ? unseen : safePool;
   const reviewMap = new Map(
     currentPlan.reviewQueue.map((item) => [item.questionId, item]),
   );
