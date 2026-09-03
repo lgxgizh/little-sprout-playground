@@ -640,6 +640,57 @@
   color: #9a9f93;
   font-size: 10px;
 }
+.learner-setup-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 390px;
+  margin-top: 11px;
+  padding: 11px 12px;
+  border: 1px solid #d8e9df;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #f5fbf5, #fffdf7);
+}
+.learner-setup-icon {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 32px;
+  place-items: center;
+  border-radius: 10px;
+  background: #e9f5e9;
+  font-size: 17px;
+}
+.learner-setup-card > div {
+  min-width: 0;
+  flex: 1;
+}
+.learner-setup-card > div > span {
+  display: block;
+  color: #79a18a;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+.learner-setup-card b,
+.learner-setup-card small {
+  display: block;
+}
+.learner-setup-card b {
+  margin-top: 2px;
+  color: #4c7060;
+  font-size: 12px;
+}
+.learner-setup-card small {
+  margin-top: 3px;
+  color: #899b91;
+  font-size: 10px;
+  line-height: 1.35;
+}
+.learner-setup-card .small-action {
+  flex: 0 0 auto;
+  padding-inline: 9px;
+}
 .model-setting select {
   max-width: 195px;
   border: 1px solid #e9e2d7;

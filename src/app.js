@@ -737,6 +737,13 @@ function englishPlanCard() {
   return `<div class="english-plan-card"><div class="english-plan-icon">🔤</div><div><span>ENGLISH PATH · STAGE ${stage.id}</span><b>${stage.labelEn}</b><small>${detail}</small></div><i aria-hidden="true">→</i></div>`;
 }
 
+function learnerSetupCard() {
+  const child = activeChild();
+  if (!child || child.baseline?.status === "complete") return "";
+  const hasPlayed = profile.totalAnswers > 0;
+  return `<div class="learner-setup-card"><span class="learner-setup-icon">🧸</span><div><span>GROWN-UP START</span><b>${hasPlayed ? "Make this path yours" : "Meet your little learner"}</b><small>Set a nickname, age, and English starting point in one minute.</small></div><button class="small-action" id="openSetup">Set up <span>→</span></button></div>`;
+}
+
 function relativeTime(iso) {
   if (!iso) return "还没开始";
   const minutes = Math.floor((Date.now() - new Date(iso).getTime()) / 60000);
@@ -1160,6 +1167,7 @@ function render() {
             <div class="star-badge">⭐ ${profile.stars} stars collected</div>
             <div class="daily-goal"><div class="daily-goal-top"><span>Today's 3-question adventure</span><b>${dailyProgress.answers}/${dailyProgress.target}</b></div><div class="daily-goal-track"><i style="width:${Math.round((dailyProgress.answers / dailyProgress.target) * 100)}%"></i></div><small>${dailyProgress.answers >= dailyProgress.target ? "Today is complete—come back tomorrow!" : `${dailyProgress.target - dailyProgress.answers} more to go`}</small></div>
             ${englishPlanCard()}
+            ${learnerSetupCard()}
           </div>
           <div class="hero-art"><img src="${assetBase}assets/fox-hero.png" alt="A little fox reads a picture book by a tent"/><div class="floating-pill pill-one">Have fun today!</div><div class="floating-pill pill-two">⭐ +1</div></div>
         </section>
@@ -1523,7 +1531,7 @@ function bindEvents() {
       render();
     });
   });
-  ["openParent", "openParent2", "openParent3"].forEach((id) =>
+  ["openParent", "openParent2", "openParent3", "openSetup"].forEach((id) =>
     document.querySelector("#" + id)?.addEventListener("click", () => {
       state.parentGate = !state.parentUnlocked;
       state.modal = true;
