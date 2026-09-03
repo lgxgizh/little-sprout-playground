@@ -602,6 +602,44 @@
   color: #a3aaa7;
   font-size: 10px;
 }
+.daily-goal {
+  max-width: 340px;
+  margin-top: 15px;
+  padding: 12px 13px;
+  border: 1px solid #f1e2c4;
+  border-radius: 14px;
+  background: rgba(255, 253, 246, 0.84);
+}
+.daily-goal-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  color: #6f7d76;
+  font-size: 12px;
+  font-weight: 700;
+}
+.daily-goal-top b {
+  color: #bc8746;
+  white-space: nowrap;
+}
+.daily-goal-track {
+  height: 7px;
+  margin: 9px 0 6px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #f2e9d7;
+}
+.daily-goal-track i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #f4c95e, #f28a6a);
+  transition: width 0.35s ease;
+}
+.daily-goal > small {
+  color: #9a9f93;
+  font-size: 10px;
+}
 .model-setting select {
   max-width: 195px;
   border: 1px solid #e9e2d7;

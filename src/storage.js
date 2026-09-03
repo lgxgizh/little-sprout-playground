@@ -93,8 +93,8 @@ function mergeProfile(saved) {
     id: DEFAULT_PROFILE_ID,
     skills: { ...defaults.skills, ...(saved?.skills || {}) },
     questionStats: { ...(saved?.questionStats || {}) },
-    events: saved?.events || [],
-    awards: saved?.awards || [],
+    events: Array.isArray(saved?.events) ? saved.events : [],
+    awards: Array.isArray(saved?.awards) ? saved.awards : [],
   };
 }
 

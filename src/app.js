@@ -432,6 +432,22 @@ function todayKey(date = new Date()) {
     .replaceAll("/", "-");
 }
 
+function todayProgress() {
+  const today = todayKey();
+  const answers = profile.events.filter((event) => {
+    const at = new Date(event.at);
+    return (
+      event.type === "answer" &&
+      Number.isFinite(at.getTime()) &&
+      todayKey(at) === today
+    );
+  }).length;
+  return {
+    answers: Math.min(3, answers),
+    target: 3,
+  };
+}
+
 function activeChild() {
   return children.find((child) => child.id === activeChildId) || children[0];
 }
@@ -997,6 +1013,7 @@ async function planQuestionWithAI() {
 
 function render() {
   const next = recommendation();
+  const dailyProgress = todayProgress();
   const activeCourse =
     courses.find((course) => course.id === state.activityCourse) || courses[0];
   const question = currentQuestion();
@@ -1022,6 +1039,7 @@ function render() {
             <button class="primary-btn" id="startLesson"><span>${state.activeSession ? "Keep playing" : "Start today's play"}</span><span class="arrow">→</span></button>
             <div class="streak"><span class="streak-icon">🔥</span><span><b>${profile.streak} days in a row</b><small>${profile.streak ? "A little play every day helps" : "Finish today to light your first star"}</small></span></div>
             <div class="star-badge">⭐ ${profile.stars} stars collected</div>
+            <div class="daily-goal"><div class="daily-goal-top"><span>Today's 3-question adventure</span><b>${dailyProgress.answers}/${dailyProgress.target}</b></div><div class="daily-goal-track"><i style="width:${Math.round((dailyProgress.answers / dailyProgress.target) * 100)}%"></i></div><small>${dailyProgress.answers >= dailyProgress.target ? "Today is complete—come back tomorrow!" : `${dailyProgress.target - dailyProgress.answers} more to go`}</small></div>
           </div>
           <div class="hero-art"><img src="${assetBase}assets/fox-hero.png" alt="A little fox reads a picture book by a tent"/><div class="floating-pill pill-one">Have fun today!</div><div class="floating-pill pill-two">⭐ +1</div></div>
         </section>
