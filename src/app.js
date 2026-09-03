@@ -1,5 +1,12 @@
 import "./styles.css";
 import "./overrides.css";
+import {
+  addLearningEvent,
+  clearLearningData,
+  createDefaultProfile,
+  loadProfile,
+  saveProfile,
+} from "./storage.js";
 
 const courses = [
   {
@@ -88,35 +95,7 @@ const models = {
   vocab: savedModels.vocab || "adaptive-picture",
 };
 
-const profileDefaults = {
-  totalSessions: 0,
-  totalAnswers: 0,
-  correctAnswers: 0,
-  streak: 0,
-  lastActive: null,
-  skills: {
-    colors: { attempts: 0, correct: 0, lastPracticed: null },
-    animals: { attempts: 0, correct: 0, lastPracticed: null },
-    shapes: { attempts: 0, correct: 0, lastPracticed: null },
-  },
-  events: [],
-};
-
-const profile = (() => {
-  try {
-    const saved = JSON.parse(
-      localStorage.getItem("little-fun-profile") || "null",
-    );
-    return {
-      ...profileDefaults,
-      ...saved,
-      skills: { ...profileDefaults.skills, ...(saved?.skills || {}) },
-      events: saved?.events || [],
-    };
-  } catch {
-    return JSON.parse(JSON.stringify(profileDefaults));
-  }
-})();
+let profile = createDefaultProfile();
 
 const state = {
   activeTab: "home",
@@ -126,6 +105,7 @@ const state = {
   correct: false,
   soundOn: true,
   modal: false,
+  encouragement: "",
 };
 const assetBase = import.meta.env.BASE_URL;
 
@@ -137,14 +117,6 @@ function todayKey(date = new Date()) {
       day: "2-digit",
     })
     .replaceAll("/", "-");
-}
-
-function saveProfile() {
-  try {
-    localStorage.setItem("little-fun-profile", JSON.stringify(profile));
-  } catch {
-    /* 本地存储不可用时，当前会话仍可正常学习 */
-  }
 }
 
 function touchLearningDay() {
@@ -162,13 +134,15 @@ function recordSession(courseId) {
   profile.totalSessions += 1;
   if (profile.skills[courseId])
     profile.skills[courseId].lastPracticed = new Date().toISOString();
-  profile.events.push({
+  const event = {
     type: "session",
     courseId,
     at: new Date().toISOString(),
-  });
+  };
+  profile.events.push(event);
   profile.events = profile.events.slice(-60);
-  saveProfile();
+  saveProfile(profile);
+  addLearningEvent(event);
 }
 
 function recordAnswer(courseId, correct) {
@@ -181,14 +155,26 @@ function recordAnswer(courseId, correct) {
     if (correct) skill.correct += 1;
     skill.lastPracticed = new Date().toISOString();
   }
-  profile.events.push({
+  if (correct) {
+    profile.stars += 1;
+    if (profile.stars % 5 === 0) {
+      profile.awards.push({
+        id: `stars-${profile.stars}`,
+        label: `${profile.stars} 颗小星星`,
+        at: new Date().toISOString(),
+      });
+    }
+  }
+  const event = {
     type: "answer",
     courseId,
     correct,
     at: new Date().toISOString(),
-  });
+  };
+  profile.events.push(event);
   profile.events = profile.events.slice(-60);
-  saveProfile();
+  saveProfile(profile);
+  addLearningEvent(event);
 }
 
 function recommendation() {
@@ -220,7 +206,7 @@ function profileSummary() {
     ? Math.round((profile.correctAnswers / profile.totalAnswers) * 100)
     : 0;
   const recommendationText = recommendation();
-  return `<div class="profile-summary"><div class="summary-head"><span>🌱</span><div><b>成长小档案</b><small>只保存在这台设备</small></div></div><div class="summary-stats"><div><strong>${profile.streak}</strong><small>连续学习天</small></div><div><strong>${profile.totalSessions}</strong><small>学习次数</small></div><div><strong>${accuracy}%</strong><small>答题正确率</small></div></div><div class="summary-recommendation"><span>✨</span><span>下一步推荐：<b>${recommendationText.course.label}</b><small>${recommendationText.reason}</small></span></div><button class="clear-profile" id="clearProfile">清除本机学习记录</button></div>`;
+  return `<div class="profile-summary"><div class="summary-head"><span>🌱</span><div><b>成长小档案</b><small>只保存在这台设备</small></div></div><div class="summary-stats"><div><strong>${profile.streak}</strong><small>连续学习天</small></div><div><strong>${profile.totalSessions}</strong><small>学习次数</small></div><div><strong>${accuracy}%</strong><small>答题正确率</small></div><div><strong>${profile.stars}</strong><small>收集星星</small></div></div><div class="summary-recommendation"><span>✨</span><span>下一步推荐：<b>${recommendationText.course.label}</b><small>${recommendationText.reason}</small></span></div><button class="clear-profile" id="clearProfile">清除本机学习记录</button></div>`;
 }
 
 function modelName(type) {
@@ -270,6 +256,7 @@ function render() {
             <p>不用识字，看一看、听一听，<br/>小眼睛也能学会新本领。</p>
             <button class="primary-btn" id="startLesson"><span>开始今天的学习</span><span class="arrow">→</span></button>
             <div class="streak"><span class="streak-icon">🔥</span><span><b>连续学习 ${profile.streak} 天</b><small>${profile.streak ? "每天玩一小会儿，成长会被记住" : "完成今天的学习，就能点亮第一颗星"}</small></span></div>
+            <div class="star-badge">⭐ 已收集 ${profile.stars} 颗小星星</div>
           </div>
           <div class="hero-art"><img src="${assetBase}assets/fox-hero.png" alt="小狐狸坐在帐篷旁读图画书"/><div class="floating-pill pill-one">今天也要玩得开心</div><div class="floating-pill pill-two">⭐ +1</div></div>
         </section>
@@ -286,7 +273,7 @@ function render() {
             <div class="quiz-top"><span>第 ${state.step} 题 / 3</span><div class="progress-dots">${[1, 2, 3].map((i) => `<i class="${i <= state.step ? "filled" : ""}"></i>`).join("")}</div></div>
             <div class="question-visual"><span class="question-emoji">🦊</span><span class="question-bubble">帮我找到<br/><b>蓝色水果</b>吧！</span></div>
             <div class="choice-grid">${quizChoices.map((choice) => `<button class="choice ${state.answered && choice.value === "blue" ? "correct" : ""}" data-choice="${choice.value}" style="--choice-color:${choice.color}"><span class="choice-emoji">${choice.emoji}</span><span>${choice.label}</span>${state.answered && choice.value === "blue" ? '<b class="check">✓</b>' : ""}</button>`).join("")}</div>
-            ${state.answered ? `<div class="feedback ${state.correct ? "good" : "try"}">${state.correct ? "太棒了！蓝莓是蓝色的 ✨" : "再听一遍，小栗子说的是蓝色哦～"}</div>` : '<div class="hint">点击图片来回答 · 答对会有小星星</div>'}
+            ${state.answered ? `<div class="feedback ${state.correct ? "good" : "try"}">${state.encouragement || (state.correct ? "太棒了！蓝莓是蓝色的 ✨" : "再听一遍，小栗子说的是蓝色哦～")}</div>` : '<div class="hint">点击图片来回答 · 答对会有小星星</div>'}
           </div>
         </section>
 
@@ -339,6 +326,19 @@ function bindEvents() {
       state.answered = true;
       state.correct = btn.dataset.choice === "blue";
       recordAnswer("colors", state.correct);
+      const goodWords = [
+        "太棒了！蓝莓是蓝色的 ✨",
+        "小眼睛真会观察！收下这颗星星吧 🌟",
+        "答对啦！你和小栗子配合得真好 🎈",
+      ];
+      const gentleWords = [
+        "没关系，我们再看一眼蓝莓的颜色吧～",
+        "差一点点！小栗子陪你再试一次",
+        "慢慢来，听清楚再选也可以哦",
+      ];
+      state.encouragement = state.correct
+        ? goodWords[profile.stars % goodWords.length]
+        : gentleWords[profile.totalAnswers % gentleWords.length];
       if (state.correct) speak("太棒了，蓝莓是蓝色的");
       else speak("再试一次，蓝色");
       render();
@@ -389,9 +389,12 @@ function bindEvents() {
   });
   document.querySelector("#clearProfile")?.addEventListener("click", () => {
     if (!window.confirm("确定要清除这台设备上的学习记录吗？")) return;
-    Object.assign(profile, JSON.parse(JSON.stringify(profileDefaults)));
-    saveProfile();
-    render();
+    clearLearningData().then(() => {
+      profile = createDefaultProfile();
+      state.answered = false;
+      state.encouragement = "";
+      render();
+    });
   });
   ["openParent", "openParent2", "openParent3"].forEach((id) =>
     document.querySelector("#" + id)?.addEventListener("click", () => {
@@ -422,4 +425,12 @@ function showToast(message) {
   toast.classList.add("show");
   setTimeout(() => toast.classList.remove("show"), 1800);
 }
-render();
+
+async function init() {
+  document.querySelector("#app").innerHTML =
+    '<div class="loading-screen"><span>🦊</span><b>小栗子正在打开成长档案…</b></div>';
+  profile = await loadProfile();
+  render();
+}
+
+init();
