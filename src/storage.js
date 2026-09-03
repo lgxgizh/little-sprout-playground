@@ -1,10 +1,12 @@
 const DB_NAME = "little-sprout-playground";
 const DB_VERSION = 2;
-const PROFILE_KEY = "default";
+const PROFILE_STORAGE_KEY = "little-sprout-profile";
+const LEGACY_PROFILE_KEY = "little-fun-profile";
+const DEFAULT_PROFILE_ID = "default";
 
 export function createDefaultProfile() {
   return {
-    id: PROFILE_KEY,
+    id: DEFAULT_PROFILE_ID,
     totalSessions: 0,
     totalAnswers: 0,
     correctAnswers: 0,
@@ -42,7 +44,7 @@ function mergeProfile(saved) {
   return {
     ...defaults,
     ...(saved || {}),
-    id: PROFILE_KEY,
+    id: DEFAULT_PROFILE_ID,
     skills: { ...defaults.skills, ...(saved?.skills || {}) },
     events: saved?.events || [],
     awards: saved?.awards || [],
@@ -114,23 +116,28 @@ export async function loadProfile() {
         db
           .transaction("profile", "readonly")
           .objectStore("profile")
-          .get(PROFILE_KEY),
+          .get(DEFAULT_PROFILE_ID),
       ),
     );
     if (saved) return mergeProfile(saved);
 
     // One-time migration from the original localStorage implementation.
-    const legacy = localStorageValue("little-fun-profile");
+    const legacy =
+      localStorageValue(PROFILE_STORAGE_KEY) ||
+      localStorageValue(LEGACY_PROFILE_KEY);
     const profile = mergeProfile(legacy);
     await saveProfile(profile);
     return profile;
   } catch {
-    return mergeProfile(localStorageValue("little-fun-profile"));
+    return mergeProfile(
+      localStorageValue(PROFILE_STORAGE_KEY) ||
+        localStorageValue(LEGACY_PROFILE_KEY),
+    );
   }
 }
 
 export async function saveProfile(profile) {
-  saveLocalStorage("little-fun-profile", profile);
+  saveLocalStorage(PROFILE_STORAGE_KEY, profile);
   try {
     await withDatabase((db) =>
       requestToPromise(
@@ -224,7 +231,8 @@ export async function clearLearningData() {
     /* Continue clearing the compatibility copy. */
   }
   try {
-    localStorage.removeItem("little-fun-profile");
+    localStorage.removeItem(PROFILE_STORAGE_KEY);
+    localStorage.removeItem(LEGACY_PROFILE_KEY);
   } catch {
     /* no-op */
   }

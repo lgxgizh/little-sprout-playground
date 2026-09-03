@@ -56,9 +56,57 @@ npm run preview
 | 语音提问 / Voice prompts     | 浏览器语音、OpenAI TTS、本地音频 / browser speech, OpenAI TTS, local audio         | 浏览器语音可直接使用 / Browser speech works without a key         |
 | 词汇量测试 / Vocabulary test | 图片自适应测试、GPT-4o mini、本地题库 / adaptive pictures, GPT-4o mini, local bank | 使用内置图片选择题演示 / Uses the built-in picture quiz           |
 
-模型设置保存在 `localStorage` 的 `little-fun-models` 项中。远程模型目前是适配器占位选项；接入真实服务时，请通过服务端代理调用，不要把 API Key 写进前端或提交到 GitHub。
+模型设置保存在 `localStorage` 的 `little-sprout-models` 项中。远程模型通过可选的服务端适配器调用；没有配置适配器、请求超时或返回内容不合规时，页面会自动回退到本地题库，不影响 GitHub Pages 演示。
 
-Model choices are stored in `localStorage` under `little-fun-models`. Remote model entries are adapter placeholders in this frontend demo. Call real providers through your own server and never commit API keys.
+选择 **GPT-4o mini** 作为题目模型时，前端会把隐私最小化的学习摘要（年龄段、主题统计、正确率、连续学习天数和最近 8 条事件）发送到 `VITE_API_BASE_URL`，请模型只从当前主题的审核候选题中选择一个 `questionId`。前端不会发送姓名、照片、音频、自由文本或原始答案；API Key 必须只保存在服务端。
+
+When **GPT-4o mini** is selected for vocabulary testing, the browser sends a privacy-minimised learning summary (age range, topic aggregates, accuracy, streak, and the latest eight events) to `VITE_API_BASE_URL`. The model must choose one `questionId` from the approved candidates for the current topic. Names, photos, audio, free text, and raw answers are not sent; provider API keys must stay on the server.
+
+### 题目规划适配器 / Question-planning adapter
+
+实现一个服务端接口 `POST /learning/next-question` 即可接入任意大模型供应商。浏览器请求形状如下：
+
+```json
+{
+  "model": "gpt-4o-mini",
+  "learningContext": {
+    "ageRange": "3",
+    "canReadText": false,
+    "currentCourse": "colors",
+    "totals": {
+      "sessions": 2,
+      "answers": 5,
+      "accuracy": 80,
+      "streakDays": 2,
+      "stars": 4
+    },
+    "skills": {
+      "colors": {
+        "attempts": 5,
+        "accuracy": 80,
+        "lastPracticed": "2026-09-03T08:00:00.000Z"
+      }
+    },
+    "recentActivity": [],
+    "constraints": {
+      "sessionMinutes": 5,
+      "maxQuestions": 3,
+      "usePicturesFirst": true,
+      "useEncouragingLanguage": true,
+      "noRankings": true
+    }
+  },
+  "candidates": [
+    { "id": "color-blue-fruit", "difficulty": 1, "prompt": "帮我找到蓝色水果" }
+  ]
+}
+```
+
+返回 `{ "questionId": "color-blue-fruit" }`。服务端应校验年龄和候选 ID，并使用结构化输出约束模型；不要让模型直接生成未经审核的儿童题目。若接口不可用或返回未知 ID，前端会使用本地自适应规则。
+
+Return `{ "questionId": "color-blue-fruit" }`. The server should validate the age and candidate ID and use structured output; do not let a model generate unreviewed child-facing content. If the adapter is unavailable or returns an unknown ID, the browser falls back to the local adaptive rule.
+
+Model choices are stored in `localStorage` under `little-sprout-models`. Remote model entries are adapter placeholders in this frontend demo. Call real providers through your own server and never commit API keys.
 
 ## 本地学习记录与个性化推荐 / Local learning records
 
@@ -80,6 +128,7 @@ The recommendation rule prioritizes topics that are new or need gentle practice.
 ├── public/assets/           # 可替换媒体 / replaceable media
 ├── src/
 │   ├── app.js               # 页面、内容、交互和模型配置 / UI and model settings
+│   ├── ai.js                # 隐私最小化学习摘要与 AI 选题适配器 / AI planner adapter
 │   ├── storage.js           # IndexedDB 存储、迁移和降级 / persistence and migration
 │   ├── styles.css           # 基础响应式样式 / base responsive styles
 │   └── overrides.css        # 配置和成长档案样式 / settings and profile styles

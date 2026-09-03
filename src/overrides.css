@@ -477,6 +477,39 @@
 .loading-screen span {
   font-size: 42px;
 }
+.ai-plan-note {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 9px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: #fff7df;
+  color: #9a7a39;
+  font-size: 10px;
+  line-height: 1.35;
+}
+.ai-plan-note.is-loading {
+  color: #8a7b66;
+  animation: plan-pulse 1.4s ease-in-out infinite;
+}
+.ai-plan-note.is-ai {
+  background: #eef8f1;
+  color: #4f8765;
+}
+.ai-plan-note.is-local {
+  background: #f4f5ee;
+  color: #708172;
+}
+@keyframes plan-pulse {
+  0%,
+  100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+}
 @media (max-width: 800px) {
   .model-setting {
     align-items: flex-start;

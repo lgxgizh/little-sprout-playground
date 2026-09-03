@@ -1,5 +1,6 @@
 import "./styles.css";
 import "./overrides.css";
+import { requestNextQuestion } from "./ai.js";
 import {
   addLearningEvent,
   clearLearningData,
@@ -195,7 +196,11 @@ const modelCatalog = {
 
 const savedModels = (() => {
   try {
-    return JSON.parse(localStorage.getItem("little-fun-models") || "{}");
+    return JSON.parse(
+      localStorage.getItem("little-sprout-models") ||
+        localStorage.getItem("little-fun-models") ||
+        "{}",
+    );
   } catch {
     return {};
   }
@@ -225,6 +230,11 @@ const state = {
   questionIndex: 0,
   selectedChoice: null,
   activityComplete: false,
+  aiQuestionId: null,
+  aiPlanning: false,
+  aiPlanSource: "local",
+  aiPlanMessage: "",
+  aiPlanToken: 0,
 };
 const assetBase = import.meta.env.BASE_URL;
 
@@ -250,6 +260,10 @@ function touchLearningDay() {
 
 function currentQuestion() {
   const questions = questionBank[state.activityCourse] || questionBank.colors;
+  const aiQuestion = questions.find(
+    (question) => question.id === state.aiQuestionId,
+  );
+  if (aiQuestion) return aiQuestion;
   const skill = profile.skills[state.activityCourse] || {
     attempts: 0,
     correct: 0,
@@ -276,6 +290,11 @@ function beginSession(courseId) {
   state.selectedChoice = null;
   state.activityComplete = false;
   state.offlineTaskDone = false;
+  state.aiQuestionId = null;
+  state.aiPlanning = false;
+  state.aiPlanSource = "local";
+  state.aiPlanMessage = "";
+  state.aiPlanToken += 1;
   const startedAt = new Date().toISOString();
   state.activeSession = { id: makeId("session"), courseId, startedAt };
   const event = {
@@ -456,7 +475,7 @@ function modelName(type) {
 
 function saveModels() {
   try {
-    localStorage.setItem("little-fun-models", JSON.stringify(models));
+    localStorage.setItem("little-sprout-models", JSON.stringify(models));
   } catch {
     /* 隐私模式下仍可继续使用当前会话设置 */
   }
@@ -470,6 +489,53 @@ function speak(text) {
   utterance.rate = 0.82;
   utterance.pitch = 1.15;
   window.speechSynthesis.speak(utterance);
+}
+
+async function planQuestionWithAI() {
+  if (models.vocab !== "gpt-4o-mini" || !state.activeSession) {
+    state.aiPlanning = false;
+    state.aiQuestionId = null;
+    state.aiPlanSource = "local";
+    state.aiPlanMessage = "";
+    return null;
+  }
+
+  const courseId = state.activityCourse;
+  const sessionId = state.activeSession.id;
+  const token = ++state.aiPlanToken;
+  const candidates = questionBank[courseId] || questionBank.colors;
+  state.aiPlanning = true;
+  state.aiPlanSource = "ai";
+  state.aiPlanMessage = "小栗子正在根据最近的学习情况想题目…";
+  render();
+
+  const result = await requestNextQuestion({
+    model: models.vocab,
+    profile,
+    activityCourse: courseId,
+    candidates,
+  });
+
+  if (
+    token !== state.aiPlanToken ||
+    state.activeSession?.id !== sessionId ||
+    state.activityCourse !== courseId
+  ) {
+    return result;
+  }
+
+  state.aiPlanning = false;
+  if (result) {
+    state.aiQuestionId = result.questionId;
+    state.aiPlanSource = "ai";
+    state.aiPlanMessage = "AI 已结合最近的学习表现选好题啦";
+  } else {
+    state.aiQuestionId = null;
+    state.aiPlanSource = "local";
+    state.aiPlanMessage = "AI 暂时不可用，先用本地自适应题库继续玩";
+  }
+  render();
+  return result;
 }
 
 function render() {
@@ -509,11 +575,11 @@ function render() {
         </section>
 
         <section class="learning-panel" id="quizPanel">
-          <div class="panel-intro"><span class="section-kicker">MINI QUEST · ${String(state.questionIndex + 1).padStart(2, "0")}</span><h2>${activeCourse.label}</h2><p>${question.prompt}<br/>和小栗子一起试试看吧！</p><button class="voice-btn" id="voicePrompt"><span>🔊</span> 听一听题目</button><div class="model-chip"><span>题目模型</span><b>${modelName("vocab")}</b></div></div>
+          <div class="panel-intro"><span class="section-kicker">MINI QUEST · ${String(state.questionIndex + 1).padStart(2, "0")}</span><h2>${activeCourse.label}</h2><p>${question.prompt}<br/>和小栗子一起试试看吧！</p><button class="voice-btn" id="voicePrompt"><span>🔊</span> 听一听题目</button><div class="model-chip"><span>题目模型</span><b>${modelName("vocab")}</b></div>${state.aiPlanning ? '<div class="ai-plan-note is-loading">🪄 正在根据最近的学习表现准备题目…</div>' : state.aiPlanMessage ? `<div class="ai-plan-note ${state.aiPlanSource === "ai" ? "is-ai" : "is-local"}">${state.aiPlanSource === "ai" ? "✨" : "🌱"} ${state.aiPlanMessage}</div>` : ""}</div>
           <div class="quiz-card">
             <div class="quiz-top"><span>第 ${state.questionIndex + 1} 题 / 3</span><span class="session-live">${state.activeSession ? "● 本次学习中" : ""}</span><div class="progress-dots">${[0, 1, 2].map((i) => `<i class="${i <= state.questionIndex ? "filled" : ""}"></i>`).join("")}</div></div>
             <div class="question-visual"><span class="question-emoji">${question.visual}</span><span class="question-bubble">${question.prompt}<br/><b>看图片来选择</b></span></div>
-            <div class="choice-grid">${question.choices.map((choice) => `<button class="choice ${state.answered && choice.value === question.answer ? "correct" : ""} ${state.answered && state.selectedChoice === choice.value && choice.value !== question.answer ? "wrong" : ""}" data-choice="${choice.value}" style="--choice-color:${choice.color}" ${state.answered ? "disabled" : ""}><span class="choice-emoji">${choice.emoji}</span><span>${choice.label}</span>${state.answered && choice.value === question.answer ? '<b class="check">✓</b>' : ""}</button>`).join("")}</div>
+            <div class="choice-grid">${question.choices.map((choice) => `<button class="choice ${state.answered && choice.value === question.answer ? "correct" : ""} ${state.answered && state.selectedChoice === choice.value && choice.value !== question.answer ? "wrong" : ""}" data-choice="${choice.value}" style="--choice-color:${choice.color}" ${state.answered || state.aiPlanning ? "disabled" : ""}><span class="choice-emoji">${choice.emoji}</span><span>${choice.label}</span>${state.answered && choice.value === question.answer ? '<b class="check">✓</b>' : ""}</button>`).join("")}</div>
             ${state.answered ? `<div class="feedback ${state.correct ? "good" : "try"}">${state.encouragement || (state.correct ? "太棒了！你发现啦 ✨" : "没关系，我们再看一眼吧～")}</div>${state.activityComplete ? offlineTaskMarkup(state.activityCourse) : `<button class="next-question" id="nextQuestion">${state.correct ? "继续下一题" : "再试下一题"} <span>→</span></button>`}` : '<div class="hint">点击图片来回答 · 答对会有小星星</div>'}
             ${state.activeSession ? `<button class="finish-btn" id="finishSession">${state.activityComplete ? "完成今天的学习" : "先结束，休息一下"}</button>` : ""}
           </div>
@@ -560,7 +626,9 @@ function bindEvents() {
     document
       .querySelector("#quizPanel")
       .scrollIntoView({ behavior: "smooth", block: "center" });
-    speak(currentQuestion().speech);
+    void planQuestionWithAI().then(() => {
+      if (state.activeSession) speak(currentQuestion().speech);
+    });
   });
   document.querySelector("#voicePrompt")?.addEventListener("click", () => {
     if (models.voice === "local-audio")
@@ -569,6 +637,7 @@ function bindEvents() {
   });
   document.querySelectorAll("[data-choice]").forEach((btn) =>
     btn.addEventListener("click", () => {
+      if (state.aiPlanning || state.answered) return;
       const question = currentQuestion();
       state.answered = true;
       state.selectedChoice = btn.dataset.choice;
@@ -602,7 +671,10 @@ function bindEvents() {
       showToast(
         state.playing === "animals" ? "动物来唱歌准备中" : "播放预览中",
       );
-      speak("现在开始播放");
+      void planQuestionWithAI().then(() => {
+        if (state.activeSession)
+          speak(`现在开始播放。${currentQuestion().speech}`);
+      });
     }),
   );
   document
@@ -615,8 +687,11 @@ function bindEvents() {
     render();
     showToast("小栗子已经为你打开啦");
     document
-      .querySelector(`[data-course="${courseId}"]`)
+      .querySelector("#quizPanel")
       ?.scrollIntoView({ behavior: "smooth", block: "center" });
+    void planQuestionWithAI().then(() => {
+      if (state.activeSession) speak(currentQuestion().speech);
+    });
   });
   document.querySelectorAll("[data-model]").forEach((select) =>
     select.addEventListener("change", () => {
@@ -639,6 +714,9 @@ function bindEvents() {
     render();
   });
   document.querySelector("#finishSession")?.addEventListener("click", () => {
+    state.aiPlanToken += 1;
+    state.aiPlanning = false;
+    state.aiQuestionId = null;
     completeSession(state.activityComplete ? "completed" : "quit");
     state.offlineTaskDone = false;
     state.answered = false;
@@ -680,13 +758,20 @@ function bindEvents() {
     state.correct = false;
     state.selectedChoice = null;
     state.encouragement = "";
+    state.aiQuestionId = null;
     render();
-    speak(currentQuestion().speech);
+    void planQuestionWithAI().then(() => {
+      if (state.activeSession) speak(currentQuestion().speech);
+    });
   });
   document.querySelector("#clearProfile")?.addEventListener("click", () => {
     if (!window.confirm("确定要清除这台设备上的学习记录吗？")) return;
     clearLearningData().then(() => {
       profile = createDefaultProfile();
+      state.aiPlanToken += 1;
+      state.aiPlanning = false;
+      state.aiQuestionId = null;
+      state.aiPlanMessage = "";
       state.answered = false;
       state.encouragement = "";
       render();
