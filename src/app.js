@@ -417,6 +417,8 @@ const state = {
   aiPlanSource: "local",
   aiPlanMessage: "",
   aiPlanToken: 0,
+  speechPractice: "idle",
+  speechFeedback: "",
 };
 const assetBase = import.meta.env.BASE_URL;
 
@@ -456,6 +458,8 @@ function resetActiveActivity() {
   state.selectedChoice = null;
   state.activityComplete = false;
   state.sessionQuestionIds = [];
+  state.speechPractice = "idle";
+  state.speechFeedback = "";
 }
 
 function switchChild(childId) {
@@ -869,6 +873,60 @@ function speak(text) {
   window.speechSynthesis.speak(utterance);
 }
 
+function startSpeechPractice() {
+  const Recognition =
+    window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!Recognition) {
+    state.speechPractice = "unsupported";
+    state.speechFeedback = "Speech practice works in Chrome or Edge.";
+    render();
+    return;
+  }
+  const question = currentQuestion();
+  const targetWords = question.answer
+    .replaceAll("-", " ")
+    .toLowerCase()
+    .split(/\s+/)
+    .filter(Boolean);
+  const recognition = new Recognition();
+  recognition.lang = "en-US";
+  recognition.interimResults = false;
+  recognition.maxAlternatives = 1;
+  state.speechPractice = "listening";
+  state.speechFeedback = "Listening…";
+  render();
+  recognition.onresult = (event) => {
+    const transcript = String(event.results?.[0]?.[0]?.transcript || "")
+      .toLowerCase()
+      .replace(/[^a-z\s-]/g, " ");
+    const matched = targetWords.every((word) => transcript.includes(word));
+    state.speechPractice = matched ? "success" : "try";
+    state.speechFeedback = matched
+      ? "Nice speaking! ✨"
+      : "Good try—listen and say it again.";
+    render();
+  };
+  recognition.onerror = () => {
+    state.speechPractice = "idle";
+    state.speechFeedback = "Tap Say it and try again.";
+    render();
+  };
+  recognition.onend = () => {
+    if (state.speechPractice === "listening") {
+      state.speechPractice = "idle";
+      state.speechFeedback = "";
+      render();
+    }
+  };
+  try {
+    recognition.start();
+  } catch {
+    state.speechPractice = "idle";
+    state.speechFeedback = "Tap Say it and try again.";
+    render();
+  }
+}
+
 async function planQuestionWithAI() {
   if (
     models.vocab !== "gpt-4o-mini" ||
@@ -975,7 +1033,7 @@ function render() {
         </section>
 
         <section class="learning-panel" id="quizPanel">
-          <div class="panel-intro"><span class="section-kicker">MINI QUEST · ${String(state.questionIndex + 1).padStart(2, "0")}</span><h2>${activeCourse.label}</h2><p>${question.prompt}<br/>Let's try it together!</p><button class="voice-btn" id="voicePrompt"><span>🔊</span> Listen</button><div class="model-chip"><span>Question model</span><b>${modelName("vocab")}</b></div>${state.aiPlanning ? '<div class="ai-plan-note is-loading">🪄 Choosing a question for you…</div>' : state.aiPlanMessage ? `<div class="ai-plan-note ${state.aiPlanSource === "ai" ? "is-ai" : "is-local"}">${state.aiPlanSource === "ai" ? "✨" : "🌱"} ${state.aiPlanMessage}</div>` : ""}</div>
+          <div class="panel-intro"><span class="section-kicker">MINI QUEST · ${String(state.questionIndex + 1).padStart(2, "0")}</span><h2>${activeCourse.label}</h2><p>${question.prompt}<br/>Let's try it together!</p><div class="speech-actions"><button class="voice-btn" id="voicePrompt"><span>🔊</span> Listen</button>${activeCourse.id === "english" ? `<button class="say-btn ${state.speechPractice === "listening" ? "is-listening" : ""}" id="sayIt" aria-label="Say the answer aloud" ${state.aiPlanning ? "disabled" : ""}><span>🎙️</span> ${state.speechPractice === "listening" ? "Listening…" : "Say it"}</button><span class="speech-feedback ${state.speechPractice === "success" ? "is-success" : ""}" aria-live="polite">${state.speechFeedback}</span>` : ""}</div><div class="model-chip"><span>Question model</span><b>${modelName("vocab")}</b></div>${state.aiPlanning ? '<div class="ai-plan-note is-loading">🪄 Choosing a question for you…</div>' : state.aiPlanMessage ? `<div class="ai-plan-note ${state.aiPlanSource === "ai" ? "is-ai" : "is-local"}">${state.aiPlanSource === "ai" ? "✨" : "🌱"} ${state.aiPlanMessage}</div>` : ""}</div>
           <div class="quiz-card">
             <div class="quiz-top"><span>Question ${state.questionIndex + 1} / 3</span><span class="session-live">${state.activeSession ? "● Playing now" : ""}</span><div class="progress-dots">${[0, 1, 2].map((i) => `<i class="${i <= state.questionIndex ? "filled" : ""}"></i>`).join("")}</div></div>
             <div class="question-visual"><span class="question-emoji">${question.visual}</span><span class="question-bubble">${question.prompt}<br/><b>Look and choose</b></span></div>
@@ -1050,9 +1108,17 @@ function bindEvents() {
       showToast("Add the English audio file to public/assets/audio");
     else speak(currentQuestion().speech);
   });
+  document
+    .querySelector("#sayIt")
+    ?.addEventListener("click", startSpeechPractice);
   document.querySelectorAll("[data-choice]").forEach((btn) =>
     btn.addEventListener("click", () => {
-      if (state.aiPlanning || state.answered) return;
+      if (
+        state.aiPlanning ||
+        state.answered ||
+        state.speechPractice === "listening"
+      )
+        return;
       const question = currentQuestion();
       state.answered = true;
       state.selectedChoice = btn.dataset.choice;
@@ -1247,6 +1313,8 @@ function bindEvents() {
     state.aiPlanToken += 1;
     state.aiPlanning = false;
     state.aiQuestionId = null;
+    state.speechPractice = "idle";
+    state.speechFeedback = "";
     state.baselineTest = false;
     state.baselineCorrect = 0;
     completeSession(state.activityComplete ? "completed" : "quit");
@@ -1291,6 +1359,8 @@ function bindEvents() {
     state.selectedChoice = null;
     state.encouragement = "";
     state.aiQuestionId = null;
+    state.speechPractice = "idle";
+    state.speechFeedback = "";
     render();
     void planQuestionWithAI().then(() => {
       if (state.activeSession) speak(currentQuestion().speech);

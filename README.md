@@ -26,6 +26,7 @@
 - 支持多个孩子的昵称、年龄、英语基础和独立学习档案 / Multiple child profiles with nickname, age, English background, and separate progress
 - 图片与听力优先的 3 题英语基础测评 / A three-question, picture-and-listening-first English baseline check
 - 英语四阶段学习路径、错题间隔复习和家长周成长卡 / Four-stage English path, spaced review, and a weekly parent growth card
+- 英语跟读按钮与本地关键词反馈（支持的浏览器中） / English speak-back practice with local keyword feedback when supported
 - 学习档案 JSON 导出与导入，方便本地备份和换设备迁移 / Local JSON export and import for backup and device migration
 - 根据最近表现给出下一步推荐，不给孩子贴标签、不展示排名 / Gentle, transparent recommendations with no rankings or labels
 - 3 题自适应微任务、完成/休息出口和屏幕外亲子小游戏 / Three-question adaptive micro-lessons with finish/rest exits and offline parent-child play
@@ -135,9 +136,9 @@ Model choices are stored in `localStorage` under `little-sprout-models`. Remote 
 
 ## 本地学习记录与个性化推荐 / Local learning records
 
-学习档案以 IndexedDB 的 `little-sprout-playground` 数据库为主，包含 `profile`、`children`、`events`、`sessions`、`attempts` 和 `rewards` 对象仓库；浏览器不支持 IndexedDB 时会降级到 `localStorage`。默认只记录完成次数、具体题目结果、主题和时间，不上传到服务器。
+学习档案以 IndexedDB 的 `little-sprout-playground` 数据库为主，包含 `profile`、`children`、`events`、`sessions`、`attempts` 和 `rewards` 对象仓库；浏览器不支持 IndexedDB 时会降级到 `localStorage`。默认只记录完成次数、具体题目结果、主题和时间；跟读识别只在当前页面临时处理，不保存录音或识别文本，也不上传到服务器。
 
-The primary store is an IndexedDB database named `little-sprout-playground` with `profile`, `children`, `events`, `sessions`, `attempts`, and `rewards` object stores. Browsers without IndexedDB fall back to `localStorage`. Study counts, per-question results, topics, and timestamps are recorded locally by default.
+The primary store is an IndexedDB database named `little-sprout-playground` with `profile`, `children`, `events`, `sessions`, `attempts`, and `rewards` object stores. Browsers without IndexedDB fall back to `localStorage`. Study counts, per-question results, topics, and timestamps are recorded locally by default. Speak-back recognition is processed only in the current page and does not store audio or transcripts.
 
 系统会优先推荐孩子较少练习或正确率较低的主题，并在一次学习单元中尽量避免重复已经完成的题目；家长可以在「家长设置」中查看统计、主题进度、最近足迹或清除本机记录。
 
