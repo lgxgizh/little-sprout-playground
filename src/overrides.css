@@ -23,6 +23,99 @@
   border-radius: 17px;
   background: linear-gradient(90deg, #fff9e8, #fffdf8);
 }
+.session-live {
+  color: #6bb585;
+  font-size: 10px;
+  font-weight: 700;
+  margin-left: auto;
+  margin-right: 8px;
+}
+.offline-task {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-top: 14px;
+  padding: 10px;
+  border-radius: 13px;
+  background: #fff9e9;
+  border: 1px dashed #f0d89b;
+}
+.offline-task.done {
+  background: #eef9f0;
+  border-color: #b8dfc0;
+}
+.offline-task-emoji {
+  width: 31px;
+  height: 31px;
+  display: grid;
+  place-items: center;
+  border-radius: 9px;
+  background: #fff0c5;
+  font-size: 17px;
+}
+.offline-task b {
+  display: block;
+  color: #9d7447;
+  font-size: 10px;
+}
+.offline-task small {
+  display: block;
+  margin-top: 2px;
+  color: #9e9f93;
+  font-size: 9px;
+}
+.offline-task button {
+  margin-left: auto;
+  flex: 0 0 auto;
+  border-radius: 9px;
+  padding: 7px 9px;
+  background: #f3c963;
+  color: #795d2f;
+  font-size: 10px;
+  font-weight: 700;
+}
+.offline-task.done button {
+  background: #b8dfc0;
+  color: #4f8e63;
+}
+.finish-btn {
+  width: 100%;
+  margin-top: 14px;
+  padding: 10px;
+  border-radius: 11px;
+  background: #edf5ee;
+  color: #5d8f71;
+  font-size: 11px;
+  font-weight: 700;
+}
+.parent-gate {
+  text-align: center;
+}
+.parent-gate .reset-btn {
+  margin-top: 13px;
+}
+.hold-btn {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  margin-top: 9px;
+  padding: 14px;
+  border-radius: 13px;
+  background: #f26b5b;
+  color: white;
+  font-size: 12px;
+  font-weight: 700;
+}
+.hold-btn i {
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: rgba(255, 255, 255, 0.2);
+  transition: transform 1s linear;
+}
+.hold-btn.holding i {
+  transform: translateX(0);
+}
 .recommendation-mascot {
   display: grid;
   place-items: center;

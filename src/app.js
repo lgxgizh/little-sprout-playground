@@ -5,7 +5,10 @@ import {
   clearLearningData,
   createDefaultProfile,
   loadProfile,
+  saveAttempt,
   saveProfile,
+  saveReward,
+  saveSession,
 } from "./storage.js";
 
 const courses = [
@@ -43,6 +46,20 @@ const quizChoices = [
   { label: "黄色", emoji: "🍌", value: "yellow", color: "#f7c94b" },
   { label: "蓝色", emoji: "🫐", value: "blue", color: "#6db6e8" },
 ];
+
+const offlineTasks = {
+  colors: {
+    title: "生活里的颜色",
+    prompt: "和家长一起找 3 个蓝色的东西",
+    emoji: "🔎",
+  },
+  animals: {
+    title: "听听小动物",
+    prompt: "学一学你最喜欢的小动物叫声",
+    emoji: "🐾",
+  },
+  shapes: { title: "形状寻宝", prompt: "在家里找一个圆圆的东西", emoji: "🧺" },
+};
 
 const modelCatalog = {
   image: [
@@ -106,6 +123,10 @@ const state = {
   soundOn: true,
   modal: false,
   encouragement: "",
+  parentGate: false,
+  parentUnlocked: false,
+  activeSession: null,
+  offlineTaskDone: false,
 };
 const assetBase = import.meta.env.BASE_URL;
 
@@ -129,20 +150,58 @@ function touchLearningDay() {
   profile.lastActive = today;
 }
 
-function recordSession(courseId) {
-  touchLearningDay();
-  profile.totalSessions += 1;
-  if (profile.skills[courseId])
-    profile.skills[courseId].lastPracticed = new Date().toISOString();
+function makeId(prefix) {
+  return `${prefix}-${globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(16).slice(2)}`}`;
+}
+
+function beginSession(courseId) {
+  if (state.activeSession?.courseId === courseId) return;
+  if (state.activeSession) completeSession("quit");
+  const startedAt = new Date().toISOString();
+  state.activeSession = { id: makeId("session"), courseId, startedAt };
   const event = {
-    type: "session",
+    type: "session_started",
     courseId,
-    at: new Date().toISOString(),
+    at: startedAt,
   };
   profile.events.push(event);
   profile.events = profile.events.slice(-60);
   saveProfile(profile);
   addLearningEvent(event);
+  saveSession({
+    id: state.activeSession.id,
+    courseId,
+    startedAt,
+    status: "started",
+  });
+}
+
+function completeSession(status = "completed") {
+  const session = state.activeSession;
+  if (!session) return;
+  const completedAt = new Date().toISOString();
+  const durationMs = Math.max(
+    0,
+    Date.now() - new Date(session.startedAt).getTime(),
+  );
+  if (status === "completed") {
+    touchLearningDay();
+    profile.totalSessions += 1;
+    if (profile.skills[session.courseId])
+      profile.skills[session.courseId].lastPracticed = completedAt;
+  }
+  const event = {
+    type: `session_${status}`,
+    courseId: session.courseId,
+    at: completedAt,
+    durationMs,
+  };
+  profile.events.push(event);
+  profile.events = profile.events.slice(-60);
+  saveProfile(profile);
+  addLearningEvent(event);
+  saveSession({ ...session, completedAt, durationMs, status });
+  state.activeSession = null;
 }
 
 function recordAnswer(courseId, correct) {
@@ -175,6 +234,14 @@ function recordAnswer(courseId, correct) {
   profile.events = profile.events.slice(-60);
   saveProfile(profile);
   addLearningEvent(event);
+  saveAttempt({
+    id: makeId("attempt"),
+    sessionId: state.activeSession?.id || null,
+    courseId,
+    correct,
+    at: event.at,
+    hintUsed: false,
+  });
 }
 
 function recommendation() {
@@ -238,7 +305,11 @@ function recentActivity() {
           ? event.correct
             ? "答对了一题，收集到一颗星"
             : "再试一次，继续加油"
-          : "完成了一次学习";
+          : event.type === "offline_task_completed"
+            ? "完成了屏幕外亲子小游戏"
+            : event.type === "session_completed"
+              ? "完成了一次学习"
+              : "开始了一次学习";
       return `<div class="activity-row"><span>${course.emoji}</span><span><b>${course.label}</b><small>${copy}</small></span><time>${relativeTime(event.at)}</time></div>`;
     })
     .join("")}</div>`;
@@ -250,6 +321,11 @@ function profileSummary() {
     : 0;
   const recommendationText = recommendation();
   return `<div class="profile-summary"><div class="summary-head"><span>🌱</span><div><b>成长小档案</b><small>只保存在这台设备</small></div></div><div class="summary-stats"><div><strong>${profile.streak}</strong><small>连续学习天</small></div><div><strong>${profile.totalSessions}</strong><small>学习次数</small></div><div><strong>${accuracy}%</strong><small>答题正确率</small></div><div><strong>${profile.stars}</strong><small>收集星星</small></div></div>${skillProgress()}${recentActivity()}<div class="summary-recommendation"><span>✨</span><span>下一步推荐：<b>${recommendationText.course.label}</b><small>${recommendationText.reason}</small></span></div><button class="clear-profile" id="clearProfile">清除本机学习记录</button></div>`;
+}
+
+function offlineTaskMarkup(courseId) {
+  const task = offlineTasks[courseId] || offlineTasks.colors;
+  return `<div class="offline-task ${state.offlineTaskDone ? "done" : ""}"><span class="offline-task-emoji">${task.emoji}</span><span><b>${task.title}</b><small>${state.offlineTaskDone ? "完成啦，和家长击个掌！" : task.prompt}</small></span><button id="offlineDone" ${state.offlineTaskDone ? "disabled" : ""}>${state.offlineTaskDone ? "✓" : "完成"}</button></div>`;
 }
 
 function modelName(type) {
@@ -297,7 +373,7 @@ function render() {
             <div class="eyebrow"><span class="spark">✦</span> 今天的 5 分钟亲子时光</div>
             <h1>和小栗子<br/><em>一起发现颜色</em></h1>
             <p>不用识字，看一看、听一听，<br/>小眼睛也能学会新本领。</p>
-            <button class="primary-btn" id="startLesson"><span>开始今天的学习</span><span class="arrow">→</span></button>
+            <button class="primary-btn" id="startLesson"><span>${state.activeSession ? "继续今天的学习" : "开始今天的学习"}</span><span class="arrow">→</span></button>
             <div class="streak"><span class="streak-icon">🔥</span><span><b>连续学习 ${profile.streak} 天</b><small>${profile.streak ? "每天玩一小会儿，成长会被记住" : "完成今天的学习，就能点亮第一颗星"}</small></span></div>
             <div class="star-badge">⭐ 已收集 ${profile.stars} 颗小星星</div>
           </div>
@@ -313,10 +389,11 @@ function render() {
         <section class="learning-panel" id="quizPanel">
           <div class="panel-intro"><span class="section-kicker">MINI QUEST · 01</span><h2>颜色小侦探</h2><p>小栗子想找一颗蓝色的水果，<br/>你能帮帮它吗？</p><button class="voice-btn" id="voicePrompt"><span>🔊</span> 听一听题目</button><div class="model-chip"><span>题目模型</span><b>${modelName("vocab")}</b></div></div>
           <div class="quiz-card">
-            <div class="quiz-top"><span>第 ${state.step} 题 / 3</span><div class="progress-dots">${[1, 2, 3].map((i) => `<i class="${i <= state.step ? "filled" : ""}"></i>`).join("")}</div></div>
+            <div class="quiz-top"><span>第 ${state.step} 题 / 3</span><span class="session-live">${state.activeSession ? "● 本次学习中" : ""}</span><div class="progress-dots">${[1, 2, 3].map((i) => `<i class="${i <= state.step ? "filled" : ""}"></i>`).join("")}</div></div>
             <div class="question-visual"><span class="question-emoji">🦊</span><span class="question-bubble">帮我找到<br/><b>蓝色水果</b>吧！</span></div>
             <div class="choice-grid">${quizChoices.map((choice) => `<button class="choice ${state.answered && choice.value === "blue" ? "correct" : ""}" data-choice="${choice.value}" style="--choice-color:${choice.color}"><span class="choice-emoji">${choice.emoji}</span><span>${choice.label}</span>${state.answered && choice.value === "blue" ? '<b class="check">✓</b>' : ""}</button>`).join("")}</div>
-            ${state.answered ? `<div class="feedback ${state.correct ? "good" : "try"}">${state.encouragement || (state.correct ? "太棒了！蓝莓是蓝色的 ✨" : "再听一遍，小栗子说的是蓝色哦～")}</div>` : '<div class="hint">点击图片来回答 · 答对会有小星星</div>'}
+            ${state.answered ? `<div class="feedback ${state.correct ? "good" : "try"}">${state.encouragement || (state.correct ? "太棒了！蓝莓是蓝色的 ✨" : "再听一遍，小栗子说的是蓝色哦～")}</div>${offlineTaskMarkup("colors")}` : '<div class="hint">点击图片来回答 · 答对会有小星星</div>'}
+            ${state.activeSession ? '<button class="finish-btn" id="finishSession">完成今天的学习</button>' : ""}
           </div>
         </section>
 
@@ -335,6 +412,9 @@ function courseCard(course, recommended = false) {
 }
 
 function modelSettingsModal() {
+  if (state.parentGate && !state.parentUnlocked) {
+    return `<div class="modal-backdrop" id="modalBackdrop"><div class="modal parent-gate"><div class="modal-icon">🔒</div><h3>家长入口</h3><p>为了不让小朋友误触，请家长长按下面按钮 1 秒钟。</p><button class="hold-btn" id="parentHold"><span>长按进入设置</span><i></i></button><button class="reset-btn" id="parentCancel">先不设置</button></div></div>`;
+  }
   const select = (type, label, icon) =>
     `<label class="model-setting"><span class="model-setting-label"><span class="model-setting-icon">${icon}</span><span><b>${label}</b><small>${type === "image" ? "生成学习插画与封面" : type === "voice" ? "朗读题目和鼓励语" : "选择题目难度与题库策略"}</small></span></span><select data-model="${type}">${modelCatalog[type].map((item) => `<option value="${item.id}" ${models[type] === item.id ? "selected" : ""}>${item.name} · ${item.note}</option>`).join("")}</select></label>`;
   return `<div class="modal-backdrop" id="modalBackdrop"><div class="modal model-modal"><button class="modal-close" id="closeModal">×</button><div class="modal-icon">⚙️</div><h3>家长设置</h3>${profileSummary()}<div class="config-divider"><span>模型与能力</span></div><p>家长可以为每项能力选择模型。设置会保存在本机，下次打开仍然生效。</p><div class="model-settings">${select("image", "图片生成", "🖼️")}${select("voice", "语音提问", "🔊")}${select("vocab", "词汇量测试", "🧩")}</div><div class="config-tip">当前语音：<b>${modelName("voice")}</b> · 当前题目：<b>${modelName("vocab")}</b></div><div class="modal-actions"><button class="reset-btn" id="resetModels">恢复默认</button><button class="primary-btn" id="closeModal2">保存配置 <span class="arrow">→</span></button></div></div></div>`;
@@ -353,7 +433,7 @@ function bindEvents() {
     render();
   });
   document.querySelector("#startLesson")?.addEventListener("click", () => {
-    recordSession("colors");
+    beginSession("colors");
     document
       .querySelector("#quizPanel")
       .scrollIntoView({ behavior: "smooth", block: "center" });
@@ -391,7 +471,7 @@ function bindEvents() {
     btn.addEventListener("click", (e) => {
       e.stopPropagation();
       state.playing = btn.dataset.play;
-      recordSession(state.playing);
+      beginSession(state.playing);
       showToast(
         state.playing === "animals" ? "动物来唱歌准备中" : "播放预览中",
       );
@@ -404,7 +484,7 @@ function bindEvents() {
   document.querySelector("[data-recommend]")?.addEventListener("click", () => {
     const courseId =
       document.querySelector("[data-recommend]").dataset.recommend;
-    recordSession(courseId);
+    beginSession(courseId);
     showToast("小栗子已经为你打开啦");
     document
       .querySelector(`[data-course="${courseId}"]`)
@@ -430,6 +510,41 @@ function bindEvents() {
     saveModels();
     render();
   });
+  document.querySelector("#finishSession")?.addEventListener("click", () => {
+    completeSession("completed");
+    state.offlineTaskDone = false;
+    state.answered = false;
+    state.encouragement = "";
+    speak("今天的学习完成啦");
+    render();
+  });
+  document.querySelector("#offlineDone")?.addEventListener("click", () => {
+    if (state.offlineTaskDone) return;
+    state.offlineTaskDone = true;
+    profile.stars += 1;
+    profile.awards.push({
+      id: makeId("offline"),
+      label: "完成亲子小游戏",
+      at: new Date().toISOString(),
+    });
+    const event = {
+      type: "offline_task_completed",
+      courseId: "colors",
+      at: new Date().toISOString(),
+    };
+    profile.events.push(event);
+    profile.events = profile.events.slice(-60);
+    saveProfile(profile);
+    addLearningEvent(event);
+    saveReward({
+      id: makeId("reward"),
+      type: "offline_task",
+      courseId: "colors",
+      at: event.at,
+    });
+    speak("太棒了，和家长一起完成啦");
+    render();
+  });
   document.querySelector("#clearProfile")?.addEventListener("click", () => {
     if (!window.confirm("确定要清除这台设备上的学习记录吗？")) return;
     clearLearningData().then(() => {
@@ -441,8 +556,30 @@ function bindEvents() {
   });
   ["openParent", "openParent2", "openParent3"].forEach((id) =>
     document.querySelector("#" + id)?.addEventListener("click", () => {
+      state.parentGate = !state.parentUnlocked;
       state.modal = true;
       render();
+    }),
+  );
+  document.querySelector("#parentCancel")?.addEventListener("click", () => {
+    state.modal = false;
+    state.parentGate = false;
+    render();
+  });
+  let holdTimer;
+  const holdButton = document.querySelector("#parentHold");
+  holdButton?.addEventListener("pointerdown", () => {
+    holdButton.classList.add("holding");
+    holdTimer = setTimeout(() => {
+      state.parentUnlocked = true;
+      state.parentGate = false;
+      render();
+    }, 1000);
+  });
+  ["pointerup", "pointerleave", "pointercancel"].forEach((eventName) =>
+    holdButton?.addEventListener(eventName, () => {
+      clearTimeout(holdTimer);
+      holdButton.classList.remove("holding");
     }),
   );
   document.querySelector("#closeModal")?.addEventListener("click", () => {

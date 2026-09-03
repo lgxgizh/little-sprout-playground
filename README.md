@@ -68,6 +68,8 @@ The primary store is an IndexedDB database named `little-sprout-playground` with
 
 The recommendation rule prioritizes topics that are new or need gentle practice. Parents can view statistics, topic progress, recent activity, or clear local records from **Parent settings**.
 
+一次学习会区分“开始、答题、完成、退出”和“屏幕外亲子任务”，避免把误触或反复点击当成学习成果。/ A learning session distinguishes **started**, **answer submitted**, **completed**, **quit**, and **offline parent-child activity** events, so accidental taps are not counted as completed learning.
+
 ## 项目结构 / Project structure
 
 ```text

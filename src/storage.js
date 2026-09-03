@@ -1,5 +1,5 @@
 const DB_NAME = "little-sprout-playground";
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 const PROFILE_KEY = "default";
 
 export function createDefaultProfile() {
@@ -67,6 +67,23 @@ function openDatabase() {
         });
         events.createIndex("by-time", "at");
         events.createIndex("by-course", "courseId");
+      }
+      if (!db.objectStoreNames.contains("children")) {
+        db.createObjectStore("children", { keyPath: "id" });
+      }
+      if (!db.objectStoreNames.contains("sessions")) {
+        const sessions = db.createObjectStore("sessions", { keyPath: "id" });
+        sessions.createIndex("by-start", "startedAt");
+        sessions.createIndex("by-course", "courseId");
+      }
+      if (!db.objectStoreNames.contains("attempts")) {
+        const attempts = db.createObjectStore("attempts", { keyPath: "id" });
+        attempts.createIndex("by-session", "sessionId");
+        attempts.createIndex("by-course", "courseId");
+      }
+      if (!db.objectStoreNames.contains("rewards")) {
+        const rewards = db.createObjectStore("rewards", { keyPath: "id" });
+        rewards.createIndex("by-time", "at");
       }
     };
     request.onsuccess = () => resolve(request.result);
@@ -140,17 +157,65 @@ export async function addLearningEvent(event) {
   }
 }
 
+export async function saveSession(session) {
+  try {
+    await withDatabase((db) =>
+      requestToPromise(
+        db
+          .transaction("sessions", "readwrite")
+          .objectStore("sessions")
+          .put(session),
+      ),
+    );
+  } catch {
+    /* The compact profile event remains the fallback. */
+  }
+}
+
+export async function saveAttempt(attempt) {
+  try {
+    await withDatabase((db) =>
+      requestToPromise(
+        db
+          .transaction("attempts", "readwrite")
+          .objectStore("attempts")
+          .put(attempt),
+      ),
+    );
+  } catch {
+    /* The compact profile event remains the fallback. */
+  }
+}
+
+export async function saveReward(reward) {
+  try {
+    await withDatabase((db) =>
+      requestToPromise(
+        db
+          .transaction("rewards", "readwrite")
+          .objectStore("rewards")
+          .put(reward),
+      ),
+    );
+  } catch {
+    /* Rewards are also summarized in profile.awards. */
+  }
+}
+
 export async function clearLearningData() {
   try {
     await withDatabase(
       (db) =>
         new Promise((resolve, reject) => {
           const transaction = db.transaction(
-            ["profile", "events"],
+            ["profile", "events", "sessions", "attempts", "rewards"],
             "readwrite",
           );
           transaction.objectStore("profile").clear();
           transaction.objectStore("events").clear();
+          transaction.objectStore("sessions").clear();
+          transaction.objectStore("attempts").clear();
+          transaction.objectStore("rewards").clear();
           transaction.oncomplete = resolve;
           transaction.onerror = () => reject(transaction.error);
         }),
