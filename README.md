@@ -23,6 +23,8 @@
 - 图片生成、语音提问和词汇量测试分别配置 / Independent model settings for image, voice, and vocabulary features
 - IndexedDB 本地成长档案 / Local IndexedDB learning profile
 - 根据最近表现给出下一步推荐，不给孩子贴标签、不展示排名 / Gentle, transparent recommendations with no rankings or labels
+- 3 题自适应微任务、完成/休息出口和屏幕外亲子小游戏 / Three-question adaptive micro-lessons with finish/rest exits and offline parent-child play
+- 家长入口长按保护 / Long-press protection for parent settings
 - 可替换的本地图片、音频和题库资源 / Replaceable local media and question banks
 - GitHub Actions 自动构建和 Pages 部署 / Automated CI and GitHub Pages deployment
 

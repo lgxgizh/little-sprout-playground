@@ -30,6 +30,14 @@
   margin-left: auto;
   margin-right: 8px;
 }
+.choice:disabled {
+  cursor: default;
+  opacity: 0.9;
+}
+.choice.wrong {
+  border-color: #f0be8f;
+  background: #fff8ef;
+}
 .offline-task {
   display: flex;
   align-items: center;

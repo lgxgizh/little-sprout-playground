@@ -41,11 +41,105 @@ const courses = [
   },
 ];
 
-const quizChoices = [
-  { label: "红色", emoji: "🍎", value: "red", color: "#ff6b5e" },
-  { label: "黄色", emoji: "🍌", value: "yellow", color: "#f7c94b" },
-  { label: "蓝色", emoji: "🫐", value: "blue", color: "#6db6e8" },
-];
+const questionBank = {
+  colors: [
+    {
+      id: "color-blue-fruit",
+      difficulty: 1,
+      visual: "🦊",
+      prompt: "帮我找到蓝色水果",
+      speech: "小栗子想找一颗蓝色的水果，你能帮帮它吗？",
+      answer: "blue",
+      choices: [
+        { label: "红色", emoji: "🍎", value: "red", color: "#ff6b5e" },
+        { label: "黄色", emoji: "🍌", value: "yellow", color: "#f7c94b" },
+        { label: "蓝色", emoji: "🫐", value: "blue", color: "#6db6e8" },
+      ],
+    },
+    {
+      id: "color-red-flower",
+      difficulty: 1,
+      visual: "🌼",
+      prompt: "哪一朵花是红色的？",
+      speech: "请找出红色的花朵。",
+      answer: "red",
+      choices: [
+        { label: "红色", emoji: "🌹", value: "red", color: "#ff6b5e" },
+        { label: "黄色", emoji: "🌻", value: "yellow", color: "#f7c94b" },
+        { label: "蓝色", emoji: "🪻", value: "blue", color: "#6db6e8" },
+      ],
+    },
+    {
+      id: "color-yellow-sun",
+      difficulty: 2,
+      visual: "☀️",
+      prompt: "把黄色的东西送给小熊",
+      speech: "请找出黄色的东西，送给小熊。",
+      answer: "yellow",
+      choices: [
+        { label: "蓝色", emoji: "🧢", value: "blue", color: "#6db6e8" },
+        { label: "黄色", emoji: "⭐", value: "yellow", color: "#f7c94b" },
+        { label: "红色", emoji: "🧣", value: "red", color: "#ff6b5e" },
+      ],
+    },
+  ],
+  animals: [
+    {
+      id: "animal-cat",
+      difficulty: 1,
+      visual: "🐼",
+      prompt: "谁会喵喵叫？",
+      speech: "请找一找，谁会喵喵叫？",
+      answer: "cat",
+      choices: [
+        { label: "小猫", emoji: "🐱", value: "cat", color: "#f3b56d" },
+        { label: "小鸭", emoji: "🦆", value: "duck", color: "#f7c94b" },
+        { label: "小牛", emoji: "🐮", value: "cow", color: "#9ed9c4" },
+      ],
+    },
+    {
+      id: "animal-duck",
+      difficulty: 2,
+      visual: "🎵",
+      prompt: "找到会嘎嘎叫的小伙伴",
+      speech: "请找出会嘎嘎叫的小伙伴。",
+      answer: "duck",
+      choices: [
+        { label: "小狗", emoji: "🐶", value: "dog", color: "#d9a66f" },
+        { label: "小鸭", emoji: "🦆", value: "duck", color: "#f7c94b" },
+        { label: "小羊", emoji: "🐑", value: "sheep", color: "#e8e8dc" },
+      ],
+    },
+  ],
+  shapes: [
+    {
+      id: "shape-circle",
+      difficulty: 1,
+      visual: "🔵",
+      prompt: "找一个圆圆的形状",
+      speech: "请找一个圆圆的形状。",
+      answer: "circle",
+      choices: [
+        { label: "圆形", emoji: "⚪", value: "circle", color: "#6db6e8" },
+        { label: "方形", emoji: "🟨", value: "square", color: "#f7c94b" },
+        { label: "三角形", emoji: "🔺", value: "triangle", color: "#ff8b76" },
+      ],
+    },
+    {
+      id: "shape-square",
+      difficulty: 2,
+      visual: "🧩",
+      prompt: "哪一个像积木的方方脸？",
+      speech: "哪一个形状像积木的方方脸？",
+      answer: "square",
+      choices: [
+        { label: "三角形", emoji: "🔺", value: "triangle", color: "#ff8b76" },
+        { label: "圆形", emoji: "⚪", value: "circle", color: "#6db6e8" },
+        { label: "方形", emoji: "🟨", value: "square", color: "#f7c94b" },
+      ],
+    },
+  ],
+};
 
 const offlineTasks = {
   colors: {
@@ -127,6 +221,10 @@ const state = {
   parentUnlocked: false,
   activeSession: null,
   offlineTaskDone: false,
+  activityCourse: "colors",
+  questionIndex: 0,
+  selectedChoice: null,
+  activityComplete: false,
 };
 const assetBase = import.meta.env.BASE_URL;
 
@@ -150,6 +248,20 @@ function touchLearningDay() {
   profile.lastActive = today;
 }
 
+function currentQuestion() {
+  const questions = questionBank[state.activityCourse] || questionBank.colors;
+  const skill = profile.skills[state.activityCourse] || {
+    attempts: 0,
+    correct: 0,
+  };
+  const accuracy = skill.attempts ? skill.correct / skill.attempts : 0;
+  const targetDifficulty = skill.attempts >= 3 && accuracy >= 0.7 ? 2 : 1;
+  const available = questions.filter(
+    (question) => question.difficulty <= targetDifficulty,
+  );
+  return available[state.questionIndex % available.length] || questions[0];
+}
+
 function makeId(prefix) {
   return `${prefix}-${globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(16).slice(2)}`}`;
 }
@@ -157,6 +269,13 @@ function makeId(prefix) {
 function beginSession(courseId) {
   if (state.activeSession?.courseId === courseId) return;
   if (state.activeSession) completeSession("quit");
+  state.activityCourse = courseId;
+  state.questionIndex = 0;
+  state.answered = false;
+  state.correct = false;
+  state.selectedChoice = null;
+  state.activityComplete = false;
+  state.offlineTaskDone = false;
   const startedAt = new Date().toISOString();
   state.activeSession = { id: makeId("session"), courseId, startedAt };
   const event = {
@@ -355,6 +474,9 @@ function speak(text) {
 
 function render() {
   const next = recommendation();
+  const activeCourse =
+    courses.find((course) => course.id === state.activityCourse) || courses[0];
+  const question = currentQuestion();
   document.querySelector("#app").innerHTML = `
     <div class="app-shell">
       <header class="topbar">
@@ -371,8 +493,8 @@ function render() {
         <section class="hero">
           <div class="hero-copy">
             <div class="eyebrow"><span class="spark">✦</span> 今天的 5 分钟亲子时光</div>
-            <h1>和小栗子<br/><em>一起发现颜色</em></h1>
-            <p>不用识字，看一看、听一听，<br/>小眼睛也能学会新本领。</p>
+            <h1>和小栗子<br/><em>${activeCourse.label}</em></h1>
+            <p>不用识字，看一看、听一听，<br/>${activeCourse.subtitle}，一起玩就会啦。</p>
             <button class="primary-btn" id="startLesson"><span>${state.activeSession ? "继续今天的学习" : "开始今天的学习"}</span><span class="arrow">→</span></button>
             <div class="streak"><span class="streak-icon">🔥</span><span><b>连续学习 ${profile.streak} 天</b><small>${profile.streak ? "每天玩一小会儿，成长会被记住" : "完成今天的学习，就能点亮第一颗星"}</small></span></div>
             <div class="star-badge">⭐ 已收集 ${profile.stars} 颗小星星</div>
@@ -387,13 +509,13 @@ function render() {
         </section>
 
         <section class="learning-panel" id="quizPanel">
-          <div class="panel-intro"><span class="section-kicker">MINI QUEST · 01</span><h2>颜色小侦探</h2><p>小栗子想找一颗蓝色的水果，<br/>你能帮帮它吗？</p><button class="voice-btn" id="voicePrompt"><span>🔊</span> 听一听题目</button><div class="model-chip"><span>题目模型</span><b>${modelName("vocab")}</b></div></div>
+          <div class="panel-intro"><span class="section-kicker">MINI QUEST · ${String(state.questionIndex + 1).padStart(2, "0")}</span><h2>${activeCourse.label}</h2><p>${question.prompt}<br/>和小栗子一起试试看吧！</p><button class="voice-btn" id="voicePrompt"><span>🔊</span> 听一听题目</button><div class="model-chip"><span>题目模型</span><b>${modelName("vocab")}</b></div></div>
           <div class="quiz-card">
-            <div class="quiz-top"><span>第 ${state.step} 题 / 3</span><span class="session-live">${state.activeSession ? "● 本次学习中" : ""}</span><div class="progress-dots">${[1, 2, 3].map((i) => `<i class="${i <= state.step ? "filled" : ""}"></i>`).join("")}</div></div>
-            <div class="question-visual"><span class="question-emoji">🦊</span><span class="question-bubble">帮我找到<br/><b>蓝色水果</b>吧！</span></div>
-            <div class="choice-grid">${quizChoices.map((choice) => `<button class="choice ${state.answered && choice.value === "blue" ? "correct" : ""}" data-choice="${choice.value}" style="--choice-color:${choice.color}"><span class="choice-emoji">${choice.emoji}</span><span>${choice.label}</span>${state.answered && choice.value === "blue" ? '<b class="check">✓</b>' : ""}</button>`).join("")}</div>
-            ${state.answered ? `<div class="feedback ${state.correct ? "good" : "try"}">${state.encouragement || (state.correct ? "太棒了！蓝莓是蓝色的 ✨" : "再听一遍，小栗子说的是蓝色哦～")}</div>${offlineTaskMarkup("colors")}` : '<div class="hint">点击图片来回答 · 答对会有小星星</div>'}
-            ${state.activeSession ? '<button class="finish-btn" id="finishSession">完成今天的学习</button>' : ""}
+            <div class="quiz-top"><span>第 ${state.questionIndex + 1} 题 / 3</span><span class="session-live">${state.activeSession ? "● 本次学习中" : ""}</span><div class="progress-dots">${[0, 1, 2].map((i) => `<i class="${i <= state.questionIndex ? "filled" : ""}"></i>`).join("")}</div></div>
+            <div class="question-visual"><span class="question-emoji">${question.visual}</span><span class="question-bubble">${question.prompt}<br/><b>看图片来选择</b></span></div>
+            <div class="choice-grid">${question.choices.map((choice) => `<button class="choice ${state.answered && choice.value === question.answer ? "correct" : ""} ${state.answered && state.selectedChoice === choice.value && choice.value !== question.answer ? "wrong" : ""}" data-choice="${choice.value}" style="--choice-color:${choice.color}" ${state.answered ? "disabled" : ""}><span class="choice-emoji">${choice.emoji}</span><span>${choice.label}</span>${state.answered && choice.value === question.answer ? '<b class="check">✓</b>' : ""}</button>`).join("")}</div>
+            ${state.answered ? `<div class="feedback ${state.correct ? "good" : "try"}">${state.encouragement || (state.correct ? "太棒了！你发现啦 ✨" : "没关系，我们再看一眼吧～")}</div>${state.activityComplete ? offlineTaskMarkup(state.activityCourse) : `<button class="next-question" id="nextQuestion">${state.correct ? "继续下一题" : "再试下一题"} <span>→</span></button>`}` : '<div class="hint">点击图片来回答 · 答对会有小星星</div>'}
+            ${state.activeSession ? `<button class="finish-btn" id="finishSession">${state.activityComplete ? "完成今天的学习" : "先结束，休息一下"}</button>` : ""}
           </div>
         </section>
 
@@ -434,23 +556,27 @@ function bindEvents() {
   });
   document.querySelector("#startLesson")?.addEventListener("click", () => {
     beginSession("colors");
+    render();
     document
       .querySelector("#quizPanel")
       .scrollIntoView({ behavior: "smooth", block: "center" });
-    speak("我们来找蓝色的水果");
+    speak(currentQuestion().speech);
   });
   document.querySelector("#voicePrompt")?.addEventListener("click", () => {
     if (models.voice === "local-audio")
       showToast("请在 public/assets/audio 中放入题目音频");
-    else speak("小栗子想找一颗蓝色的水果，你能帮帮它吗？");
+    else speak(currentQuestion().speech);
   });
   document.querySelectorAll("[data-choice]").forEach((btn) =>
     btn.addEventListener("click", () => {
+      const question = currentQuestion();
       state.answered = true;
-      state.correct = btn.dataset.choice === "blue";
-      recordAnswer("colors", state.correct);
+      state.selectedChoice = btn.dataset.choice;
+      state.correct = btn.dataset.choice === question.answer;
+      recordAnswer(state.activityCourse, state.correct);
+      if (state.questionIndex >= 2) state.activityComplete = true;
       const goodWords = [
-        "太棒了！蓝莓是蓝色的 ✨",
+        "太棒了！你发现啦 ✨",
         "小眼睛真会观察！收下这颗星星吧 🌟",
         "答对啦！你和小栗子配合得真好 🎈",
       ];
@@ -462,8 +588,8 @@ function bindEvents() {
       state.encouragement = state.correct
         ? goodWords[profile.stars % goodWords.length]
         : gentleWords[profile.totalAnswers % gentleWords.length];
-      if (state.correct) speak("太棒了，蓝莓是蓝色的");
-      else speak("再试一次，蓝色");
+      if (state.correct) speak("太棒了，你找到了");
+      else speak("没关系，我们换一道题试试");
       render();
     }),
   );
@@ -472,6 +598,7 @@ function bindEvents() {
       e.stopPropagation();
       state.playing = btn.dataset.play;
       beginSession(state.playing);
+      render();
       showToast(
         state.playing === "animals" ? "动物来唱歌准备中" : "播放预览中",
       );
@@ -485,6 +612,7 @@ function bindEvents() {
     const courseId =
       document.querySelector("[data-recommend]").dataset.recommend;
     beginSession(courseId);
+    render();
     showToast("小栗子已经为你打开啦");
     document
       .querySelector(`[data-course="${courseId}"]`)
@@ -511,7 +639,7 @@ function bindEvents() {
     render();
   });
   document.querySelector("#finishSession")?.addEventListener("click", () => {
-    completeSession("completed");
+    completeSession(state.activityComplete ? "completed" : "quit");
     state.offlineTaskDone = false;
     state.answered = false;
     state.encouragement = "";
@@ -529,7 +657,7 @@ function bindEvents() {
     });
     const event = {
       type: "offline_task_completed",
-      courseId: "colors",
+      courseId: state.activityCourse,
       at: new Date().toISOString(),
     };
     profile.events.push(event);
@@ -539,11 +667,20 @@ function bindEvents() {
     saveReward({
       id: makeId("reward"),
       type: "offline_task",
-      courseId: "colors",
+      courseId: state.activityCourse,
       at: event.at,
     });
     speak("太棒了，和家长一起完成啦");
     render();
+  });
+  document.querySelector("#nextQuestion")?.addEventListener("click", () => {
+    state.questionIndex = Math.min(2, state.questionIndex + 1);
+    state.answered = false;
+    state.correct = false;
+    state.selectedChoice = null;
+    state.encouragement = "";
+    render();
+    speak(currentQuestion().speech);
   });
   document.querySelector("#clearProfile")?.addEventListener("click", () => {
     if (!window.confirm("确定要清除这台设备上的学习记录吗？")) return;
