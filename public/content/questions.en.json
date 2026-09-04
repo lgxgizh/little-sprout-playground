@@ -9,25 +9,40 @@
       "stage": 1,
       "ageMin": 2,
       "ageMax": 4,
-      "concept": "greeting",
+      "concept": "star",
       "baseline": true,
       "visual": "👋",
-      "prompt": "Which one says hello?",
-      "speech": "Which one says hello?",
-      "answer": "hello",
+      "prompt": "Find the star",
+      "speech": "Find the star.",
+      "answer": "star",
       "choices": [
         {
-          "label": "Hello",
-          "emoji": "👋",
-          "value": "hello",
-          "color": "#9ed9c4"
+          "label": "Star",
+          "emoji": "⭐",
+          "value": "star",
+          "color": "#f7c94b",
+          "imageKey": "star"
         },
-        { "label": "Bye", "emoji": "👋", "value": "bye", "color": "#6db6e8" },
         {
-          "label": "Sleep",
-          "emoji": "😴",
-          "value": "sleep",
-          "color": "#c9b9d9"
+          "label": "Ball",
+          "emoji": "⚽",
+          "value": "ball",
+          "color": "#6db6e8",
+          "imageKey": "ball"
+        },
+        {
+          "label": "Cup",
+          "emoji": "🥤",
+          "value": "cup",
+          "color": "#9ed9c4",
+          "imageKey": "cup"
+        },
+        {
+          "label": "Fish",
+          "emoji": "🐟",
+          "value": "fish",
+          "color": "#6db6e8",
+          "imageKey": "fish"
         }
       ]
     },
@@ -44,9 +59,34 @@
       "speech": "Which one is a ball?",
       "answer": "ball",
       "choices": [
-        { "label": "Ball", "emoji": "⚽", "value": "ball", "color": "#6db6e8" },
-        { "label": "Cup", "emoji": "🥤", "value": "cup", "color": "#9ed9c4" },
-        { "label": "Book", "emoji": "📘", "value": "book", "color": "#c9b9d9" }
+        {
+          "label": "Ball",
+          "emoji": "⚽",
+          "value": "ball",
+          "color": "#6db6e8",
+          "imageKey": "ball"
+        },
+        {
+          "label": "Cup",
+          "emoji": "🥤",
+          "value": "cup",
+          "color": "#9ed9c4",
+          "imageKey": "cup"
+        },
+        {
+          "label": "Star",
+          "emoji": "⭐",
+          "value": "star",
+          "color": "#f7c94b",
+          "imageKey": "star"
+        },
+        {
+          "label": "Apple",
+          "emoji": "🍎",
+          "value": "apple",
+          "color": "#ff6b5e",
+          "imageKey": "apple"
+        }
       ]
     },
     {
@@ -62,9 +102,34 @@
       "speech": "Can you find the cup?",
       "answer": "cup",
       "choices": [
-        { "label": "Cup", "emoji": "🥤", "value": "cup", "color": "#9ed9c4" },
-        { "label": "Shoe", "emoji": "👟", "value": "shoe", "color": "#d9a66f" },
-        { "label": "Fish", "emoji": "🐟", "value": "fish", "color": "#6db6e8" }
+        {
+          "label": "Cup",
+          "emoji": "🥤",
+          "value": "cup",
+          "color": "#9ed9c4",
+          "imageKey": "cup"
+        },
+        {
+          "label": "Ball",
+          "emoji": "⚽",
+          "value": "ball",
+          "color": "#6db6e8",
+          "imageKey": "ball"
+        },
+        {
+          "label": "Fish",
+          "emoji": "🐟",
+          "value": "fish",
+          "color": "#6db6e8",
+          "imageKey": "fish"
+        },
+        {
+          "label": "Banana",
+          "emoji": "🍌",
+          "value": "banana",
+          "color": "#f7c94b",
+          "imageKey": "banana"
+        }
       ]
     },
     {
@@ -73,16 +138,41 @@
       "stage": 2,
       "ageMin": 2,
       "ageMax": 5,
-      "concept": "bird",
+      "concept": "fish",
       "baseline": true,
-      "visual": "🐦",
-      "prompt": "Which one is a bird?",
-      "speech": "Which one is a bird?",
-      "answer": "bird",
+      "visual": "🐟",
+      "prompt": "Which one is a fish?",
+      "speech": "Which one is a fish?",
+      "answer": "fish",
       "choices": [
-        { "label": "Bird", "emoji": "🐦", "value": "bird", "color": "#9ed9c4" },
-        { "label": "Fish", "emoji": "🐟", "value": "fish", "color": "#6db6e8" },
-        { "label": "Dog", "emoji": "🐶", "value": "dog", "color": "#d9a66f" }
+        {
+          "label": "Fish",
+          "emoji": "🐟",
+          "value": "fish",
+          "color": "#6db6e8",
+          "imageKey": "fish"
+        },
+        {
+          "label": "Dog",
+          "emoji": "🐶",
+          "value": "dog",
+          "color": "#d9a66f",
+          "imageKey": "dog"
+        },
+        {
+          "label": "Cat",
+          "emoji": "🐱",
+          "value": "cat",
+          "color": "#f3b56d",
+          "imageKey": "cat"
+        },
+        {
+          "label": "Apple",
+          "emoji": "🍎",
+          "value": "apple",
+          "color": "#ff6b5e",
+          "imageKey": "apple"
+        }
       ]
     },
     {
@@ -91,21 +181,41 @@
       "stage": 2,
       "ageMin": 2,
       "ageMax": 5,
-      "concept": "green",
+      "concept": "banana",
       "baseline": true,
-      "visual": "🟢",
-      "prompt": "Find the green one",
-      "speech": "Find the green one.",
-      "answer": "green",
+      "visual": "🍌",
+      "prompt": "Find the banana",
+      "speech": "Find the banana.",
+      "answer": "banana",
       "choices": [
         {
-          "label": "Green",
-          "emoji": "🟢",
-          "value": "green",
-          "color": "#9ed9c4"
+          "label": "Banana",
+          "emoji": "🍌",
+          "value": "banana",
+          "color": "#f7c94b",
+          "imageKey": "banana"
         },
-        { "label": "Red", "emoji": "🔴", "value": "red", "color": "#ff6b5e" },
-        { "label": "Blue", "emoji": "🔵", "value": "blue", "color": "#6db6e8" }
+        {
+          "label": "Apple",
+          "emoji": "🍎",
+          "value": "apple",
+          "color": "#ff6b5e",
+          "imageKey": "apple"
+        },
+        {
+          "label": "Cup",
+          "emoji": "🥤",
+          "value": "cup",
+          "color": "#9ed9c4",
+          "imageKey": "cup"
+        },
+        {
+          "label": "Star",
+          "emoji": "⭐",
+          "value": "star",
+          "color": "#f7c94b",
+          "imageKey": "star"
+        }
       ]
     },
     {
@@ -114,16 +224,41 @@
       "stage": 2,
       "ageMin": 2,
       "ageMax": 5,
-      "concept": "hand",
+      "concept": "dog",
       "baseline": true,
-      "visual": "✋",
-      "prompt": "Which one is a hand?",
-      "speech": "Which one is a hand?",
-      "answer": "hand",
+      "visual": "🐶",
+      "prompt": "Which one is a dog?",
+      "speech": "Which one is a dog?",
+      "answer": "dog",
       "choices": [
-        { "label": "Hand", "emoji": "✋", "value": "hand", "color": "#f3b56d" },
-        { "label": "Foot", "emoji": "🦶", "value": "foot", "color": "#d9a66f" },
-        { "label": "Eye", "emoji": "👀", "value": "eye", "color": "#6db6e8" }
+        {
+          "label": "Dog",
+          "emoji": "🐶",
+          "value": "dog",
+          "color": "#d9a66f",
+          "imageKey": "dog"
+        },
+        {
+          "label": "Cat",
+          "emoji": "🐱",
+          "value": "cat",
+          "color": "#f3b56d",
+          "imageKey": "cat"
+        },
+        {
+          "label": "Fish",
+          "emoji": "🐟",
+          "value": "fish",
+          "color": "#6db6e8",
+          "imageKey": "fish"
+        },
+        {
+          "label": "Ball",
+          "emoji": "⚽",
+          "value": "ball",
+          "color": "#6db6e8",
+          "imageKey": "ball"
+        }
       ]
     },
     {
@@ -132,25 +267,40 @@
       "stage": 2,
       "ageMin": 3,
       "ageMax": 5,
-      "concept": "milk",
+      "concept": "cup",
       "baseline": true,
-      "visual": "🥛",
-      "prompt": "Find the milk",
-      "speech": "Can you find the milk?",
-      "answer": "milk",
+      "visual": "🥤",
+      "prompt": "Find the cup",
+      "speech": "Can you find the cup?",
+      "answer": "cup",
       "choices": [
-        { "label": "Milk", "emoji": "🥛", "value": "milk", "color": "#e8e8dc" },
+        {
+          "label": "Cup",
+          "emoji": "🥤",
+          "value": "cup",
+          "color": "#9ed9c4",
+          "imageKey": "cup"
+        },
         {
           "label": "Banana",
           "emoji": "🍌",
           "value": "banana",
-          "color": "#f7c94b"
+          "color": "#f7c94b",
+          "imageKey": "banana"
         },
         {
-          "label": "Cookie",
-          "emoji": "🍪",
-          "value": "cookie",
-          "color": "#d9a66f"
+          "label": "Apple",
+          "emoji": "🍎",
+          "value": "apple",
+          "color": "#ff6b5e",
+          "imageKey": "apple"
+        },
+        {
+          "label": "Star",
+          "emoji": "⭐",
+          "value": "star",
+          "color": "#f7c94b",
+          "imageKey": "star"
         }
       ]
     },
@@ -160,16 +310,41 @@
       "stage": 2,
       "ageMin": 2,
       "ageMax": 5,
-      "concept": "sun",
+      "concept": "star",
       "baseline": true,
-      "visual": "☀️",
-      "prompt": "Which one is the sun?",
-      "speech": "Which one is the sun?",
-      "answer": "sun",
+      "visual": "⭐",
+      "prompt": "Which one is the star?",
+      "speech": "Which one is the star?",
+      "answer": "star",
       "choices": [
-        { "label": "Sun", "emoji": "☀️", "value": "sun", "color": "#f7c94b" },
-        { "label": "Moon", "emoji": "🌙", "value": "moon", "color": "#c9b9d9" },
-        { "label": "Star", "emoji": "⭐", "value": "star", "color": "#f7c94b" }
+        {
+          "label": "Star",
+          "emoji": "⭐",
+          "value": "star",
+          "color": "#f7c94b",
+          "imageKey": "star"
+        },
+        {
+          "label": "Ball",
+          "emoji": "⚽",
+          "value": "ball",
+          "color": "#6db6e8",
+          "imageKey": "ball"
+        },
+        {
+          "label": "Fish",
+          "emoji": "🐟",
+          "value": "fish",
+          "color": "#6db6e8",
+          "imageKey": "fish"
+        },
+        {
+          "label": "Cup",
+          "emoji": "🥤",
+          "value": "cup",
+          "color": "#9ed9c4",
+          "imageKey": "cup"
+        }
       ]
     },
     {
@@ -178,15 +353,40 @@
       "stage": 3,
       "ageMin": 3,
       "ageMax": 6,
-      "concept": "door",
-      "visual": "🚪",
-      "prompt": "Open the door, please",
-      "speech": "Open the door, please.",
-      "answer": "door",
+      "concept": "apple",
+      "visual": "🍎",
+      "prompt": "Find the apple",
+      "speech": "Find the apple.",
+      "answer": "apple",
       "choices": [
-        { "label": "Door", "emoji": "🚪", "value": "door", "color": "#d9a66f" },
-        { "label": "Cup", "emoji": "🥤", "value": "cup", "color": "#6db6e8" },
-        { "label": "Book", "emoji": "📘", "value": "book", "color": "#9ed9c4" }
+        {
+          "label": "Apple",
+          "emoji": "🍎",
+          "value": "apple",
+          "color": "#ff6b5e",
+          "imageKey": "apple"
+        },
+        {
+          "label": "Cup",
+          "emoji": "🥤",
+          "value": "cup",
+          "color": "#6db6e8",
+          "imageKey": "cup"
+        },
+        {
+          "label": "Ball",
+          "emoji": "⚽",
+          "value": "ball",
+          "color": "#9ed9c4",
+          "imageKey": "ball"
+        },
+        {
+          "label": "Dog",
+          "emoji": "🐶",
+          "value": "dog",
+          "color": "#d9a66f",
+          "imageKey": "dog"
+        }
       ]
     },
     {
@@ -195,20 +395,40 @@
       "stage": 3,
       "ageMin": 3,
       "ageMax": 6,
-      "concept": "chair",
-      "visual": "🪑",
-      "prompt": "Sit on the chair",
-      "speech": "Sit on the chair.",
-      "answer": "chair",
+      "concept": "cat",
+      "visual": "🐱",
+      "prompt": "Find the cat",
+      "speech": "Find the cat.",
+      "answer": "cat",
       "choices": [
         {
-          "label": "Chair",
-          "emoji": "🪑",
-          "value": "chair",
-          "color": "#d9a66f"
+          "label": "Cat",
+          "emoji": "🐱",
+          "value": "cat",
+          "color": "#f3b56d",
+          "imageKey": "cat"
         },
-        { "label": "Bed", "emoji": "🛏️", "value": "bed", "color": "#6db6e8" },
-        { "label": "Ball", "emoji": "⚽", "value": "ball", "color": "#9ed9c4" }
+        {
+          "label": "Dog",
+          "emoji": "🐶",
+          "value": "dog",
+          "color": "#d9a66f",
+          "imageKey": "dog"
+        },
+        {
+          "label": "Fish",
+          "emoji": "🐟",
+          "value": "fish",
+          "color": "#6db6e8",
+          "imageKey": "fish"
+        },
+        {
+          "label": "Ball",
+          "emoji": "⚽",
+          "value": "ball",
+          "color": "#9ed9c4",
+          "imageKey": "ball"
+        }
       ]
     },
     {
@@ -227,10 +447,30 @@
           "label": "Apple",
           "emoji": "🍎",
           "value": "apple",
-          "color": "#ff6b5e"
+          "color": "#ff6b5e",
+          "imageKey": "apple"
         },
-        { "label": "Car", "emoji": "🚗", "value": "car", "color": "#6db6e8" },
-        { "label": "Hat", "emoji": "🎩", "value": "hat", "color": "#c9b9d9" }
+        {
+          "label": "Banana",
+          "emoji": "🍌",
+          "value": "banana",
+          "color": "#f7c94b",
+          "imageKey": "banana"
+        },
+        {
+          "label": "Star",
+          "emoji": "⭐",
+          "value": "star",
+          "color": "#f7c94b",
+          "imageKey": "star"
+        },
+        {
+          "label": "Cup",
+          "emoji": "🥤",
+          "value": "cup",
+          "color": "#c9b9d9",
+          "imageKey": "cup"
+        }
       ]
     },
     {
@@ -239,20 +479,40 @@
       "stage": 4,
       "ageMin": 3,
       "ageMax": 6,
-      "concept": "greeting",
-      "visual": "👋",
-      "prompt": "Wave and say bye",
-      "speech": "Wave and say bye.",
-      "answer": "bye",
+      "concept": "star",
+      "visual": "⭐",
+      "prompt": "Find the yellow star",
+      "speech": "Find the yellow star.",
+      "answer": "star",
       "choices": [
-        { "label": "Bye", "emoji": "👋", "value": "bye", "color": "#9ed9c4" },
         {
-          "label": "Sleep",
-          "emoji": "😴",
-          "value": "sleep",
-          "color": "#c9b9d9"
+          "label": "Star",
+          "emoji": "⭐",
+          "value": "star",
+          "color": "#f7c94b",
+          "imageKey": "star"
         },
-        { "label": "Eat", "emoji": "🍽️", "value": "eat", "color": "#f7c94b" }
+        {
+          "label": "Ball",
+          "emoji": "⚽",
+          "value": "ball",
+          "color": "#6db6e8",
+          "imageKey": "ball"
+        },
+        {
+          "label": "Fish",
+          "emoji": "🐟",
+          "value": "fish",
+          "color": "#6db6e8",
+          "imageKey": "fish"
+        },
+        {
+          "label": "Cup",
+          "emoji": "🥤",
+          "value": "cup",
+          "color": "#9ed9c4",
+          "imageKey": "cup"
+        }
       ]
     }
   ]

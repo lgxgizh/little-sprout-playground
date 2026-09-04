@@ -9,21 +9,29 @@ import {
   suggestedLevelFromBaseline,
 } from "./assessment.js";
 import {
+  ANIMATION_FEATURE,
+  createDemoAnimations,
+  loadAnimationLibrary,
+  mergeAnimationShelf,
+  normalizeAnimationEntry,
+  parentAnimationSummary,
+  saveAnimationLibrary,
+  summarizeAnimationAttempts,
+} from "./animation-quiz.js";
+import {
+  LISTENING_FEATURE,
+  createListeningSeedQuestions,
+  enrichQuestionImages,
+  withChoiceImages,
+} from "./listening.js";
+import {
   chooseQuestionCandidates,
   stageDefinition,
   stageFromBaseline,
   summarizeWeek,
   updateEnglishPlan,
 } from "./learning-plan.js";
-import {
-  createDemoVideos,
-  loadVideoLibrary,
-  mergeVideoShelf,
-  normalizeVideoEntry,
-  parentVideoSummary,
-  saveVideoLibrary,
-  summarizeVideoAttempts,
-} from "./video-comprehension.js";
+import { choiceGridMarkup, escapeHtml, listenButtonMarkup } from "./quiz-ui.js";
 import {
   addLearningEvent,
   clearLearningData,
@@ -40,7 +48,7 @@ import {
   serializeLearningData,
 } from "./storage.js";
 
-const courses = [
+const secondaryCourses = [
   {
     id: "colors",
     label: "Color Hunt",
@@ -48,7 +56,7 @@ const courses = [
     emoji: "🌈",
     tone: "peach",
     duration: "5 min",
-    tag: "Today's pick",
+    tag: "Extra",
   },
   {
     id: "animals",
@@ -57,7 +65,7 @@ const courses = [
     emoji: "🐼",
     tone: "mint",
     duration: "5 min",
-    tag: "Fun sounds",
+    tag: "Extra",
   },
   {
     id: "shapes",
@@ -66,18 +74,33 @@ const courses = [
     emoji: "🔵",
     tone: "lavender",
     duration: "5 min",
-    tag: "Hands-on play",
-  },
-  {
-    id: "english",
-    label: "English Ears",
-    subtitle: "Learn words with pictures and sounds",
-    emoji: "🔤",
-    tone: "sky",
-    duration: "5 min",
-    tag: "English starter",
+    tag: "Extra",
   },
 ];
+
+const courses = [
+  {
+    id: "english",
+    label: LISTENING_FEATURE.title,
+    subtitle: LISTENING_FEATURE.subtitle,
+    emoji: LISTENING_FEATURE.emoji,
+    tone: LISTENING_FEATURE.tone,
+    duration: "5–8 min",
+    tag: "Kid feature",
+  },
+  {
+    id: "animation",
+    label: ANIMATION_FEATURE.title,
+    subtitle: ANIMATION_FEATURE.subtitle,
+    emoji: ANIMATION_FEATURE.emoji,
+    tone: ANIMATION_FEATURE.tone,
+    duration: "~12 sec + Q",
+    tag: "Kid feature",
+  },
+  ...secondaryCourses,
+];
+
+const assetBase = import.meta.env.BASE_URL;
 
 let questionBank = {
   colors: [
@@ -177,169 +200,7 @@ let questionBank = {
       ],
     },
   ],
-  english: [
-    {
-      id: "english-apple",
-      baseline: true,
-      difficulty: 1,
-      stage: 1,
-      ageMin: 2,
-      ageMax: 4,
-      concept: "apple",
-      visual: "🍎",
-      prompt: "Which one is an apple?",
-      speech: "Which one is an apple?",
-      answer: "apple",
-      choices: [
-        { label: "Apple", emoji: "🍎", value: "apple", color: "#ff6b5e" },
-        {
-          label: "Banana",
-          emoji: "🍌",
-          value: "banana",
-          color: "#f7c94b",
-        },
-        { label: "Cat", emoji: "🐱", value: "cat", color: "#f3b56d" },
-      ],
-    },
-    {
-      id: "english-cat",
-      baseline: true,
-      difficulty: 1,
-      stage: 1,
-      ageMin: 2,
-      ageMax: 4,
-      concept: "cat",
-      visual: "🐱",
-      prompt: "Which one is a cat?",
-      speech: "Which one is a cat?",
-      answer: "cat",
-      choices: [
-        { label: "Dog", emoji: "🐶", value: "dog", color: "#d9a66f" },
-        { label: "Cat", emoji: "🐱", value: "cat", color: "#f3b56d" },
-        { label: "Duck", emoji: "🦆", value: "duck", color: "#f7c94b" },
-      ],
-    },
-    {
-      id: "english-red",
-      baseline: true,
-      difficulty: 1,
-      stage: 1,
-      ageMin: 2,
-      ageMax: 4,
-      concept: "red",
-      visual: "🔴",
-      prompt: "Find the red one",
-      speech: "Find the red one.",
-      answer: "red",
-      choices: [
-        { label: "Blue", emoji: "🔵", value: "blue", color: "#6db6e8" },
-        {
-          label: "Yellow",
-          emoji: "🟡",
-          value: "yellow",
-          color: "#f7c94b",
-        },
-        { label: "Red", emoji: "🔴", value: "red", color: "#ff6b5e" },
-      ],
-    },
-    {
-      id: "english-dog",
-      baseline: true,
-      difficulty: 1,
-      stage: 1,
-      ageMin: 2,
-      ageMax: 5,
-      concept: "dog",
-      visual: "🐶",
-      prompt: "Which one is a dog?",
-      speech: "Which one is a dog?",
-      answer: "dog",
-      choices: [
-        { label: "Dog", emoji: "🐶", value: "dog", color: "#d9a66f" },
-        { label: "Fish", emoji: "🐟", value: "fish", color: "#6db6e8" },
-        { label: "Bird", emoji: "🐦", value: "bird", color: "#9ed9c4" },
-      ],
-    },
-    {
-      id: "english-yellow",
-      baseline: true,
-      difficulty: 1,
-      stage: 2,
-      ageMin: 2,
-      ageMax: 5,
-      concept: "yellow",
-      visual: "⭐",
-      prompt: "Find the yellow one",
-      speech: "Can you find the yellow one?",
-      answer: "yellow",
-      choices: [
-        { label: "Green", emoji: "🟢", value: "green", color: "#9ed9c4" },
-        { label: "Yellow", emoji: "⭐", value: "yellow", color: "#f7c94b" },
-        { label: "Blue", emoji: "🔵", value: "blue", color: "#6db6e8" },
-      ],
-    },
-    {
-      id: "english-ball",
-      difficulty: 2,
-      stage: 3,
-      ageMin: 3,
-      ageMax: 6,
-      concept: "ball",
-      visual: "⚽",
-      prompt: "Touch the big red ball",
-      speech: "Touch the big red ball.",
-      answer: "red-ball",
-      choices: [
-        {
-          label: "Big red ball",
-          emoji: "🔴",
-          value: "red-ball",
-          color: "#ff6b5e",
-        },
-        { label: "Blue hat", emoji: "🧢", value: "blue-hat", color: "#6db6e8" },
-        {
-          label: "Yellow star",
-          emoji: "⭐",
-          value: "yellow-star",
-          color: "#f7c94b",
-        },
-      ],
-    },
-    {
-      id: "english-big",
-      difficulty: 2,
-      stage: 3,
-      ageMin: 3,
-      ageMax: 6,
-      concept: "big",
-      visual: "🐘",
-      prompt: "Which animal is big?",
-      speech: "Which animal is big?",
-      answer: "elephant",
-      choices: [
-        { label: "Mouse", emoji: "🐭", value: "mouse", color: "#c9b9d9" },
-        { label: "Elephant", emoji: "🐘", value: "elephant", color: "#9da9b6" },
-        { label: "Ant", emoji: "🐜", value: "ant", color: "#d9a66f" },
-      ],
-    },
-    {
-      id: "english-wash",
-      difficulty: 2,
-      stage: 4,
-      ageMin: 3,
-      ageMax: 6,
-      concept: "soap",
-      visual: "🧼",
-      prompt: "What do we use to wash our hands?",
-      speech: "What do we use to wash our hands?",
-      answer: "soap",
-      choices: [
-        { label: "Soap", emoji: "🧼", value: "soap", color: "#9ed9c4" },
-        { label: "Shoe", emoji: "👟", value: "shoe", color: "#d9a66f" },
-        { label: "Ball", emoji: "⚽", value: "ball", color: "#6db6e8" },
-      ],
-    },
-  ],
+  english: createListeningSeedQuestions(assetBase),
 };
 
 const offlineTasks = {
@@ -359,9 +220,14 @@ const offlineTasks = {
     emoji: "🧺",
   },
   english: {
-    title: "English Play Time",
-    prompt: "Say apple, cat, or red with a grown-up",
-    emoji: "🎈",
+    title: "English Listening Play",
+    prompt: "Say apple, cat, or ball with a grown-up",
+    emoji: "🎧",
+  },
+  animation: {
+    title: "Story Replay",
+    prompt: "Watch the fox GIF again and point to the apple",
+    emoji: "🎞️",
   },
 };
 
@@ -464,20 +330,18 @@ const state = {
   baselineCorrect: 0,
   baselineAnswers: [],
   baselinePool: [],
-  videoMode: false,
-  activeVideoId: null,
-  videoPhase: "watch",
-  videoLibrary: [],
+  animationMode: false,
+  activeAnimationId: null,
+  animationPhase: "watch",
+  animationLibrary: [],
   sessionBlobUrls: [],
   aiQuestionId: null,
   aiPlanning: false,
   aiPlanSource: "local",
   aiPlanMessage: "",
   aiPlanToken: 0,
-  speechPractice: "idle",
-  speechFeedback: "",
+  showExtras: false,
 };
-const assetBase = import.meta.env.BASE_URL;
 
 function todayKey(date = new Date()) {
   return date
@@ -527,9 +391,9 @@ function resetActiveActivity() {
   state.baselineCorrect = 0;
   state.baselineAnswers = [];
   state.baselinePool = [];
-  state.videoMode = false;
-  state.activeVideoId = null;
-  state.videoPhase = "watch";
+  state.animationMode = false;
+  state.activeAnimationId = null;
+  state.animationPhase = "watch";
   for (const url of state.sessionBlobUrls || []) {
     try {
       URL.revokeObjectURL(url);
@@ -544,8 +408,6 @@ function resetActiveActivity() {
   state.selectedChoice = null;
   state.activityComplete = false;
   state.sessionQuestionIds = [];
-  state.speechPractice = "idle";
-  state.speechFeedback = "";
 }
 
 function switchChild(childId) {
@@ -572,15 +434,17 @@ function touchLearningDay() {
   profile.lastActive = today;
 }
 
-function activeVideo() {
+function activeAnimation() {
   return (
-    state.videoLibrary.find((video) => video.id === state.activeVideoId) || null
+    state.animationLibrary.find(
+      (video) => video.id === state.activeAnimationId,
+    ) || null
   );
 }
 
 function sessionQuestionTotal() {
-  if (state.videoMode) {
-    return Math.max(1, activeVideo()?.questions?.length || 1);
+  if (state.animationMode) {
+    return Math.max(1, activeAnimation()?.questions?.length || 1);
   }
   if (state.baselineTest) {
     if (state.activityComplete && state.baselineAnswers.length) {
@@ -595,27 +459,28 @@ function sessionQuestionTotal() {
 }
 
 function currentQuestion() {
-  if (state.videoMode) {
-    const video = activeVideo();
-    const questions = video?.questions || [];
-    return (
-      questions[state.questionIndex % Math.max(1, questions.length)] || {
-        id: "video-empty",
-        visual: "🎬",
-        prompt: "Watch the clip, then tap a picture",
-        speech: "Watch the clip, then tap a picture.",
-        answer: "ready",
-        choices: [
-          { label: "Ready", emoji: "👍", value: "ready", color: "#9ed9c4" },
-        ],
-      }
-    );
+  let question = null;
+  if (state.animationMode) {
+    const item = activeAnimation();
+    const questions = item?.questions || [];
+    question = questions[
+      state.questionIndex % Math.max(1, questions.length)
+    ] || {
+      id: "animation-empty",
+      visual: "🎞️",
+      prompt: "Watch the animation, then tap a picture",
+      speech: "Watch the animation, then tap a picture.",
+      answer: "apple",
+      choices: [
+        { label: "Apple", emoji: "🍎", value: "apple", color: "#ff6b5e" },
+        { label: "Ball", emoji: "⚽", value: "ball", color: "#6db6e8" },
+      ],
+    };
+    return enrichQuestionImages(question, assetBase);
   }
   const questions = questionBank[state.activityCourse] || questionBank.colors;
-  const aiQuestion = questions.find(
-    (question) => question.id === state.aiQuestionId,
-  );
-  if (aiQuestion) return aiQuestion;
+  const aiQuestion = questions.find((item) => item.id === state.aiQuestionId);
+  if (aiQuestion) return enrichQuestionImages(aiQuestion, assetBase);
   if (state.activityCourse === "english") {
     const child = activeChild();
     const candidates = state.baselineTest
@@ -630,14 +495,14 @@ function currentQuestion() {
           age: child?.age,
         });
     const unseen = candidates.filter(
-      (question) => !state.sessionQuestionIds.includes(question.id),
+      (item) => !state.sessionQuestionIds.includes(item.id),
     );
     const pool = unseen.length ? unseen : candidates;
-    return (
+    question =
       pool[Math.min(state.questionIndex, pool.length - 1)] ||
       pool[0] ||
-      questions[0]
-    );
+      questions[0];
+    return enrichQuestionImages(question, assetBase);
   }
   const skill = profile.skills[state.activityCourse] || {
     attempts: 0,
@@ -646,13 +511,14 @@ function currentQuestion() {
   const accuracy = skill.attempts ? skill.correct / skill.attempts : 0;
   const targetDifficulty = skill.attempts >= 3 && accuracy >= 0.7 ? 2 : 1;
   const available = questions.filter(
-    (question) => question.difficulty <= targetDifficulty,
+    (item) => item.difficulty <= targetDifficulty,
   );
   const unseen = available.filter(
-    (question) => !state.sessionQuestionIds.includes(question.id),
+    (item) => !state.sessionQuestionIds.includes(item.id),
   );
   const pool = unseen.length ? unseen : available;
-  return pool[state.questionIndex % pool.length] || questions[0];
+  question = pool[state.questionIndex % pool.length] || questions[0];
+  return enrichQuestionImages(question, assetBase);
 }
 
 function makeId(prefix) {
@@ -661,7 +527,8 @@ function makeId(prefix) {
 
 function beginSession(courseId, baselineTest = false, options = {}) {
   const sameCourse = state.activeSession?.courseId === courseId;
-  const sameVideo = !options.videoId || state.activeVideoId === options.videoId;
+  const sameVideo =
+    !options.animationId || state.activeAnimationId === options.animationId;
   if (sameCourse && sameVideo && !options.force) return;
   if (state.activeSession) completeSession("quit");
   state.activityCourse = courseId;
@@ -675,9 +542,9 @@ function beginSession(courseId, baselineTest = false, options = {}) {
   state.baselineTest = baselineTest;
   state.baselineCorrect = 0;
   state.baselineAnswers = [];
-  state.videoMode = Boolean(options.videoId);
-  state.activeVideoId = options.videoId || null;
-  state.videoPhase = options.videoId ? "watch" : "watch";
+  state.animationMode = Boolean(options.animationId);
+  state.activeAnimationId = options.animationId || null;
+  state.animationPhase = options.animationId ? "watch" : "watch";
   state.baselinePool = baselineTest
     ? selectBaselineQuestions(questionBank.english, activeChild()?.age || 3)
     : [];
@@ -691,12 +558,14 @@ function beginSession(courseId, baselineTest = false, options = {}) {
     id: makeId("session"),
     courseId,
     startedAt,
-    videoId: options.videoId || null,
+    animationId: options.animationId || null,
+    videoId: options.animationId || null,
   };
   const event = {
     type: "session_started",
     courseId,
-    videoId: options.videoId || null,
+    animationId: options.animationId || null,
+    videoId: options.animationId || null,
     at: startedAt,
   };
   profile.events.push(event);
@@ -706,7 +575,8 @@ function beginSession(courseId, baselineTest = false, options = {}) {
   saveSession({
     id: state.activeSession.id,
     courseId,
-    videoId: options.videoId || null,
+    animationId: options.animationId || null,
+    videoId: options.animationId || null,
     startedAt,
     status: "started",
   });
@@ -729,7 +599,7 @@ function completeSession(status = "completed") {
   const event = {
     type: `session_${status}`,
     courseId: session.courseId,
-    videoId: session.videoId || null,
+    videoId: session.animationId || null,
     at: completedAt,
     durationMs,
   };
@@ -740,9 +610,9 @@ function completeSession(status = "completed") {
   saveSession({ ...session, completedAt, durationMs, status });
   state.activeSession = null;
   if (status === "completed" || status === "quit") {
-    state.videoMode = false;
-    state.activeVideoId = null;
-    state.videoPhase = "watch";
+    state.animationMode = false;
+    state.activeAnimationId = null;
+    state.animationPhase = "watch";
   }
 }
 
@@ -750,8 +620,8 @@ function recordAnswer(courseId, correct, question) {
   touchLearningDay();
   profile.totalAnswers += 1;
   if (correct) profile.correctAnswers += 1;
-  if (!profile.skills[courseId] && courseId === "video") {
-    profile.skills.video = { attempts: 0, correct: 0, lastPracticed: null };
+  if (!profile.skills[courseId] && courseId === "animation") {
+    profile.skills.animation = { attempts: 0, correct: 0, lastPracticed: null };
   }
   const skill = profile.skills[courseId];
   if (skill) {
@@ -774,7 +644,8 @@ function recordAnswer(courseId, correct, question) {
     courseId,
     questionId: question.id,
     difficulty: question.difficulty || 1,
-    videoId: state.activeVideoId || null,
+    animationId: state.activeAnimationId || null,
+    videoId: state.activeAnimationId || null,
     correct,
     at: new Date().toISOString(),
   };
@@ -809,7 +680,8 @@ function recordAnswer(courseId, correct, question) {
     id: makeId("attempt"),
     sessionId: state.activeSession?.id || null,
     courseId,
-    videoId: state.activeVideoId || null,
+    animationId: state.activeAnimationId || null,
+    videoId: state.activeAnimationId || null,
     correct,
     at: event.at,
     questionId: question.id,
@@ -820,7 +692,13 @@ function recordAnswer(courseId, correct, question) {
 }
 
 function recommendation() {
-  const preferenceOrder = ["english", "colors", "animals", "shapes"];
+  const preferenceOrder = [
+    "english",
+    "animation",
+    "colors",
+    "animals",
+    "shapes",
+  ];
   const child = activeChild();
   const dueReviews = (child?.englishPlan?.reviewQueue || []).filter(
     (item) => !item.dueAt || new Date(item.dueAt).getTime() <= Date.now(),
@@ -976,9 +854,12 @@ function baselineResultMarkup() {
   return `<div class="baseline-result"><span class="baseline-result-icon">🎈</span><span><b>${escapeHtml(summary.headline || "English check complete!")}</b><small>${escapeHtml(summary.detail || "")}</small></span></div>`;
 }
 
-function videoResultMarkup() {
-  const stats = summarizeVideoAttempts(profile.events, state.activeVideoId);
-  return `<div class="baseline-result"><span class="baseline-result-icon">🎬</span><span><b>Nice watching!</b><small>${escapeHtml(parentVideoSummary(stats))}</small></span></div>`;
+function animationResultMarkup() {
+  const stats = summarizeAnimationAttempts(
+    profile.events,
+    state.activeAnimationId,
+  );
+  return `<div class="baseline-result"><span class="baseline-result-icon">🎬</span><span><b>Nice watching!</b><small>${escapeHtml(parentAnimationSummary(stats))}</small></span></div>`;
 }
 function familyTaskPanel() {
   const recommendedId = recommendation().course.id;
@@ -992,36 +873,26 @@ function familyTaskPanel() {
     )}</div><p class="family-task-note">You do not need to finish every task. Looking, listening, and playing with a grown-up is wonderful learning.</p></section>`;
 }
 
-function mediaShelf() {
-  const videos = state.videoLibrary.length
-    ? state.videoLibrary
-    : mergeVideoShelf(createDemoVideos(assetBase), loadVideoLibrary());
-  const cards = videos
-    .map((video) => {
-      const stats = summarizeVideoAttempts(profile.events, video.id);
-      const thumb = video.poster
-        ? `<img src="${escapeHtml(video.poster)}" alt=""/>`
-        : `<div class="media-empty-icon">🎬</div>`;
-      return `<article class="media-card ${video.demo ? "media-card-featured" : ""}"><div class="media-thumb">${thumb}<span class="media-duration">${escapeHtml(video.durationLabel)}</span></div><div class="media-card-copy"><span class="media-type">${video.demo ? "Demo story" : "Your local video"}</span><h3>${escapeHtml(video.title)}</h3><p>${escapeHtml(video.description)}</p><button class="media-play" data-video="${escapeHtml(video.id)}">▶ Watch & answer</button><small class="media-status">${stats.answers ? parentVideoSummary(stats) : "Picture answers after watching"}</small></div></article>`;
+function animationShelf() {
+  const items = state.animationLibrary.length
+    ? state.animationLibrary
+    : createDemoAnimations(assetBase);
+  const cards = items
+    .map((item) => {
+      const stats = summarizeAnimationAttempts(profile.events, item.id);
+      const thumb = item.poster
+        ? `<img src="${escapeHtml(item.poster)}" alt=""/>`
+        : `<span class="media-empty-icon">🎞️</span>`;
+      return `<article class="media-card ${item.demo ? "media-card-featured" : ""}"><div class="media-thumb">${thumb}<span class="media-duration">${escapeHtml(item.durationLabel)}</span></div><div class="media-card-copy"><span class="media-type">${item.demo ? "Demo GIF" : "Your local animation"}</span><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.description)}</p><button class="media-play" data-animation="${escapeHtml(item.id)}">▶ Watch & answer</button><small class="media-status">${stats.answers ? parentAnimationSummary(stats) : "Picture answers after watching"}</small></div></article>`;
     })
     .join("");
-  return `<section class="media-shelf" id="mediaShelf"><div class="section-heading"><div><span class="section-kicker">PICTURE STORIES · VIDEO</span><h2>Play shelf</h2><span class="active-model">Watch · listen · tap</span></div><span class="shelf-note">Local only</span></div><div class="media-grid">${cards}<article class="media-card media-card-empty"><div class="media-empty-icon">🎧</div><div><span class="media-type">Your local audio</span><h3>Add a listening moment</h3><p>Place an MP3 in <code>public/assets/audio</code> for English listening play.</p><span class="media-status">English audio only</span></div></article></div><p class="family-task-note">Demo clip uses original shapes only. Parents can add short local MP4s in Parent settings or under <code>public/assets/media</code>.</p></section>`;
+  return `<section class="media-shelf" id="mediaShelf"><div class="section-heading"><div><span class="section-kicker">ANIMATION Q&A · 动画提问</span><h2>Story shelf</h2><span class="active-model">GIF · listen · tap</span></div><span class="shelf-note">Local only</span></div><div class="media-grid">${cards}</div><p class="family-task-note">Demo uses <code>fox-apple.gif</code>. Parents can register another local GIF/image in Parent settings. The old shapes MP4 is no longer the primary demo.</p></section>`;
 }
 
 function modelName(type) {
   return (
     modelCatalog[type].find((item) => item.id === models[type])?.name ||
     models[type]
-  );
-}
-
-function escapeHtml(value = "") {
-  return String(value).replace(
-    /[&<>"']/g,
-    (character) =>
-      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[
-        character
-      ],
   );
 }
 
@@ -1034,17 +905,27 @@ function normalizeContentQuestion(question) {
       .trim()
       .slice(0, max);
   const choices = Array.isArray(question.choices)
-    ? question.choices
-        .map((choice) => ({
-          label: clean(choice?.label, 40),
-          emoji: clean(choice?.emoji, 8),
-          value: clean(choice?.value, 40),
-          color: /^#[0-9a-f]{6}$/i.test(choice?.color)
-            ? choice.color
-            : "#9ed9c4",
-        }))
-        .filter((choice) => choice.label && choice.value && choice.emoji)
-        .slice(0, 4)
+    ? withChoiceImages(
+        question.choices
+          .map((choice) => ({
+            label: clean(choice?.label, 40),
+            emoji: clean(choice?.emoji, 8),
+            value: clean(choice?.value, 40),
+            color: /^#[0-9a-f]{6}$/i.test(choice?.color)
+              ? choice.color
+              : "#9ed9c4",
+            imageKey: clean(choice?.imageKey || choice?.value, 40),
+            imageSrc: clean(choice?.imageSrc, 400),
+          }))
+          .filter(
+            (choice) =>
+              choice.label &&
+              choice.value &&
+              (choice.emoji || choice.imageSrc || choice.imageKey),
+          )
+          .slice(0, 4),
+        assetBase,
+      )
     : [];
   const ageMin = Math.min(6, Math.max(2, Number(question.ageMin) || 2));
   const ageMax = Math.min(6, Math.max(2, Number(question.ageMax) || 6));
@@ -1060,7 +941,7 @@ function normalizeContentQuestion(question) {
     ageMax,
     concept: clean(question.concept, 60),
     baseline: Boolean(question.baseline),
-    visual: clean(question.visual, 8),
+    visual: clean(question.visual, 8) || "🎧",
     prompt: clean(question.prompt),
     speech: clean(question.speech),
     answer: clean(question.answer, 40),
@@ -1074,7 +955,6 @@ function normalizeContentQuestion(question) {
   ];
   if (
     !normalized.id ||
-    !normalized.visual ||
     !normalized.prompt ||
     !normalized.speech ||
     !normalized.answer ||
@@ -1136,7 +1016,7 @@ function childProfileSettings() {
     )
     .join(
       "",
-    )}</select></label></div><div class="baseline-row"><span>当前英语路径：<b>第 ${stage.id} 阶段 · ${stage.label}</b><small>${baseline}</small></span><button class="small-action" id="startBaseline">开始听力图片测评</button></div><div class="video-register"><div class="config-divider"><span>本地动画理解</span></div><p class="video-register-note">添加短视频（本机文件或 <code>public/assets/media</code> 路径）。题目用大图卡片，不上传名字或音频。</p><label><span>标题</span><input id="videoTitle" maxlength="40" placeholder="例如：Shapes say hello" /></label><label><span>资源路径或选择文件</span><input id="videoAssetPath" maxlength="120" placeholder="assets/media/shapes-hello.mp4" /><input id="videoFile" type="file" accept="video/mp4,video/webm" /></label><label><span>题目英文提示</span><input id="videoPrompt" maxlength="80" placeholder="Which one is a circle?" value="Which one is a circle?" /></label><label><span>正确答案</span><input id="videoAnswer" maxlength="40" placeholder="circle" value="circle" /></label><div class="video-choice-row"><label><span>选项 A</span><input id="videoChoiceA" maxlength="20" value="circle" /></label><label><span>选项 B</span><input id="videoChoiceB" maxlength="20" value="square" /></label><label><span>选项 C</span><input id="videoChoiceC" maxlength="20" value="star" /></label></div><button class="small-action" id="addVideoClip">＋ 登记本地视频</button><div class="video-library-list">${(state.videoLibrary.filter((v) => !v.demo) || []).map((video) => `<div class="video-library-item"><b>${escapeHtml(video.title)}</b><small>${escapeHtml(video.src)}</small><button class="text-btn" data-remove-video="${escapeHtml(video.id)}">移除</button></div>`).join("") || "<small>还没有自定义视频</small>"}</div></div><button class="save-child-btn" id="saveChildProfile">保存孩子信息</button></div>`;
+    )}</select></label></div><div class="baseline-row"><span>当前英语路径：<b>第 ${stage.id} 阶段 · ${stage.label}</b><small>${baseline}</small></span><button class="small-action" id="startBaseline">开始听力图片测评</button></div><div class="video-register"><div class="config-divider"><span>本地动画理解（GIF/图片）</span></div><p class="video-register-note">添加本地 GIF 或图片（本机文件或 <code>public/assets/stories</code> 路径）。孩子流程：观看 → 听题 → 点大图。旧版 MP4 已降级，不再作为主演示。</p><label><span>标题</span><input id="animationTitle" maxlength="40" placeholder="例如：Fox finds an apple" /></label><label><span>资源路径或选择文件</span><input id="animationAssetPath" maxlength="160" placeholder="assets/stories/fox-apple.gif" /><input id="animationFile" type="file" accept="image/gif,image/png,image/webp,image/jpeg,video/mp4,video/webm" /></label><label><span>题目英文提示</span><input id="animationPrompt" maxlength="80" placeholder="What fruit did you see?" value="What fruit did you see?" /></label><label><span>正确答案</span><input id="animationAnswer" maxlength="40" placeholder="apple" value="apple" /></label><div class="video-choice-row"><label><span>选项 A</span><input id="animationChoiceA" maxlength="20" value="apple" /></label><label><span>选项 B</span><input id="animationChoiceB" maxlength="20" value="banana" /></label><label><span>选项 C</span><input id="animationChoiceC" maxlength="20" value="ball" /></label><label><span>选项 D</span><input id="animationChoiceD" maxlength="20" value="cup" /></label></div><button class="small-action" id="addAnimationClip">＋ 登记本地动画</button><div class="video-library-list">${(state.animationLibrary.filter((v) => !v.demo) || []).map((item) => `<div class="video-library-item"><b>${escapeHtml(item.title)}</b><small>${escapeHtml(item.src)}</small><button class="text-btn" data-remove-animation="${escapeHtml(item.id)}">移除</button></div>`).join("") || "<small>还没有自定义动画</small>"}</div></div><div class="config-divider"><span>次要玩法（可选）</span></div><p class="video-register-note">颜色 / 动物 / 形状已从孩子主页收起，需要时再打开。</p><label class="extras-toggle"><input type="checkbox" id="showExtrasToggle" ${state.showExtras ? "checked" : ""} /> 在主页显示次要玩法卡片</label><button class="save-child-btn" id="saveChildProfile">保存孩子信息</button></div>`;
 }
 
 function saveChildForm() {
@@ -1173,66 +1053,12 @@ function speak(text) {
   window.speechSynthesis.speak(utterance);
 }
 
-function startSpeechPractice() {
-  const Recognition =
-    window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!Recognition) {
-    state.speechPractice = "unsupported";
-    state.speechFeedback = "Speech practice works in Chrome or Edge.";
-    render();
-    return;
-  }
-  const question = currentQuestion();
-  const targetWords = question.answer
-    .replaceAll("-", " ")
-    .toLowerCase()
-    .split(/\s+/)
-    .filter(Boolean);
-  const recognition = new Recognition();
-  recognition.lang = "en-US";
-  recognition.interimResults = false;
-  recognition.maxAlternatives = 1;
-  state.speechPractice = "listening";
-  state.speechFeedback = "Listening…";
-  render();
-  recognition.onresult = (event) => {
-    const transcript = String(event.results?.[0]?.[0]?.transcript || "")
-      .toLowerCase()
-      .replace(/[^a-z\s-]/g, " ");
-    const matched = targetWords.every((word) => transcript.includes(word));
-    state.speechPractice = matched ? "success" : "try";
-    state.speechFeedback = matched
-      ? "Nice speaking! ✨"
-      : "Good try—listen and say it again.";
-    render();
-  };
-  recognition.onerror = () => {
-    state.speechPractice = "idle";
-    state.speechFeedback = "Tap Say it and try again.";
-    render();
-  };
-  recognition.onend = () => {
-    if (state.speechPractice === "listening") {
-      state.speechPractice = "idle";
-      state.speechFeedback = "";
-      render();
-    }
-  };
-  try {
-    recognition.start();
-  } catch {
-    state.speechPractice = "idle";
-    state.speechFeedback = "Tap Say it and try again.";
-    render();
-  }
-}
-
 async function planQuestionWithAI() {
   if (
     models.vocab !== "gpt-4o-mini" ||
     !state.activeSession ||
     state.answered ||
-    state.videoMode ||
+    state.animationMode ||
     state.baselineTest
   ) {
     state.aiPlanning = false;
@@ -1301,10 +1127,20 @@ async function planQuestionWithAI() {
   return result;
 }
 
-function videoWatchMarkup() {
-  const video = activeVideo();
-  if (!video) return "";
-  return `<div class="video-player-card"><video id="comprehensionVideo" class="comprehension-video" src="${escapeHtml(video.src)}" poster="${escapeHtml(video.poster || "")}" controls playsinline></video><div class="video-player-copy"><b>${escapeHtml(video.title)}</b><small>Look and listen. Grown-ups can pause anytime.</small></div></div>`;
+function animationWatchMarkup() {
+  const item = activeAnimation();
+  if (!item) return "";
+  const isImage =
+    item.mediaType === "image" ||
+    /\.(gif|png|webp|jpe?g)(\?|$)/i.test(item.src);
+  const media = isImage
+    ? `<img id="comprehensionAnimation" class="comprehension-animation" src="${escapeHtml(item.src)}" alt="${escapeHtml(item.title)}" />`
+    : `<video id="comprehensionAnimation" class="comprehension-animation" src="${escapeHtml(item.src)}" poster="${escapeHtml(item.poster || "")}" controls playsinline></video>`;
+  return `<div class="video-player-card animation-player-card">${media}<div class="video-player-copy"><b>${escapeHtml(item.title)}</b><small>Look and listen. Grown-ups can pause anytime.</small></div></div>`;
+}
+
+function featureHubMarkup(next) {
+  return `<section class="feature-hub" id="featureHub"><div class="section-heading"><div><span class="section-kicker">TWO KID FEATURES · 两大玩法</span><h2>What shall we play?</h2></div></div><div class="feature-hub-grid"><article class="feature-card feature-listening ${next.course.id === "english" ? "is-recommended" : ""}" data-feature="listening"><div class="feature-card-art"><span>🎧</span><b>听力测试</b></div><div class="feature-card-copy"><h3>Listening test</h3><p>Browser speech asks an English question. Tap a big picture card A / B / C / D.</p><button class="primary-btn feature-start" data-feature="listening"><span>Start listening</span><span class="arrow">→</span></button></div></article><article class="feature-card feature-animation ${next.course.id === "animation" ? "is-recommended" : ""}" data-feature="animation"><div class="feature-card-art"><span>🎞️</span><b>动画提问</b></div><div class="feature-card-copy"><h3>Animation Q&A</h3><p>Watch the fox GIF story, then answer with the same cute picture cards.</p><button class="primary-btn feature-start" data-feature="animation"><span>Watch & answer</span><span class="arrow">→</span></button></div></article></div>${state.showExtras ? `<div class="extras-grid">${secondaryCourses.map((course) => courseCard(course, false)).join("")}</div>` : `<p class="hub-aux-note">Parent helpers, storage, and voice prompts stay in settings. Extra color / animal / shape play is tucked away unless a grown-up turns it on.</p>`}</section>`;
 }
 
 function render() {
@@ -1330,45 +1166,48 @@ function render() {
         <section class="hero">
           <div class="hero-copy">
             <div class="eyebrow"><span class="spark">✦</span> 5-MINUTE PLAY TIME</div>
-            <h1>${childName} + Little Sprout<br/><em>${activeCourse.label}</em></h1>
-            <p>Look, listen, and play together.<br/>${activeCourse.subtitle}.</p>
-            <button class="primary-btn" id="startLesson"><span>${state.activeSession ? "Keep playing" : "Start today's play"}</span><span class="arrow">→</span></button>
+            <h1>${childName} + Little Sprout<br/><em>Listening & Animation</em></h1>
+            <p>Two big play paths for little listeners.<br/>Tap pictures — no typing, no speak-back mic.</p>
+            <button class="primary-btn" id="startLesson"><span>${state.activeSession ? "Keep playing" : "Start listening test"}</span><span class="arrow">→</span></button>
             <div class="streak"><span class="streak-icon">🔥</span><span><b>${profile.streak} days in a row</b><small>${profile.streak ? "A little play every day helps" : "Finish today to light your first star"}</small></span></div>
             <div class="star-badge">⭐ ${profile.stars} stars collected</div>
-            <div class="daily-goal"><div class="daily-goal-top"><span>Today's 3-question adventure</span><b>${dailyProgress.answers}/${dailyProgress.target}</b></div><div class="daily-goal-track"><i style="width:${Math.round((dailyProgress.answers / dailyProgress.target) * 100)}%"></i></div><small>${dailyProgress.answers >= dailyProgress.target ? "Today is complete—come back tomorrow!" : `${dailyProgress.target - dailyProgress.answers} more to go`}</small></div>
+            <div class="daily-goal"><div class="daily-goal-top"><span>Today's picture answers</span><b>${dailyProgress.answers}/${dailyProgress.target}</b></div><div class="daily-goal-track"><i style="width:${Math.round((dailyProgress.answers / dailyProgress.target) * 100)}%"></i></div><small>${dailyProgress.answers >= dailyProgress.target ? "Today is complete—come back tomorrow!" : `${dailyProgress.target - dailyProgress.answers} more to go`}</small></div>
             ${englishPlanCard()}
             ${learnerSetupCard()}
           </div>
-          <div class="hero-art"><img src="${assetBase}assets/fox-hero.png" alt="A little fox reads a picture book by a tent"/><div class="floating-pill pill-one">Have fun today!</div><div class="floating-pill pill-two">⭐ +1</div></div>
+          <div class="hero-art"><img src="${assetBase}assets/fox-hero.png" alt="A little fox reads a picture book by a tent"/><div class="floating-pill pill-one">Listen & tap!</div><div class="floating-pill pill-two">⭐ +1</div></div>
         </section>
 
-        <section class="section-block" id="lessonArea">
-          <div class="section-heading"><div><span class="section-kicker">PLAY · LEARN · GROW</span><h2>What shall we play?</h2><span class="active-model">Pictures: ${modelName("image")}</span></div><button class="text-btn" id="viewAll">See all <span>→</span></button></div>
-          <div class="course-grid">${courses.map((course) => courseCard(course, course.id === next.course.id)).join("")}</div>
-          <div class="recommendation-strip"><span class="recommendation-mascot">🦊</span><div><span class="section-kicker">READY FOR YOU</span><b>${next.course.label}</b><small>${next.reason}</small></div><button class="mini-cta" data-recommend="${next.course.id}">Play <span>→</span></button></div>
-        </section>
+        ${featureHubMarkup(next)}
 
         <section class="learning-panel" id="quizPanel">
-          ${state.videoMode && state.videoPhase === "watch" ? videoWatchMarkup() : ""}
-          <div class="panel-intro"><span class="section-kicker">${state.videoMode ? "VIDEO QUEST" : state.baselineTest ? "ENGLISH CHECK" : "MINI QUEST"} · ${String(state.questionIndex + 1).padStart(2, "0")}</span><h2>${state.videoMode ? escapeHtml(activeVideo()?.title || "Video play") : activeCourse.label}</h2><p>${state.videoMode && state.videoPhase === "watch" ? "Watch first, then answer with pictures." : `${question.prompt}<br/>Let's try it together!`}</p><div class="speech-actions"><button class="voice-btn" id="voicePrompt" ${state.videoMode && state.videoPhase === "watch" ? "disabled" : ""}><span>🔊</span> Listen</button>${(activeCourse.id === "english" || state.videoMode) && !(state.videoMode && state.videoPhase === "watch") ? `<button class="say-btn ${state.speechPractice === "listening" ? "is-listening" : ""}" id="sayIt" aria-label="Say the answer aloud" ${state.aiPlanning ? "disabled" : ""}><span>🎙️</span> ${state.speechPractice === "listening" ? "Listening…" : "Say it"}</button><span class="speech-feedback ${state.speechPractice === "success" ? "is-success" : ""}" aria-live="polite">${state.speechFeedback}</span>` : ""}</div><div class="model-chip"><span>Question model</span><b>${state.videoMode ? "Local video cards" : modelName("vocab")}</b></div>${state.aiPlanning ? '<div class="ai-plan-note is-loading">🪄 Choosing a question for you…</div>' : state.aiPlanMessage ? `<div class="ai-plan-note ${state.aiPlanSource === "ai" ? "is-ai" : "is-local"}">${state.aiPlanSource === "ai" ? "✨" : "🌱"} ${state.aiPlanMessage}</div>` : ""}</div>
-          <div class="quiz-card ${state.videoMode && state.videoPhase === "watch" ? "is-watching" : ""}">
-            <div class="quiz-top"><span>${state.videoMode && state.videoPhase === "watch" ? "Watch time" : `Question ${state.questionIndex + 1} / ${sessionQuestionTotal()}`}</span><span class="session-live">${state.activeSession ? "● Playing now" : ""}</span><div class="progress-dots">${Array.from({ length: Math.min(sessionQuestionTotal(), 12) }, (_, i) => `<i class="${i <= state.questionIndex ? "filled" : ""}"></i>`).join("")}</div></div>
+          ${state.animationMode && state.animationPhase === "watch" ? animationWatchMarkup() : ""}
+          <div class="panel-intro"><span class="section-kicker">${state.animationMode ? "ANIMATION Q&A" : state.baselineTest ? "LISTENING CHECK" : "MINI QUEST"} · ${String(state.questionIndex + 1).padStart(2, "0")}</span><h2>${state.animationMode ? escapeHtml(activeAnimation()?.title || "Animation play") : activeCourse.label}</h2><p>${state.animationMode && state.animationPhase === "watch" ? "Watch first, then answer with pictures." : `${question.prompt}<br/>Let's try it together!`}</p><div class="speech-actions">${listenButtonMarkup({ disabled: state.animationMode && state.animationPhase === "watch" })}</div><div class="model-chip"><span>Question model</span><b>${state.animationMode ? "Local animation cards" : modelName("vocab")}</b></div>${state.aiPlanning ? '<div class="ai-plan-note is-loading">🪄 Choosing a question for you…</div>' : state.aiPlanMessage ? `<div class="ai-plan-note ${state.aiPlanSource === "ai" ? "is-ai" : "is-local"}">${state.aiPlanSource === "ai" ? "✨" : "🌱"} ${state.aiPlanMessage}</div>` : ""}</div>
+          <div class="quiz-card ${state.animationMode && state.animationPhase === "watch" ? "is-watching" : ""}">
+            <div class="quiz-top"><span>${state.animationMode && state.animationPhase === "watch" ? "Watch time" : `Question ${state.questionIndex + 1} / ${sessionQuestionTotal()}`}</span><span class="session-live">${state.activeSession ? "● Playing now" : ""}</span><div class="progress-dots">${Array.from({ length: Math.min(sessionQuestionTotal(), 12) }, (_, i) => `<i class="${i <= state.questionIndex ? "filled" : ""}"></i>`).join("")}</div></div>
             ${
-              state.videoMode && state.videoPhase === "watch"
-                ? `<div class="video-watch-hint"><p>When the clip ends, tap <b>Ready to answer</b>.</p><button class="primary-btn" id="videoReady"><span>Ready to answer</span><span class="arrow">→</span></button></div>`
+              state.animationMode && state.animationPhase === "watch"
+                ? `<div class="video-watch-hint"><p>When the animation ends, tap <b>Ready to answer</b>.</p><button class="primary-btn" id="animationReady"><span>Ready to answer</span><span class="arrow">→</span></button></div>`
                 : `<div class="question-visual"><span class="question-emoji">${escapeHtml(question.visual)}</span><span class="question-bubble">${escapeHtml(question.prompt)}<br/><b>Look and choose</b></span></div>
-            <div class="choice-grid">${question.choices.map((choice) => `<button class="choice ${state.answered && choice.value === question.answer ? "correct" : ""} ${state.answered && state.selectedChoice === choice.value && choice.value !== question.answer ? "wrong" : ""}" data-choice="${escapeHtml(choice.value)}" aria-label="${escapeHtml(question.prompt)}: ${escapeHtml(choice.label)}" style="--choice-color:${choice.color}" ${state.answered || state.aiPlanning ? "disabled" : ""}><span class="choice-emoji">${escapeHtml(choice.emoji)}</span><span>${escapeHtml(choice.label)}</span>${state.answered && choice.value === question.answer ? '<b class="check">✓</b>' : ""}</button>`).join("")}</div>
-            ${state.answered ? `<div class="feedback ${state.correct ? "good" : "try"}">${state.encouragement || (state.correct ? "You found it! ✨" : "That's okay—let's look again")}</div>${state.activityComplete ? (state.baselineTest ? baselineResultMarkup() : state.videoMode ? videoResultMarkup() : offlineTaskMarkup(state.activityCourse)) : `<button class="next-question" id="nextQuestion">${state.correct ? "Next one" : "Try another"} <span>→</span></button>`}` : '<div class="hint">Tap a picture to answer · Find a star!</div>'}`
+            ${choiceGridMarkup(question.choices, {
+              answer: question.answer,
+              selectedChoice: state.selectedChoice,
+              answered: state.answered,
+              disabled: state.aiPlanning,
+              prompt: question.prompt,
+              showLabels: true,
+            })}
+            ${state.answered ? `<div class="feedback ${state.correct ? "good" : "try"}">${state.encouragement || (state.correct ? "You found it! ✨" : "That's okay—let's look again")}</div>${state.activityComplete ? (state.baselineTest ? baselineResultMarkup() : state.animationMode ? animationResultMarkup() : offlineTaskMarkup(state.activityCourse)) : `<button class="next-question" id="nextQuestion">${state.correct ? "Next one" : "Try another"} <span>→</span></button>`}` : '<div class="hint">Tap a picture to answer · Find a star!</div>'}`
             }
             ${state.activeSession ? `<button class="finish-btn" id="finishSession">${state.activityComplete ? "Finish today" : "Take a break"}</button>` : ""}
           </div>
         </section>
 
-        ${mediaShelf()}
+        ${animationShelf()}
 
         ${familyTaskPanel()}
 
-        <section class="parent-note"><div class="note-icon">💛</div><div><b>Grown-up note</b><p>Five to eight minutes is plenty. Follow your child's curiosity.</p></div><button class="round-arrow" id="openParent2" aria-label="Open parent settings">→</button></section>
+        <section class="parent-note"><div class="note-icon">💛</div><div><b>Grown-up note</b><p>Five to eight minutes is plenty. Voice is for prompts only.</p></div><button class="round-arrow" id="openParent2" aria-label="Open parent settings">→</button></section>
       </main>
 
       <nav class="mobile-nav"><button class="mobile-nav-item ${state.activeTab === "home" ? "active" : ""}" data-tab="home">⌂<span>Today</span></button><button class="mobile-nav-item ${state.activeTab === "library" ? "active" : ""}" data-tab="library">▶<span>Play</span></button><button class="mobile-nav-item ${state.activeTab === "tasks" ? "active" : ""}" data-tab="tasks">♡<span>Together</span></button><button class="mobile-nav-item" id="openParent3">☼<span>Parent</span></button></nav>
@@ -1402,7 +1241,7 @@ function bindEvents() {
           ? "#mediaShelf"
           : state.activeTab === "tasks"
             ? "#familyTasks"
-            : "#quizPanel";
+            : "#featureHub";
       requestAnimationFrame(() =>
         document
           .querySelector(targetId)
@@ -1415,36 +1254,70 @@ function bindEvents() {
     render();
   });
   document.querySelector("#startLesson")?.addEventListener("click", () => {
-    beginSession("english");
+    const child = activeChild();
+    beginSession("english", child?.baseline?.status !== "complete", {
+      force: true,
+    });
     render();
     document
       .querySelector("#quizPanel")
       .scrollIntoView({ behavior: "smooth", block: "center" });
-    void planQuestionWithAI().then(() => {
-      if (state.activeSession) speak(currentQuestion().speech);
-    });
+    speak(currentQuestion().speech);
   });
+  document.querySelectorAll("[data-feature]").forEach((btn) =>
+    btn.addEventListener("click", () => {
+      const feature = btn.dataset.feature;
+      if (feature === "animation") {
+        const animationId =
+          state.animationLibrary.find((item) => item.demo)?.id ||
+          createDemoAnimations(assetBase)[0]?.id;
+        beginSession("animation", false, { animationId, force: true });
+        state.animationPhase = "watch";
+        state.activeTab = "library";
+        render();
+        document
+          .querySelector("#quizPanel")
+          ?.scrollIntoView({ behavior: "smooth", block: "center" });
+        showToast("Watch the animation, then answer");
+        return;
+      }
+      const child = activeChild();
+      beginSession("english", child?.baseline?.status !== "complete", {
+        force: true,
+      });
+      render();
+      document
+        .querySelector("#quizPanel")
+        ?.scrollIntoView({ behavior: "smooth", block: "center" });
+      speak(currentQuestion().speech);
+    }),
+  );
+  document
+    .querySelector("#showExtrasToggle")
+    ?.addEventListener("change", (event) => {
+      state.showExtras = Boolean(event.target.checked);
+      try {
+        localStorage.setItem(
+          "little-sprout-show-extras",
+          state.showExtras ? "1" : "0",
+        );
+      } catch {
+        /* ignore */
+      }
+    });
   document.querySelector("#voicePrompt")?.addEventListener("click", () => {
     if (models.voice === "local-audio")
       showToast("Add the English audio file to public/assets/audio");
     else speak(currentQuestion().speech);
   });
-  document
-    .querySelector("#sayIt")
-    ?.addEventListener("click", startSpeechPractice);
   document.querySelectorAll("[data-choice]").forEach((btn) =>
     btn.addEventListener("click", () => {
-      if (
-        state.aiPlanning ||
-        state.answered ||
-        state.speechPractice === "listening"
-      )
-        return;
+      if (state.aiPlanning || state.answered) return;
       const question = currentQuestion();
       state.answered = true;
       state.selectedChoice = btn.dataset.choice;
       state.correct = btn.dataset.choice === question.answer;
-      const courseId = state.videoMode ? "video" : state.activityCourse;
+      const courseId = state.animationMode ? "animation" : state.activityCourse;
       recordAnswer(courseId, state.correct, question);
       if (state.baselineTest) {
         if (state.correct) state.baselineCorrect += 1;
@@ -1462,8 +1335,8 @@ function bindEvents() {
         ) {
           state.activityComplete = true;
         }
-      } else if (state.videoMode) {
-        const total = activeVideo()?.questions?.length || 1;
+      } else if (state.animationMode) {
+        const total = activeAnimation()?.questions?.length || 1;
         if (state.questionIndex >= total - 1) state.activityComplete = true;
       } else if (state.questionIndex >= 2) {
         state.activityComplete = true;
@@ -1535,18 +1408,18 @@ function bindEvents() {
       });
     }),
   );
-  document.querySelectorAll("[data-video]").forEach((btn) =>
+  document.querySelectorAll("[data-animation]").forEach((btn) =>
     btn.addEventListener("click", () => {
-      const videoId = btn.dataset.video;
-      beginSession("video", false, { videoId, force: true });
-      state.videoPhase = "watch";
+      const animationId = btn.dataset.animation;
+      beginSession("animation", false, { animationId, force: true });
+      state.animationPhase = "watch";
       state.activeTab = "library";
       render();
       document
         .querySelector("#quizPanel")
         ?.scrollIntoView({ behavior: "smooth", block: "center" });
-      showToast("Watch the clip, then answer");
-      const player = document.querySelector("#comprehensionVideo");
+      showToast("Watch the animation, then answer");
+      const player = document.querySelector("#comprehensionAnimation");
       try {
         player?.play?.();
       } catch {
@@ -1554,8 +1427,8 @@ function bindEvents() {
       }
     }),
   );
-  document.querySelector("#videoReady")?.addEventListener("click", () => {
-    state.videoPhase = "quiz";
+  document.querySelector("#animationReady")?.addEventListener("click", () => {
+    state.animationPhase = "quiz";
     state.questionIndex = 0;
     state.answered = false;
     state.correct = false;
@@ -1565,19 +1438,19 @@ function bindEvents() {
     render();
     speak(currentQuestion().speech);
   });
-  document.querySelector("#addVideoClip")?.addEventListener("click", () => {
+  document.querySelector("#addAnimationClip")?.addEventListener("click", () => {
     const title =
-      document.querySelector("#videoTitle")?.value.trim() || "My video";
+      document.querySelector("#animationTitle")?.value.trim() || "My animation";
     const prompt =
-      document.querySelector("#videoPrompt")?.value.trim() ||
-      "Which one is a circle?";
+      document.querySelector("#animationPrompt")?.value.trim() ||
+      "What fruit did you see?";
     const answer =
-      document.querySelector("#videoAnswer")?.value.trim().toLowerCase() ||
-      "circle";
-    const choiceValues = ["A", "B", "C"]
+      document.querySelector("#animationAnswer")?.value.trim().toLowerCase() ||
+      "apple";
+    const choiceValues = ["A", "B", "C", "D"]
       .map((key) =>
         document
-          .querySelector(`#videoChoice${key}`)
+          .querySelector(`#animationChoice${key}`)
           ?.value.trim()
           .toLowerCase(),
       )
@@ -1587,8 +1460,8 @@ function bindEvents() {
       showToast("请至少提供两个选项，并让正确答案出现在选项中");
       return;
     }
-    const file = document.querySelector("#videoFile")?.files?.[0];
-    let src = document.querySelector("#videoAssetPath")?.value.trim() || "";
+    const file = document.querySelector("#animationFile")?.files?.[0];
+    let src = document.querySelector("#animationAssetPath")?.value.trim() || "";
     let sourceType = "asset";
     if (file) {
       src = URL.createObjectURL(file);
@@ -1598,21 +1471,20 @@ function bindEvents() {
       if (
         !src.startsWith("http") &&
         !src.startsWith("/") &&
-        !src.startsWith("assets/")
+        !src.startsWith("assets/") &&
+        !src.startsWith("blob:")
       ) {
-        src = `assets/media/${src.replace(/^\/?assets\/media\//, "")}`;
+        src = `assets/stories/${src.replace(/^\/?assets\/stories\//, "")}`;
       }
       if (src.startsWith("assets/")) src = `${assetBase}${src}`;
       sourceType = "asset";
     } else {
-      showToast("请选择本地视频或填写 assets/media 路径");
+      showToast("请选择本地 GIF/图片或填写 assets/stories 路径");
       return;
     }
-    const emojis = ["🟢", "🟦", "⭐", "🍎", "🐱"];
-    const colors = ["#9ed9c4", "#6db6e8", "#f7c94b", "#ff6b5e", "#c9b9d9"];
-    const entry = normalizeVideoEntry(
+    const entry = normalizeAnimationEntry(
       {
-        id: makeId("video"),
+        id: makeId("animation"),
         title,
         description: "Watch, then tap a picture.",
         durationLabel: "short",
@@ -1621,48 +1493,52 @@ function bindEvents() {
         poster: `${assetBase}assets/fox-hero.png`,
         questions: [
           {
-            id: makeId("video-q"),
-            visual: "🎬",
+            id: makeId("anim-q"),
+            visual: "🎞️",
             prompt,
             speech: prompt,
             answer,
-            choices: uniqueChoices.map((value, index) => ({
+            choices: uniqueChoices.map((value) => ({
               label: value,
-              emoji: emojis[index % emojis.length],
               value,
-              color: colors[index % colors.length],
+              imageKey: value,
             })),
           },
         ],
       },
-      { allowBlob: true },
+      { allowBlob: true, assetBase },
     );
     if (!entry) {
-      showToast("视频题目格式不正确");
+      showToast("动画题目格式不正确");
       return;
     }
     const custom = [
-      ...state.videoLibrary.filter(
-        (video) => !video.demo && video.sourceType !== "blob",
+      ...state.animationLibrary.filter(
+        (item) => !item.demo && item.sourceType !== "blob",
       ),
       ...(entry.sourceType === "blob" ? [] : [entry]),
     ];
-    saveVideoLibrary(custom);
-    state.videoLibrary = mergeVideoShelf(createDemoVideos(assetBase), [
-      ...custom,
-      ...(entry.sourceType === "blob" ? [entry] : []),
-    ]);
+    saveAnimationLibrary(custom, assetBase);
+    state.animationLibrary = mergeAnimationShelf(
+      createDemoAnimations(assetBase),
+      [...custom, ...(entry.sourceType === "blob" ? [entry] : [])],
+    );
     render();
-    showToast("本地视频已加入 Play shelf");
+    showToast("本地动画已加入 Story shelf");
   });
-  document.querySelectorAll("[data-remove-video]").forEach((btn) =>
+  document.querySelectorAll("[data-remove-animation]").forEach((btn) =>
     btn.addEventListener("click", () => {
-      const id = btn.dataset.removeVideo;
-      const custom = loadVideoLibrary().filter((video) => video.id !== id);
-      saveVideoLibrary(custom);
-      state.videoLibrary = mergeVideoShelf(createDemoVideos(assetBase), custom);
+      const id = btn.dataset.removeAnimation;
+      const custom = loadAnimationLibrary(assetBase).filter(
+        (item) => item.id !== id,
+      );
+      saveAnimationLibrary(custom, assetBase);
+      state.animationLibrary = mergeAnimationShelf(
+        createDemoAnimations(assetBase),
+        custom,
+      );
       render();
-      showToast("已移除自定义视频");
+      showToast("已移除自定义动画");
     }),
   );
   document
@@ -1784,16 +1660,14 @@ function bindEvents() {
     state.aiPlanToken += 1;
     state.aiPlanning = false;
     state.aiQuestionId = null;
-    state.speechPractice = "idle";
-    state.speechFeedback = "";
     state.baselineTest = false;
     state.baselineCorrect = 0;
     state.baselineAnswers = [];
     state.baselinePool = [];
     completeSession(state.activityComplete ? "completed" : "quit");
-    state.videoMode = false;
-    state.activeVideoId = null;
-    state.videoPhase = "watch";
+    state.animationMode = false;
+    state.activeAnimationId = null;
+    state.animationPhase = "watch";
     state.offlineTaskDone = false;
     state.answered = false;
     state.encouragement = "";
@@ -1838,10 +1712,8 @@ function bindEvents() {
     state.selectedChoice = null;
     state.encouragement = "";
     state.aiQuestionId = null;
-    state.speechPractice = "idle";
-    state.speechFeedback = "";
     render();
-    if (state.baselineTest || state.videoMode) {
+    if (state.baselineTest || state.animationMode) {
       if (state.activeSession) speak(currentQuestion().speech);
       return;
     }
@@ -1864,8 +1736,8 @@ function bindEvents() {
       state.baselineCorrect = 0;
       state.baselineAnswers = [];
       state.baselinePool = [];
-      state.videoMode = false;
-      state.activeVideoId = null;
+      state.animationMode = false;
+      state.activeAnimationId = null;
       state.sessionQuestionIds = [];
       state.answered = false;
       state.encouragement = "";
@@ -1927,11 +1799,17 @@ function showToast(message) {
 async function init() {
   document.querySelector("#app").innerHTML =
     '<div class="loading-screen"><span>🦊</span><b>Little Sprout is getting ready…</b></div>';
+  try {
+    state.showExtras =
+      localStorage.getItem("little-sprout-show-extras") === "1";
+  } catch {
+    state.showExtras = false;
+  }
   children = await loadChildren();
   await loadQuestionPack();
-  state.videoLibrary = mergeVideoShelf(
-    createDemoVideos(assetBase),
-    loadVideoLibrary(),
+  state.animationLibrary = mergeAnimationShelf(
+    createDemoAnimations(assetBase),
+    loadAnimationLibrary(assetBase),
   );
   if (!children.length) children = [createDefaultChild()];
   activeChildId = children[0].id;

@@ -4,4 +4,4 @@
 
 本仓库不接受从商业儿童应用、流媒体服务或未授权网站复制的动画、图片、音频与题目。
 
-`media/shapes-hello.mp4` 是原创占位短片（纯色形状标签），用于动画理解演示。替换规则见 [`media/README.md`](media/README.md)。
+主演示动画为 `stories/fox-apple.gif`（约 12 秒）。选项大图在 `choices/`。旧版 `media/shapes-hello.mp4` 已降级，不再作为主演示。

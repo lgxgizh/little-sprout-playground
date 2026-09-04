@@ -36,6 +36,9 @@ test("English content pack follows the safe question schema", async () => {
     assert.ok(
       question.choices.some((choice) => choice.value === question.answer),
     );
+    for (const choice of question.choices) {
+      assert.ok(choice.emoji || choice.imageKey || choice.imageSrc);
+    }
     for (const text of [
       question.prompt,
       question.speech,

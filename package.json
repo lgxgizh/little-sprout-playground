@@ -2,7 +2,7 @@
   "name": "little-sprout-playground",
   "version": "0.1.0",
   "private": true,
-  "description": "A picture-first, voice-assisted learning web app for preschool children.",
+  "description": "A picture-first listening and animation Q&A playground for preschool children.",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -20,7 +20,7 @@
     "test": "node --test tests/*.test.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "check": "npm run format:check && npm test && node --check src/app.js && node --check src/learning-plan.js && node --check src/storage.js && node --check src/assessment.js && node --check src/video-comprehension.js && vite build"
+    "check": "npm run format:check && npm test && node --check src/app.js && node --check src/learning-plan.js && node --check src/storage.js && node --check src/assessment.js && node --check src/animation-quiz.js && node --check src/listening.js && node --check src/quiz-ui.js && node --check src/video-comprehension.js && vite build"
   },
   "devDependencies": {
     "prettier": "^3.9.6",

@@ -6,7 +6,7 @@
 
 **中文** · [English](#english)
 
-一个面向学龄前儿童的图片优先、语音辅助学习网页。孩子无需识字，可以通过图片选择和语音提示完成简短的启蒙活动；家长可以分别选择图片、语音和词汇测试所使用的模型。
+一个面向学龄前儿童的图片优先学习网页，主打两大孩子玩法：**听力测试**与**动画提问**。孩子听英文提问、看 GIF 小故事，再点选 A/B/C/D 大图卡片；语音只用于题目朗读，演示流程不含跟读麦克风。
 
 **[在线体验](https://lgxgizh.github.io/little-sprout-playground/)** · [报告问题](https://github.com/lgxgizh/little-sprout-playground/issues)
 
@@ -26,14 +26,15 @@
 - 支持多个孩子的昵称、年龄、英语基础和独立学习档案 / Multiple child profiles with nickname, age, English background, and separate progress
 - 面向约 3 岁的英语听力图片测评（约 8–12 题，可自适应提前结束）与温和家长总结 / Age~3 English listening/picture check (~8–12 items, adaptive stop) with a gentle parent summary
 - 英语四阶段学习路径、错题间隔复习和家长周成长卡 / Four-stage English path, spaced review, and a weekly parent growth card
-- 英语跟读按钮与本地关键词反馈（支持的浏览器中） / English speak-back practice with local keyword feedback when supported
+- 孩子流程不含跟读/麦克风识别；仅保留 Listen 朗读按钮 / Kid flows have no speak-back mic—Listen prompts only
 - 学习档案 JSON 导出与导入，方便本地备份和换设备迁移 / Local JSON export and import for backup and device migration
 - 根据最近表现给出下一步推荐，不给孩子贴标签、不展示排名 / Gentle, transparent recommendations with no rankings or labels
 - 3 题自适应微任务、完成/休息出口和屏幕外亲子小游戏 / Three-question adaptive micro-lessons with finish/rest exits and offline parent-child play
 - 独立的亲子任务区，鼓励把学习带到真实生活中 / A dedicated parent-child activity area that extends learning into daily life
 - 家长入口长按保护 / Long-press protection for parent settings
 - 可替换的本地图片、音频和题库资源 / Replaceable local media and question banks
-- Play shelf 动画理解：原创占位短片、本地视频登记、观看后图片答题与本地尝试记录 / Play-shelf video comprehension with an original demo clip, local video registration, watch-then-picture answers, and local attempt history
+- 主页两大入口：听力测试（TTS + 图片选项）与动画提问（fox-apple.gif + 图片选项） / Home hub with Listening test and Animation Q&A (fox-apple.gif + picture cards)
+- Story shelf：本地 GIF/图片登记、观看后图片答题 / Story shelf for local GIF/image registration and watch-then-picture answers
 - GitHub Actions 自动构建和 Pages 部署 / Automated CI and GitHub Pages deployment
 
 ## 快速开始 / Quick start
@@ -136,9 +137,9 @@ Model choices are stored in `localStorage` under `little-sprout-models`. Remote 
 
 ## 本地学习记录与个性化推荐 / Local learning records
 
-学习档案以 IndexedDB 的 `little-sprout-playground` 数据库为主，包含 `profile`、`children`、`events`、`sessions`、`attempts` 和 `rewards` 对象仓库；浏览器不支持 IndexedDB 时会降级到 `localStorage`。默认只记录完成次数、具体题目结果、主题和时间；跟读识别只在当前页面临时处理，不保存录音或识别文本，也不上传到服务器。
+学习档案以 IndexedDB 的 `little-sprout-playground` 数据库为主，包含 `profile`、`children`、`events`、`sessions`、`attempts` 和 `rewards` 对象仓库；浏览器不支持 IndexedDB 时会降级到 `localStorage`。默认只记录完成次数、具体题目结果、主题和时间；演示孩子流程不含跟读麦克风；语音仅用于题目朗读。
 
-The primary store is an IndexedDB database named `little-sprout-playground` with `profile`, `children`, `events`, `sessions`, `attempts`, and `rewards` object stores. Browsers without IndexedDB fall back to `localStorage`. Study counts, per-question results, topics, and timestamps are recorded locally by default. Speak-back recognition is processed only in the current page and does not store audio or transcripts.
+The primary store is an IndexedDB database named `little-sprout-playground` with `profile`, `children`, `events`, `sessions`, `attempts`, and `rewards` object stores. Browsers without IndexedDB fall back to `localStorage`. Study counts, per-question results, topics, and timestamps are recorded locally by default. Demo kid flows do not use speak-back recognition; voice is for prompts only.
 
 系统会优先推荐孩子较少练习或正确率较低的主题，并在一次学习单元中尽量避免重复已经完成的题目；家长可以在「家长设置」中查看统计、主题进度、最近足迹或清除本机记录。
 
@@ -170,14 +171,17 @@ The recommendation rule prioritizes topics that are new or need gentle practice 
 ├── .github/                 # CI、Pages、Issue 和 PR 模板 / workflows and templates
 ├── public/assets/           # 可替换媒体 / replaceable media
 ├── src/
-│   ├── app.js               # 页面、内容、交互和模型配置 / UI and model settings
+│   ├── app.js               # 主页两大玩法、共享答题 UI、家长设置 / hub UI + parent settings
+│   ├── listening.js         # 听力测试题与 choice PNG 映射 / listening seeds + choice assets
+│   ├── animation-quiz.js    # GIF/图片动画理解书架 / GIF animation comprehension shelf
+│   ├── quiz-ui.js           # A–D 大图选项共享渲染 / shared picture-choice cards
 │   ├── ai.js                # 隐私最小化学习摘要与 AI 选题适配器 / AI planner adapter
 │   ├── learning-plan.js     # 英语阶段、复习规则和周统计 / English stages, review rules, weekly stats
 │   ├── assessment.js        # 约 3 岁英语测评与家长总结 / age-3 English check helpers
-│   ├── video-comprehension.js # 本地视频书架与理解题 / local video shelf helpers
+│   ├── video-comprehension.js # 兼容旧导入的薄封装 / thin compatibility shim
 │   ├── storage.js           # IndexedDB 存储、迁移和降级 / persistence and migration
 │   ├── styles.css           # 基础响应式样式 / base responsive styles
-│   └── overrides.css        # 配置和成长档案样式 / settings and profile styles
+│   └── overrides.css        # 配置、成长档案与两大玩法样式 / settings + hub styles
 ├── index.html
 ├── vite.config.js
 └── package.json
@@ -187,7 +191,9 @@ The recommendation rule prioritizes topics that are new or need gentle practice 
 
 - 图片或封面放入 `public/assets/`，在 `src/app.js` 中引用。 / Put images in `public/assets/` and reference them from `src/app.js`.
 - 本地音频建议放入 `public/assets/audio/`，在 `speak()` 的适配分支中播放。 / Put local audio in `public/assets/audio/` and handle it in the `speak()` adapter.
-- 本地视频可放入 `public/assets/media/`，或在家长设置中登记；详见 [`public/assets/media/README.md`](public/assets/media/README.md)。 / Put local videos in `public/assets/media/` or register them in Parent settings; see [`public/assets/media/README.md`](public/assets/media/README.md).
+- 选项大图放在 `public/assets/choices/`（apple/banana/cat/dog/ball/cup/star/fish）。 / Choice PNGs live in `public/assets/choices/`.
+- 演示动画为 `public/assets/stories/fox-apple.gif`；家长可在设置中登记其它本地 GIF/图片。 / Demo animation is `public/assets/stories/fox-apple.gif`; parents can register other local GIFs/images.
+- 旧版 `public/assets/media/shapes-hello.mp4` 已降级，不再作为主演示。 / Legacy `shapes-hello.mp4` is demoted and no longer the primary demo.
 - 自定义题目可以抽取为 JSON，由本地题库适配器加载。 / Store custom questions as JSON and load them through a local question-bank adapter.
 - 直接编辑 `public/content/questions.en.json` 即可追加英语题目；字段和教材建议见 [`public/content/README.md`](public/content/README.md)。 / Add English questions by editing `public/content/questions.en.json`; see [`public/content/README.md`](public/content/README.md) for the schema and curriculum guidance.
 - 每道题可用 `stage`、`ageMin`、`ageMax` 和 `concept` 控制阶段、适龄范围与复习归类；应用会在本地自动过滤不适合当前孩子的题目。 / Use `stage`, `ageMin`, `ageMax`, and `concept` to control level, age fit, and review grouping; the app filters unsuitable questions locally.
@@ -217,6 +223,6 @@ The code is released under the [MIT License](LICENSE). Media added by contributo
 
 ## English summary
 
-Little Sprout Playground is an independent, picture-first learning web app for preschool children. It includes voice-assisted picture quizzes, an expanded age~3 English listening check, local video comprehension on the Play shelf, local progress tracking, gentle recommendations, and configurable adapters for image generation, voice prompts, and vocabulary testing.
+Little Sprout Playground is an independent, picture-first learning web app for preschool children. The kid-facing home centers on two features: **Listening test** (browser speech prompts + A/B/C/D picture cards) and **Animation Q&A** (watch `fox-apple.gif`, then tap picture answers). Speak-back/microphone recognition is removed from demo kid flows. Parent helpers, storage, and model settings stay behind the long-press parent gate.
 
-It ships with an original demo illustration and an original shapes placeholder clip only—no third-party copyrighted cartoons. Learning data stays on the device by default. See [SECURITY.md](SECURITY.md) for privacy guidance.
+It ships with generated choice PNGs under `public/assets/choices/` and the fox-apple GIF story—no third-party copyrighted cartoons. Learning data stays on the device by default. See [SECURITY.md](SECURITY.md) for privacy guidance.

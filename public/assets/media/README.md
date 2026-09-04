@@ -16,3 +16,6 @@
 Do **not** commit commercial cartoons, streaming rips, trademarked characters, or any media you cannot redistribute.
 
 请勿提交商业动画片、流媒体资源、商标角色，或任何无权再分发的素材。
+
+> Note / 说明: The kid-facing demo now prefers `public/assets/stories/fox-apple.gif`. This MP4 folder remains for optional/legacy clips only.
+> 孩子主演示已改为 `fox-apple.gif`；本目录仅保留可选/旧版短片。
