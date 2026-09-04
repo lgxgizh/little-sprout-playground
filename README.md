@@ -24,7 +24,7 @@
 - IndexedDB 本地成长档案 / Local IndexedDB learning profile
 - 记录到具体题目的练习轨迹，并避开同一学习单元内的重复题目 / Per-question practice history with in-session repetition avoidance
 - 支持多个孩子的昵称、年龄、英语基础和独立学习档案 / Multiple child profiles with nickname, age, English background, and separate progress
-- 图片与听力优先的 3 题英语基础测评 / A three-question, picture-and-listening-first English baseline check
+- 面向约 3 岁的英语听力图片测评（约 8–12 题，可自适应提前结束）与温和家长总结 / Age~3 English listening/picture check (~8–12 items, adaptive stop) with a gentle parent summary
 - 英语四阶段学习路径、错题间隔复习和家长周成长卡 / Four-stage English path, spaced review, and a weekly parent growth card
 - 英语跟读按钮与本地关键词反馈（支持的浏览器中） / English speak-back practice with local keyword feedback when supported
 - 学习档案 JSON 导出与导入，方便本地备份和换设备迁移 / Local JSON export and import for backup and device migration
@@ -33,7 +33,7 @@
 - 独立的亲子任务区，鼓励把学习带到真实生活中 / A dedicated parent-child activity area that extends learning into daily life
 - 家长入口长按保护 / Long-press protection for parent settings
 - 可替换的本地图片、音频和题库资源 / Replaceable local media and question banks
-- 图片故事架与本地视频/音频占位入口 / Picture-story shelf with local video/audio slots
+- Play shelf 动画理解：原创占位短片、本地视频登记、观看后图片答题与本地尝试记录 / Play-shelf video comprehension with an original demo clip, local video registration, watch-then-picture answers, and local attempt history
 - GitHub Actions 自动构建和 Pages 部署 / Automated CI and GitHub Pages deployment
 
 ## 快速开始 / Quick start
@@ -173,6 +173,8 @@ The recommendation rule prioritizes topics that are new or need gentle practice 
 │   ├── app.js               # 页面、内容、交互和模型配置 / UI and model settings
 │   ├── ai.js                # 隐私最小化学习摘要与 AI 选题适配器 / AI planner adapter
 │   ├── learning-plan.js     # 英语阶段、复习规则和周统计 / English stages, review rules, weekly stats
+│   ├── assessment.js        # 约 3 岁英语测评与家长总结 / age-3 English check helpers
+│   ├── video-comprehension.js # 本地视频书架与理解题 / local video shelf helpers
 │   ├── storage.js           # IndexedDB 存储、迁移和降级 / persistence and migration
 │   ├── styles.css           # 基础响应式样式 / base responsive styles
 │   └── overrides.css        # 配置和成长档案样式 / settings and profile styles
@@ -185,7 +187,7 @@ The recommendation rule prioritizes topics that are new or need gentle practice 
 
 - 图片或封面放入 `public/assets/`，在 `src/app.js` 中引用。 / Put images in `public/assets/` and reference them from `src/app.js`.
 - 本地音频建议放入 `public/assets/audio/`，在 `speak()` 的适配分支中播放。 / Put local audio in `public/assets/audio/` and handle it in the `speak()` adapter.
-- 本地视频可放入 `public/assets/media/`，并在 Play shelf 中替换对应卡片。 / Put local videos in `public/assets/media/` and wire them to a Play shelf card.
+- 本地视频可放入 `public/assets/media/`，或在家长设置中登记；详见 [`public/assets/media/README.md`](public/assets/media/README.md)。 / Put local videos in `public/assets/media/` or register them in Parent settings; see [`public/assets/media/README.md`](public/assets/media/README.md).
 - 自定义题目可以抽取为 JSON，由本地题库适配器加载。 / Store custom questions as JSON and load them through a local question-bank adapter.
 - 直接编辑 `public/content/questions.en.json` 即可追加英语题目；字段和教材建议见 [`public/content/README.md`](public/content/README.md)。 / Add English questions by editing `public/content/questions.en.json`; see [`public/content/README.md`](public/content/README.md) for the schema and curriculum guidance.
 - 每道题可用 `stage`、`ageMin`、`ageMax` 和 `concept` 控制阶段、适龄范围与复习归类；应用会在本地自动过滤不适合当前孩子的题目。 / Use `stage`, `ageMin`, `ageMax`, and `concept` to control level, age fit, and review grouping; the app filters unsuitable questions locally.
@@ -215,6 +217,6 @@ The code is released under the [MIT License](LICENSE). Media added by contributo
 
 ## English summary
 
-Little Sprout Playground is an independent, picture-first learning web app for preschool children. It includes voice-assisted picture quizzes, local progress tracking, gentle recommendations, and configurable adapters for image generation, voice prompts, and vocabulary testing.
+Little Sprout Playground is an independent, picture-first learning web app for preschool children. It includes voice-assisted picture quizzes, an expanded age~3 English listening check, local video comprehension on the Play shelf, local progress tracking, gentle recommendations, and configurable adapters for image generation, voice prompts, and vocabulary testing.
 
-It ships only with an original demo illustration and does not include third-party copyrighted media. Learning data stays on the device by default. See [SECURITY.md](SECURITY.md) for privacy guidance.
+It ships with an original demo illustration and an original shapes placeholder clip only—no third-party copyrighted cartoons. Learning data stays on the device by default. See [SECURITY.md](SECURITY.md) for privacy guidance.

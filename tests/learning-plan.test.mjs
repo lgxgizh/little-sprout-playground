@@ -18,6 +18,8 @@ test("baseline score maps to the safe starting stages", () => {
   assert.equal(stageFromBaseline(0), 1);
   assert.equal(stageFromBaseline(2), 1);
   assert.equal(stageFromBaseline(3), 2);
+  assert.equal(stageFromBaseline(8, 10), 2);
+  assert.equal(stageFromBaseline(3, 10), 1);
 });
 
 test("new English answers enter a one-day review queue", () => {

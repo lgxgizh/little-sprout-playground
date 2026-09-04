@@ -10,6 +10,7 @@
       "ageMin": 2,
       "ageMax": 4,
       "concept": "greeting",
+      "baseline": true,
       "visual": "👋",
       "prompt": "Which one says hello?",
       "speech": "Which one says hello?",
@@ -31,12 +32,153 @@
       ]
     },
     {
+      "id": "english-ball-noun",
+      "difficulty": 1,
+      "stage": 1,
+      "ageMin": 2,
+      "ageMax": 4,
+      "concept": "ball",
+      "baseline": true,
+      "visual": "⚽",
+      "prompt": "Which one is a ball?",
+      "speech": "Which one is a ball?",
+      "answer": "ball",
+      "choices": [
+        { "label": "Ball", "emoji": "⚽", "value": "ball", "color": "#6db6e8" },
+        { "label": "Cup", "emoji": "🥤", "value": "cup", "color": "#9ed9c4" },
+        { "label": "Book", "emoji": "📘", "value": "book", "color": "#c9b9d9" }
+      ]
+    },
+    {
+      "id": "english-cup",
+      "difficulty": 1,
+      "stage": 1,
+      "ageMin": 2,
+      "ageMax": 4,
+      "concept": "cup",
+      "baseline": true,
+      "visual": "🥤",
+      "prompt": "Find the cup",
+      "speech": "Can you find the cup?",
+      "answer": "cup",
+      "choices": [
+        { "label": "Cup", "emoji": "🥤", "value": "cup", "color": "#9ed9c4" },
+        { "label": "Shoe", "emoji": "👟", "value": "shoe", "color": "#d9a66f" },
+        { "label": "Fish", "emoji": "🐟", "value": "fish", "color": "#6db6e8" }
+      ]
+    },
+    {
+      "id": "english-bird",
+      "difficulty": 1,
+      "stage": 2,
+      "ageMin": 2,
+      "ageMax": 5,
+      "concept": "bird",
+      "baseline": true,
+      "visual": "🐦",
+      "prompt": "Which one is a bird?",
+      "speech": "Which one is a bird?",
+      "answer": "bird",
+      "choices": [
+        { "label": "Bird", "emoji": "🐦", "value": "bird", "color": "#9ed9c4" },
+        { "label": "Fish", "emoji": "🐟", "value": "fish", "color": "#6db6e8" },
+        { "label": "Dog", "emoji": "🐶", "value": "dog", "color": "#d9a66f" }
+      ]
+    },
+    {
+      "id": "english-green",
+      "difficulty": 1,
+      "stage": 2,
+      "ageMin": 2,
+      "ageMax": 5,
+      "concept": "green",
+      "baseline": true,
+      "visual": "🟢",
+      "prompt": "Find the green one",
+      "speech": "Find the green one.",
+      "answer": "green",
+      "choices": [
+        {
+          "label": "Green",
+          "emoji": "🟢",
+          "value": "green",
+          "color": "#9ed9c4"
+        },
+        { "label": "Red", "emoji": "🔴", "value": "red", "color": "#ff6b5e" },
+        { "label": "Blue", "emoji": "🔵", "value": "blue", "color": "#6db6e8" }
+      ]
+    },
+    {
+      "id": "english-hand",
+      "difficulty": 1,
+      "stage": 2,
+      "ageMin": 2,
+      "ageMax": 5,
+      "concept": "hand",
+      "baseline": true,
+      "visual": "✋",
+      "prompt": "Which one is a hand?",
+      "speech": "Which one is a hand?",
+      "answer": "hand",
+      "choices": [
+        { "label": "Hand", "emoji": "✋", "value": "hand", "color": "#f3b56d" },
+        { "label": "Foot", "emoji": "🦶", "value": "foot", "color": "#d9a66f" },
+        { "label": "Eye", "emoji": "👀", "value": "eye", "color": "#6db6e8" }
+      ]
+    },
+    {
+      "id": "english-milk",
+      "difficulty": 1,
+      "stage": 2,
+      "ageMin": 3,
+      "ageMax": 5,
+      "concept": "milk",
+      "baseline": true,
+      "visual": "🥛",
+      "prompt": "Find the milk",
+      "speech": "Can you find the milk?",
+      "answer": "milk",
+      "choices": [
+        { "label": "Milk", "emoji": "🥛", "value": "milk", "color": "#e8e8dc" },
+        {
+          "label": "Banana",
+          "emoji": "🍌",
+          "value": "banana",
+          "color": "#f7c94b"
+        },
+        {
+          "label": "Cookie",
+          "emoji": "🍪",
+          "value": "cookie",
+          "color": "#d9a66f"
+        }
+      ]
+    },
+    {
+      "id": "english-sun",
+      "difficulty": 1,
+      "stage": 2,
+      "ageMin": 2,
+      "ageMax": 5,
+      "concept": "sun",
+      "baseline": true,
+      "visual": "☀️",
+      "prompt": "Which one is the sun?",
+      "speech": "Which one is the sun?",
+      "answer": "sun",
+      "choices": [
+        { "label": "Sun", "emoji": "☀️", "value": "sun", "color": "#f7c94b" },
+        { "label": "Moon", "emoji": "🌙", "value": "moon", "color": "#c9b9d9" },
+        { "label": "Star", "emoji": "⭐", "value": "star", "color": "#f7c94b" }
+      ]
+    },
+    {
       "id": "english-open",
       "difficulty": 2,
       "stage": 3,
       "ageMin": 3,
       "ageMax": 6,
-      "concept": "daily action",
+      "concept": "door",
       "visual": "🚪",
       "prompt": "Open the door, please",
       "speech": "Open the door, please.",
@@ -45,6 +187,72 @@
         { "label": "Door", "emoji": "🚪", "value": "door", "color": "#d9a66f" },
         { "label": "Cup", "emoji": "🥤", "value": "cup", "color": "#6db6e8" },
         { "label": "Book", "emoji": "📘", "value": "book", "color": "#9ed9c4" }
+      ]
+    },
+    {
+      "id": "english-sit",
+      "difficulty": 2,
+      "stage": 3,
+      "ageMin": 3,
+      "ageMax": 6,
+      "concept": "chair",
+      "visual": "🪑",
+      "prompt": "Sit on the chair",
+      "speech": "Sit on the chair.",
+      "answer": "chair",
+      "choices": [
+        {
+          "label": "Chair",
+          "emoji": "🪑",
+          "value": "chair",
+          "color": "#d9a66f"
+        },
+        { "label": "Bed", "emoji": "🛏️", "value": "bed", "color": "#6db6e8" },
+        { "label": "Ball", "emoji": "⚽", "value": "ball", "color": "#9ed9c4" }
+      ]
+    },
+    {
+      "id": "english-eat-apple",
+      "difficulty": 2,
+      "stage": 3,
+      "ageMin": 3,
+      "ageMax": 6,
+      "concept": "apple",
+      "visual": "🍎",
+      "prompt": "Eat the apple",
+      "speech": "Eat the apple.",
+      "answer": "apple",
+      "choices": [
+        {
+          "label": "Apple",
+          "emoji": "🍎",
+          "value": "apple",
+          "color": "#ff6b5e"
+        },
+        { "label": "Car", "emoji": "🚗", "value": "car", "color": "#6db6e8" },
+        { "label": "Hat", "emoji": "🎩", "value": "hat", "color": "#c9b9d9" }
+      ]
+    },
+    {
+      "id": "english-wave",
+      "difficulty": 2,
+      "stage": 4,
+      "ageMin": 3,
+      "ageMax": 6,
+      "concept": "greeting",
+      "visual": "👋",
+      "prompt": "Wave and say bye",
+      "speech": "Wave and say bye.",
+      "answer": "bye",
+      "choices": [
+        { "label": "Bye", "emoji": "👋", "value": "bye", "color": "#9ed9c4" },
+        {
+          "label": "Sleep",
+          "emoji": "😴",
+          "value": "sleep",
+          "color": "#c9b9d9"
+        },
+        { "label": "Eat", "emoji": "🍽️", "value": "eat", "color": "#f7c94b" }
       ]
     }
   ]
