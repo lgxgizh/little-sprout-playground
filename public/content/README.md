@@ -47,7 +47,7 @@
 - `stage`: `1`–`4`; the question becomes eligible when the child reaches that English stage. Use stage 1–2 for picture/word matching and stage 3–4 for short phrases and play scenes / `1`–`4`，孩子达到对应阶段后才会出现。阶段 1–2 适合图片和词汇匹配，阶段 3–4 适合短句与生活互动。
 - `ageMin` and `ageMax`: optional inclusive age range from `2` to `6`. Questions outside the child’s range are skipped / 可选的适龄范围（含边界，`2`–`6` 岁）；超出孩子年龄的题目会自动跳过。
 - `concept`: optional stable English concept key such as `apple` or `greeting`; keep it short and reuse it for related questions / 可选的稳定概念标识，如 `apple` 或 `greeting`；请保持简短，相关题目复用同一个标识。
-- `baseline`: set `true` only for the three starter-check questions / 只有基础测评的 3 道题设置为 `true`。新增题目一般填 `false`。
+- `baseline`: set `true` for English-check pool items (about 8–12 age-safe listening/picture questions; the app may stop early) / 英语测评题库条目设为 `true`（约 8–12 道适龄听力图片题，应用可自适应提前结束）。日常练习题一般填 `false`。
 - `visual`: one emoji for the question hero (the current renderer is emoji-first). Use the picture-story shelf for local image/video cards / 题目主视觉使用一个 emoji（当前渲染器以 emoji 为主）；本地图片或视频请接入下方的故事卡片。
 - `prompt` and `speech`: child-facing English only. Keep them short and concrete / 面向孩子的英文短句，尽量短、具体。
 - `answer`: must exactly match one choice `value` / 必须与某个选项的 `value` 完全一致。
@@ -87,6 +87,6 @@ The included `english-open` example is stage 3, so it will stay hidden for a sta
 
 ## Media paths / 媒体路径
 
-- Put local MP4 videos in `public/assets/media/` / 本地 MP4 放入 `public/assets/media/`。
+- Put local MP4 videos in `public/assets/media/` and/or register them under Parent settings → 本地动画理解. See `public/assets/media/README.md` / 本地 MP4 放入 `public/assets/media/`，也可在家长设置「本地动画理解」登记；详见 `public/assets/media/README.md`。
 - Put local English MP3 files in `public/assets/audio/` / 英文 MP3 放入 `public/assets/audio/`。
 - Use short clips, clear speech, and assets with redistribution rights / 建议使用短片段、清晰语音，并确认素材拥有公开再分发权。

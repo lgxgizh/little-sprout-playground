@@ -69,8 +69,11 @@ export function stageDefinition(stage) {
   return ENGLISH_STAGES[Math.min(4, Math.max(1, Number(stage) || 1))];
 }
 
-export function stageFromBaseline(score) {
-  if (score >= 3) return 2;
+export function stageFromBaseline(score, total = 3) {
+  const safeTotal = Math.max(1, Number(total) || 3);
+  const ratio = Number(score) / safeTotal;
+  if (safeTotal <= 3) return Number(score) >= 3 ? 2 : 1;
+  if (ratio >= 0.8) return 2;
   return 1;
 }
 

@@ -2,12 +2,28 @@ import "./styles.css";
 import "./overrides.css";
 import { requestNextQuestion } from "./ai.js";
 import {
+  BASELINE_MAX_ITEMS,
+  selectBaselineQuestions,
+  shouldStopBaseline,
+  summarizeBaseline,
+  suggestedLevelFromBaseline,
+} from "./assessment.js";
+import {
   chooseQuestionCandidates,
   stageDefinition,
   stageFromBaseline,
   summarizeWeek,
   updateEnglishPlan,
 } from "./learning-plan.js";
+import {
+  createDemoVideos,
+  loadVideoLibrary,
+  mergeVideoShelf,
+  normalizeVideoEntry,
+  parentVideoSummary,
+  saveVideoLibrary,
+  summarizeVideoAttempts,
+} from "./video-comprehension.js";
 import {
   addLearningEvent,
   clearLearningData,
@@ -166,6 +182,10 @@ let questionBank = {
       id: "english-apple",
       baseline: true,
       difficulty: 1,
+      stage: 1,
+      ageMin: 2,
+      ageMax: 4,
+      concept: "apple",
       visual: "🍎",
       prompt: "Which one is an apple?",
       speech: "Which one is an apple?",
@@ -185,6 +205,10 @@ let questionBank = {
       id: "english-cat",
       baseline: true,
       difficulty: 1,
+      stage: 1,
+      ageMin: 2,
+      ageMax: 4,
+      concept: "cat",
       visual: "🐱",
       prompt: "Which one is a cat?",
       speech: "Which one is a cat?",
@@ -199,6 +223,10 @@ let questionBank = {
       id: "english-red",
       baseline: true,
       difficulty: 1,
+      stage: 1,
+      ageMin: 2,
+      ageMax: 4,
+      concept: "red",
       visual: "🔴",
       prompt: "Find the red one",
       speech: "Find the red one.",
@@ -216,7 +244,12 @@ let questionBank = {
     },
     {
       id: "english-dog",
+      baseline: true,
       difficulty: 1,
+      stage: 1,
+      ageMin: 2,
+      ageMax: 5,
+      concept: "dog",
       visual: "🐶",
       prompt: "Which one is a dog?",
       speech: "Which one is a dog?",
@@ -229,7 +262,12 @@ let questionBank = {
     },
     {
       id: "english-yellow",
+      baseline: true,
       difficulty: 1,
+      stage: 2,
+      ageMin: 2,
+      ageMax: 5,
+      concept: "yellow",
       visual: "⭐",
       prompt: "Find the yellow one",
       speech: "Can you find the yellow one?",
@@ -243,6 +281,10 @@ let questionBank = {
     {
       id: "english-ball",
       difficulty: 2,
+      stage: 3,
+      ageMin: 3,
+      ageMax: 6,
+      concept: "ball",
       visual: "⚽",
       prompt: "Touch the big red ball",
       speech: "Touch the big red ball.",
@@ -266,6 +308,10 @@ let questionBank = {
     {
       id: "english-big",
       difficulty: 2,
+      stage: 3,
+      ageMin: 3,
+      ageMax: 6,
+      concept: "big",
       visual: "🐘",
       prompt: "Which animal is big?",
       speech: "Which animal is big?",
@@ -279,6 +325,10 @@ let questionBank = {
     {
       id: "english-wash",
       difficulty: 2,
+      stage: 4,
+      ageMin: 3,
+      ageMax: 6,
+      concept: "soap",
       visual: "🧼",
       prompt: "What do we use to wash our hands?",
       speech: "What do we use to wash our hands?",
@@ -412,6 +462,13 @@ const state = {
   activityComplete: false,
   baselineTest: false,
   baselineCorrect: 0,
+  baselineAnswers: [],
+  baselinePool: [],
+  videoMode: false,
+  activeVideoId: null,
+  videoPhase: "watch",
+  videoLibrary: [],
+  sessionBlobUrls: [],
   aiQuestionId: null,
   aiPlanning: false,
   aiPlanSource: "local",
@@ -468,6 +525,19 @@ function resetActiveActivity() {
   state.activeSession = null;
   state.baselineTest = false;
   state.baselineCorrect = 0;
+  state.baselineAnswers = [];
+  state.baselinePool = [];
+  state.videoMode = false;
+  state.activeVideoId = null;
+  state.videoPhase = "watch";
+  for (const url of state.sessionBlobUrls || []) {
+    try {
+      URL.revokeObjectURL(url);
+    } catch {
+      /* ignore */
+    }
+  }
+  state.sessionBlobUrls = [];
   state.offlineTaskDone = false;
   state.answered = false;
   state.correct = false;
@@ -502,7 +572,45 @@ function touchLearningDay() {
   profile.lastActive = today;
 }
 
+function activeVideo() {
+  return (
+    state.videoLibrary.find((video) => video.id === state.activeVideoId) || null
+  );
+}
+
+function sessionQuestionTotal() {
+  if (state.videoMode) {
+    return Math.max(1, activeVideo()?.questions?.length || 1);
+  }
+  if (state.baselineTest) {
+    if (state.activityComplete && state.baselineAnswers.length) {
+      return state.baselineAnswers.length;
+    }
+    return Math.max(
+      state.baselinePool.length || BASELINE_MAX_ITEMS,
+      state.questionIndex + 1,
+    );
+  }
+  return 3;
+}
+
 function currentQuestion() {
+  if (state.videoMode) {
+    const video = activeVideo();
+    const questions = video?.questions || [];
+    return (
+      questions[state.questionIndex % Math.max(1, questions.length)] || {
+        id: "video-empty",
+        visual: "🎬",
+        prompt: "Watch the clip, then tap a picture",
+        speech: "Watch the clip, then tap a picture.",
+        answer: "ready",
+        choices: [
+          { label: "Ready", emoji: "👍", value: "ready", color: "#9ed9c4" },
+        ],
+      }
+    );
+  }
   const questions = questionBank[state.activityCourse] || questionBank.colors;
   const aiQuestion = questions.find(
     (question) => question.id === state.aiQuestionId,
@@ -511,7 +619,9 @@ function currentQuestion() {
   if (state.activityCourse === "english") {
     const child = activeChild();
     const candidates = state.baselineTest
-      ? questions.filter((question) => question.baseline).slice(0, 3)
+      ? state.baselinePool.length
+        ? state.baselinePool
+        : selectBaselineQuestions(questions, child?.age || 3)
       : chooseQuestionCandidates({
           questions,
           plan: child?.englishPlan,
@@ -523,7 +633,11 @@ function currentQuestion() {
       (question) => !state.sessionQuestionIds.includes(question.id),
     );
     const pool = unseen.length ? unseen : candidates;
-    return pool[state.questionIndex % pool.length] || questions[0];
+    return (
+      pool[Math.min(state.questionIndex, pool.length - 1)] ||
+      pool[0] ||
+      questions[0]
+    );
   }
   const skill = profile.skills[state.activityCourse] || {
     attempts: 0,
@@ -545,8 +659,10 @@ function makeId(prefix) {
   return `${prefix}-${globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(16).slice(2)}`}`;
 }
 
-function beginSession(courseId, baselineTest = false) {
-  if (state.activeSession?.courseId === courseId) return;
+function beginSession(courseId, baselineTest = false, options = {}) {
+  const sameCourse = state.activeSession?.courseId === courseId;
+  const sameVideo = !options.videoId || state.activeVideoId === options.videoId;
+  if (sameCourse && sameVideo && !options.force) return;
   if (state.activeSession) completeSession("quit");
   state.activityCourse = courseId;
   state.questionIndex = 0;
@@ -558,16 +674,29 @@ function beginSession(courseId, baselineTest = false) {
   state.offlineTaskDone = false;
   state.baselineTest = baselineTest;
   state.baselineCorrect = 0;
+  state.baselineAnswers = [];
+  state.videoMode = Boolean(options.videoId);
+  state.activeVideoId = options.videoId || null;
+  state.videoPhase = options.videoId ? "watch" : "watch";
+  state.baselinePool = baselineTest
+    ? selectBaselineQuestions(questionBank.english, activeChild()?.age || 3)
+    : [];
   state.aiQuestionId = null;
   state.aiPlanning = false;
   state.aiPlanSource = "local";
   state.aiPlanMessage = "";
   state.aiPlanToken += 1;
   const startedAt = new Date().toISOString();
-  state.activeSession = { id: makeId("session"), courseId, startedAt };
+  state.activeSession = {
+    id: makeId("session"),
+    courseId,
+    startedAt,
+    videoId: options.videoId || null,
+  };
   const event = {
     type: "session_started",
     courseId,
+    videoId: options.videoId || null,
     at: startedAt,
   };
   profile.events.push(event);
@@ -577,6 +706,7 @@ function beginSession(courseId, baselineTest = false) {
   saveSession({
     id: state.activeSession.id,
     courseId,
+    videoId: options.videoId || null,
     startedAt,
     status: "started",
   });
@@ -599,6 +729,7 @@ function completeSession(status = "completed") {
   const event = {
     type: `session_${status}`,
     courseId: session.courseId,
+    videoId: session.videoId || null,
     at: completedAt,
     durationMs,
   };
@@ -608,12 +739,20 @@ function completeSession(status = "completed") {
   addLearningEvent(event);
   saveSession({ ...session, completedAt, durationMs, status });
   state.activeSession = null;
+  if (status === "completed" || status === "quit") {
+    state.videoMode = false;
+    state.activeVideoId = null;
+    state.videoPhase = "watch";
+  }
 }
 
 function recordAnswer(courseId, correct, question) {
   touchLearningDay();
   profile.totalAnswers += 1;
   if (correct) profile.correctAnswers += 1;
+  if (!profile.skills[courseId] && courseId === "video") {
+    profile.skills.video = { attempts: 0, correct: 0, lastPracticed: null };
+  }
   const skill = profile.skills[courseId];
   if (skill) {
     skill.attempts += 1;
@@ -634,7 +773,8 @@ function recordAnswer(courseId, correct, question) {
     type: "answer",
     courseId,
     questionId: question.id,
-    difficulty: question.difficulty,
+    difficulty: question.difficulty || 1,
+    videoId: state.activeVideoId || null,
     correct,
     at: new Date().toISOString(),
   };
@@ -669,10 +809,11 @@ function recordAnswer(courseId, correct, question) {
     id: makeId("attempt"),
     sessionId: state.activeSession?.id || null,
     courseId,
+    videoId: state.activeVideoId || null,
     correct,
     at: event.at,
     questionId: question.id,
-    difficulty: question.difficulty,
+    difficulty: question.difficulty || 1,
     selectedChoice: state.selectedChoice,
     hintUsed: false,
   });
@@ -823,16 +964,22 @@ function offlineTaskMarkup(courseId) {
 }
 
 function baselineResultMarkup() {
-  const score = state.baselineCorrect;
-  const suggestedLevel =
-    score >= 3
-      ? "picture words"
-      : score === 2
-        ? "songs and picture words"
-        : "sounds and pictures";
-  return `<div class="baseline-result"><span class="baseline-result-icon">🎈</span><span><b>English check complete!</b><small>${score} / 3 correct · Ready for: ${suggestedLevel}</small></span></div>`;
+  const child = activeChild();
+  const summary =
+    child?.baseline?.summary ||
+    summarizeBaseline({
+      score: state.baselineCorrect,
+      total: Math.max(state.baselineAnswers.length, 1),
+      answers: state.baselineAnswers,
+      questions: state.baselinePool,
+    });
+  return `<div class="baseline-result"><span class="baseline-result-icon">🎈</span><span><b>${escapeHtml(summary.headline || "English check complete!")}</b><small>${escapeHtml(summary.detail || "")}</small></span></div>`;
 }
 
+function videoResultMarkup() {
+  const stats = summarizeVideoAttempts(profile.events, state.activeVideoId);
+  return `<div class="baseline-result"><span class="baseline-result-icon">🎬</span><span><b>Nice watching!</b><small>${escapeHtml(parentVideoSummary(stats))}</small></span></div>`;
+}
 function familyTaskPanel() {
   const recommendedId = recommendation().course.id;
   return `<section class="family-tasks" id="familyTasks"><div class="section-heading"><div><span class="section-kicker">TOGETHER · PLAY TIME</span><h2>Play beyond the screen</h2></div><span class="active-model">Pick just one today</span></div><div class="family-task-grid">${courses
@@ -846,7 +993,19 @@ function familyTaskPanel() {
 }
 
 function mediaShelf() {
-  return `<section class="media-shelf" id="mediaShelf"><div class="section-heading"><div><span class="section-kicker">PICTURE STORIES · 1 MINUTE</span><h2>Play shelf</h2><span class="active-model">Short, calm, repeatable</span></div><span class="shelf-note">No scores here</span></div><div class="media-grid"><article class="media-card media-card-featured"><div class="media-thumb"><img src="${assetBase}assets/fox-hero.png" alt="A fox reads a picture book"/><span class="media-duration">1 min</span></div><div class="media-card-copy"><span class="media-type">Picture story</span><h3>Fox says hello</h3><p>Look, listen, and say hello together.</p><button class="media-play" data-story="fox-hello">▶ Play story</button></div></article><article class="media-card media-card-empty"><div class="media-empty-icon">🎬</div><div><span class="media-type">Your local video</span><h3>Add a favorite clip</h3><p>Place an MP4 in <code>public/assets/media</code> to make it part of the shelf.</p><span class="media-status">Ready for your content</span></div></article><article class="media-card media-card-empty"><div class="media-empty-icon">🎧</div><div><span class="media-type">Your local audio</span><h3>Add a listening moment</h3><p>Place an MP3 in <code>public/assets/audio</code> for English listening play.</p><span class="media-status">English audio only</span></div></article></div></section>`;
+  const videos = state.videoLibrary.length
+    ? state.videoLibrary
+    : mergeVideoShelf(createDemoVideos(assetBase), loadVideoLibrary());
+  const cards = videos
+    .map((video) => {
+      const stats = summarizeVideoAttempts(profile.events, video.id);
+      const thumb = video.poster
+        ? `<img src="${escapeHtml(video.poster)}" alt=""/>`
+        : `<div class="media-empty-icon">🎬</div>`;
+      return `<article class="media-card ${video.demo ? "media-card-featured" : ""}"><div class="media-thumb">${thumb}<span class="media-duration">${escapeHtml(video.durationLabel)}</span></div><div class="media-card-copy"><span class="media-type">${video.demo ? "Demo story" : "Your local video"}</span><h3>${escapeHtml(video.title)}</h3><p>${escapeHtml(video.description)}</p><button class="media-play" data-video="${escapeHtml(video.id)}">▶ Watch & answer</button><small class="media-status">${stats.answers ? parentVideoSummary(stats) : "Picture answers after watching"}</small></div></article>`;
+    })
+    .join("");
+  return `<section class="media-shelf" id="mediaShelf"><div class="section-heading"><div><span class="section-kicker">PICTURE STORIES · VIDEO</span><h2>Play shelf</h2><span class="active-model">Watch · listen · tap</span></div><span class="shelf-note">Local only</span></div><div class="media-grid">${cards}<article class="media-card media-card-empty"><div class="media-empty-icon">🎧</div><div><span class="media-type">Your local audio</span><h3>Add a listening moment</h3><p>Place an MP3 in <code>public/assets/audio</code> for English listening play.</p><span class="media-status">English audio only</span></div></article></div><p class="family-task-note">Demo clip uses original shapes only. Parents can add short local MP4s in Parent settings or under <code>public/assets/media</code>.</p></section>`;
 }
 
 function modelName(type) {
@@ -956,8 +1115,8 @@ function childProfileSettings() {
   const child = activeChild() || createDefaultChild();
   const baseline =
     child.baseline?.status === "complete"
-      ? `已完成：${child.baseline.score} / ${child.baseline.total}`
-      : "还没有做过基础测评";
+      ? `已完成：${child.baseline.score} / ${child.baseline.total}${child.baseline.summary?.readyFor ? ` · ${child.baseline.summary.readyFor}` : ""}`
+      : "还没有做过听力图片测评";
   const stage = stageDefinition(child.englishPlan?.stage);
   return `<div class="child-profile-settings"><div class="child-switch-row"><label><span>当前孩子</span><select id="childSelect">${children.map((item) => `<option value="${escapeHtml(item.id)}" ${item.id === child.id ? "selected" : ""}>${escapeHtml(item.nickname)}</option>`).join("")}</select></label><button class="small-action" id="addChild">＋ 添加孩子</button></div><div class="child-form-grid"><label><span>孩子昵称</span><input id="childNickname" maxlength="12" value="${escapeHtml(child.nickname)}" placeholder="例如：小米" /></label><label><span>年龄</span><select id="childAge">${[2, 3, 4, 5, 6].map((age) => `<option value="${age}" ${Number(child.age) === age ? "selected" : ""}>${age} 岁</option>`).join("")}</select></label><label><span>性别（可不填）</span><select id="childGender">${Object.entries(
     childLabels.gender,
@@ -977,7 +1136,7 @@ function childProfileSettings() {
     )
     .join(
       "",
-    )}</select></label></div><div class="baseline-row"><span>当前英语路径：<b>第 ${stage.id} 阶段 · ${stage.label}</b><small>${baseline}</small></span><button class="small-action" id="startBaseline">开始 3 题测评</button></div><button class="save-child-btn" id="saveChildProfile">保存孩子信息</button></div>`;
+    )}</select></label></div><div class="baseline-row"><span>当前英语路径：<b>第 ${stage.id} 阶段 · ${stage.label}</b><small>${baseline}</small></span><button class="small-action" id="startBaseline">开始听力图片测评</button></div><div class="video-register"><div class="config-divider"><span>本地动画理解</span></div><p class="video-register-note">添加短视频（本机文件或 <code>public/assets/media</code> 路径）。题目用大图卡片，不上传名字或音频。</p><label><span>标题</span><input id="videoTitle" maxlength="40" placeholder="例如：Shapes say hello" /></label><label><span>资源路径或选择文件</span><input id="videoAssetPath" maxlength="120" placeholder="assets/media/shapes-hello.mp4" /><input id="videoFile" type="file" accept="video/mp4,video/webm" /></label><label><span>题目英文提示</span><input id="videoPrompt" maxlength="80" placeholder="Which one is a circle?" value="Which one is a circle?" /></label><label><span>正确答案</span><input id="videoAnswer" maxlength="40" placeholder="circle" value="circle" /></label><div class="video-choice-row"><label><span>选项 A</span><input id="videoChoiceA" maxlength="20" value="circle" /></label><label><span>选项 B</span><input id="videoChoiceB" maxlength="20" value="square" /></label><label><span>选项 C</span><input id="videoChoiceC" maxlength="20" value="star" /></label></div><button class="small-action" id="addVideoClip">＋ 登记本地视频</button><div class="video-library-list">${(state.videoLibrary.filter((v) => !v.demo) || []).map((video) => `<div class="video-library-item"><b>${escapeHtml(video.title)}</b><small>${escapeHtml(video.src)}</small><button class="text-btn" data-remove-video="${escapeHtml(video.id)}">移除</button></div>`).join("") || "<small>还没有自定义视频</small>"}</div></div><button class="save-child-btn" id="saveChildProfile">保存孩子信息</button></div>`;
 }
 
 function saveChildForm() {
@@ -1072,7 +1231,9 @@ async function planQuestionWithAI() {
   if (
     models.vocab !== "gpt-4o-mini" ||
     !state.activeSession ||
-    state.answered
+    state.answered ||
+    state.videoMode ||
+    state.baselineTest
   ) {
     state.aiPlanning = false;
     state.aiQuestionId = null;
@@ -1087,9 +1248,12 @@ async function planQuestionWithAI() {
   const allCandidates =
     courseId === "english"
       ? state.baselineTest
-        ? questionBank.english
-            .filter((question) => question.baseline)
-            .slice(0, 3)
+        ? state.baselinePool.length
+          ? state.baselinePool
+          : selectBaselineQuestions(
+              questionBank.english,
+              activeChild()?.age || 3,
+            )
         : chooseQuestionCandidates({
             questions: questionBank.english,
             plan: activeChild()?.englishPlan,
@@ -1137,6 +1301,12 @@ async function planQuestionWithAI() {
   return result;
 }
 
+function videoWatchMarkup() {
+  const video = activeVideo();
+  if (!video) return "";
+  return `<div class="video-player-card"><video id="comprehensionVideo" class="comprehension-video" src="${escapeHtml(video.src)}" poster="${escapeHtml(video.poster || "")}" controls playsinline></video><div class="video-player-copy"><b>${escapeHtml(video.title)}</b><small>Look and listen. Grown-ups can pause anytime.</small></div></div>`;
+}
+
 function render() {
   const next = recommendation();
   const dailyProgress = todayProgress();
@@ -1179,12 +1349,17 @@ function render() {
         </section>
 
         <section class="learning-panel" id="quizPanel">
-          <div class="panel-intro"><span class="section-kicker">MINI QUEST · ${String(state.questionIndex + 1).padStart(2, "0")}</span><h2>${activeCourse.label}</h2><p>${question.prompt}<br/>Let's try it together!</p><div class="speech-actions"><button class="voice-btn" id="voicePrompt"><span>🔊</span> Listen</button>${activeCourse.id === "english" ? `<button class="say-btn ${state.speechPractice === "listening" ? "is-listening" : ""}" id="sayIt" aria-label="Say the answer aloud" ${state.aiPlanning ? "disabled" : ""}><span>🎙️</span> ${state.speechPractice === "listening" ? "Listening…" : "Say it"}</button><span class="speech-feedback ${state.speechPractice === "success" ? "is-success" : ""}" aria-live="polite">${state.speechFeedback}</span>` : ""}</div><div class="model-chip"><span>Question model</span><b>${modelName("vocab")}</b></div>${state.aiPlanning ? '<div class="ai-plan-note is-loading">🪄 Choosing a question for you…</div>' : state.aiPlanMessage ? `<div class="ai-plan-note ${state.aiPlanSource === "ai" ? "is-ai" : "is-local"}">${state.aiPlanSource === "ai" ? "✨" : "🌱"} ${state.aiPlanMessage}</div>` : ""}</div>
-          <div class="quiz-card">
-            <div class="quiz-top"><span>Question ${state.questionIndex + 1} / 3</span><span class="session-live">${state.activeSession ? "● Playing now" : ""}</span><div class="progress-dots">${[0, 1, 2].map((i) => `<i class="${i <= state.questionIndex ? "filled" : ""}"></i>`).join("")}</div></div>
-            <div class="question-visual"><span class="question-emoji">${escapeHtml(question.visual)}</span><span class="question-bubble">${escapeHtml(question.prompt)}<br/><b>Look and choose</b></span></div>
+          ${state.videoMode && state.videoPhase === "watch" ? videoWatchMarkup() : ""}
+          <div class="panel-intro"><span class="section-kicker">${state.videoMode ? "VIDEO QUEST" : state.baselineTest ? "ENGLISH CHECK" : "MINI QUEST"} · ${String(state.questionIndex + 1).padStart(2, "0")}</span><h2>${state.videoMode ? escapeHtml(activeVideo()?.title || "Video play") : activeCourse.label}</h2><p>${state.videoMode && state.videoPhase === "watch" ? "Watch first, then answer with pictures." : `${question.prompt}<br/>Let's try it together!`}</p><div class="speech-actions"><button class="voice-btn" id="voicePrompt" ${state.videoMode && state.videoPhase === "watch" ? "disabled" : ""}><span>🔊</span> Listen</button>${(activeCourse.id === "english" || state.videoMode) && !(state.videoMode && state.videoPhase === "watch") ? `<button class="say-btn ${state.speechPractice === "listening" ? "is-listening" : ""}" id="sayIt" aria-label="Say the answer aloud" ${state.aiPlanning ? "disabled" : ""}><span>🎙️</span> ${state.speechPractice === "listening" ? "Listening…" : "Say it"}</button><span class="speech-feedback ${state.speechPractice === "success" ? "is-success" : ""}" aria-live="polite">${state.speechFeedback}</span>` : ""}</div><div class="model-chip"><span>Question model</span><b>${state.videoMode ? "Local video cards" : modelName("vocab")}</b></div>${state.aiPlanning ? '<div class="ai-plan-note is-loading">🪄 Choosing a question for you…</div>' : state.aiPlanMessage ? `<div class="ai-plan-note ${state.aiPlanSource === "ai" ? "is-ai" : "is-local"}">${state.aiPlanSource === "ai" ? "✨" : "🌱"} ${state.aiPlanMessage}</div>` : ""}</div>
+          <div class="quiz-card ${state.videoMode && state.videoPhase === "watch" ? "is-watching" : ""}">
+            <div class="quiz-top"><span>${state.videoMode && state.videoPhase === "watch" ? "Watch time" : `Question ${state.questionIndex + 1} / ${sessionQuestionTotal()}`}</span><span class="session-live">${state.activeSession ? "● Playing now" : ""}</span><div class="progress-dots">${Array.from({ length: Math.min(sessionQuestionTotal(), 12) }, (_, i) => `<i class="${i <= state.questionIndex ? "filled" : ""}"></i>`).join("")}</div></div>
+            ${
+              state.videoMode && state.videoPhase === "watch"
+                ? `<div class="video-watch-hint"><p>When the clip ends, tap <b>Ready to answer</b>.</p><button class="primary-btn" id="videoReady"><span>Ready to answer</span><span class="arrow">→</span></button></div>`
+                : `<div class="question-visual"><span class="question-emoji">${escapeHtml(question.visual)}</span><span class="question-bubble">${escapeHtml(question.prompt)}<br/><b>Look and choose</b></span></div>
             <div class="choice-grid">${question.choices.map((choice) => `<button class="choice ${state.answered && choice.value === question.answer ? "correct" : ""} ${state.answered && state.selectedChoice === choice.value && choice.value !== question.answer ? "wrong" : ""}" data-choice="${escapeHtml(choice.value)}" aria-label="${escapeHtml(question.prompt)}: ${escapeHtml(choice.label)}" style="--choice-color:${choice.color}" ${state.answered || state.aiPlanning ? "disabled" : ""}><span class="choice-emoji">${escapeHtml(choice.emoji)}</span><span>${escapeHtml(choice.label)}</span>${state.answered && choice.value === question.answer ? '<b class="check">✓</b>' : ""}</button>`).join("")}</div>
-            ${state.answered ? `<div class="feedback ${state.correct ? "good" : "try"}">${state.encouragement || (state.correct ? "You found it! ✨" : "That's okay—let's look again")}</div>${state.activityComplete ? (state.baselineTest ? baselineResultMarkup() : offlineTaskMarkup(state.activityCourse)) : `<button class="next-question" id="nextQuestion">${state.correct ? "Next one" : "Try another"} <span>→</span></button>`}` : '<div class="hint">Tap a picture to answer · Find a star!</div>'}
+            ${state.answered ? `<div class="feedback ${state.correct ? "good" : "try"}">${state.encouragement || (state.correct ? "You found it! ✨" : "That's okay—let's look again")}</div>${state.activityComplete ? (state.baselineTest ? baselineResultMarkup() : state.videoMode ? videoResultMarkup() : offlineTaskMarkup(state.activityCourse)) : `<button class="next-question" id="nextQuestion">${state.correct ? "Next one" : "Try another"} <span>→</span></button>`}` : '<div class="hint">Tap a picture to answer · Find a star!</div>'}`
+            }
             ${state.activeSession ? `<button class="finish-btn" id="finishSession">${state.activityComplete ? "Finish today" : "Take a break"}</button>` : ""}
           </div>
         </section>
@@ -1269,25 +1444,53 @@ function bindEvents() {
       state.answered = true;
       state.selectedChoice = btn.dataset.choice;
       state.correct = btn.dataset.choice === question.answer;
-      recordAnswer(state.activityCourse, state.correct, question);
-      if (state.baselineTest && state.correct) state.baselineCorrect += 1;
-      if (state.questionIndex >= 2) state.activityComplete = true;
+      const courseId = state.videoMode ? "video" : state.activityCourse;
+      recordAnswer(courseId, state.correct, question);
+      if (state.baselineTest) {
+        if (state.correct) state.baselineCorrect += 1;
+        state.baselineAnswers.push({
+          questionId: question.id,
+          correct: state.correct,
+        });
+        const recentCorrect = state.baselineAnswers.map((item) => item.correct);
+        if (
+          shouldStopBaseline({
+            answered: state.baselineAnswers.length,
+            correct: state.baselineCorrect,
+            recentCorrect,
+          })
+        ) {
+          state.activityComplete = true;
+        }
+      } else if (state.videoMode) {
+        const total = activeVideo()?.questions?.length || 1;
+        if (state.questionIndex >= total - 1) state.activityComplete = true;
+      } else if (state.questionIndex >= 2) {
+        state.activityComplete = true;
+      }
       if (state.baselineTest && state.activityComplete) {
         const child = activeChild();
         const score = state.baselineCorrect;
-        const suggestedLevel =
-          score >= 3 ? "words" : score === 2 ? "songs" : "not-started";
+        const total = state.baselineAnswers.length;
+        const summary = summarizeBaseline({
+          score,
+          total,
+          answers: state.baselineAnswers,
+          questions: state.baselinePool,
+        });
+        const suggestedLevel = suggestedLevelFromBaseline(score, total);
         if (child) {
           child.baseline = {
             status: "complete",
             score,
-            total: 3,
+            total,
             completedAt: new Date().toISOString(),
             suggestedLevel,
+            summary,
           };
           child.englishPlan = {
             ...child.englishPlan,
-            stage: stageFromBaseline(score),
+            stage: stageFromBaseline(score, total),
             stageStartedAt: new Date().toISOString(),
             masteredConcepts: [],
             reviewQueue: [],
@@ -1332,12 +1535,134 @@ function bindEvents() {
       });
     }),
   );
-  document.querySelectorAll("[data-story]").forEach((btn) =>
+  document.querySelectorAll("[data-video]").forEach((btn) =>
     btn.addEventListener("click", () => {
-      if (btn.dataset.story === "fox-hello") {
-        speak("Hello! I am Fox. Let's say hello together.");
-        showToast("Picture story is playing");
+      const videoId = btn.dataset.video;
+      beginSession("video", false, { videoId, force: true });
+      state.videoPhase = "watch";
+      state.activeTab = "library";
+      render();
+      document
+        .querySelector("#quizPanel")
+        ?.scrollIntoView({ behavior: "smooth", block: "center" });
+      showToast("Watch the clip, then answer");
+      const player = document.querySelector("#comprehensionVideo");
+      try {
+        player?.play?.();
+      } catch {
+        /* autoplay may be blocked; controls remain */
       }
+    }),
+  );
+  document.querySelector("#videoReady")?.addEventListener("click", () => {
+    state.videoPhase = "quiz";
+    state.questionIndex = 0;
+    state.answered = false;
+    state.correct = false;
+    state.selectedChoice = null;
+    state.activityComplete = false;
+    state.encouragement = "";
+    render();
+    speak(currentQuestion().speech);
+  });
+  document.querySelector("#addVideoClip")?.addEventListener("click", () => {
+    const title =
+      document.querySelector("#videoTitle")?.value.trim() || "My video";
+    const prompt =
+      document.querySelector("#videoPrompt")?.value.trim() ||
+      "Which one is a circle?";
+    const answer =
+      document.querySelector("#videoAnswer")?.value.trim().toLowerCase() ||
+      "circle";
+    const choiceValues = ["A", "B", "C"]
+      .map((key) =>
+        document
+          .querySelector(`#videoChoice${key}`)
+          ?.value.trim()
+          .toLowerCase(),
+      )
+      .filter(Boolean);
+    const uniqueChoices = [...new Set(choiceValues)];
+    if (uniqueChoices.length < 2 || !uniqueChoices.includes(answer)) {
+      showToast("请至少提供两个选项，并让正确答案出现在选项中");
+      return;
+    }
+    const file = document.querySelector("#videoFile")?.files?.[0];
+    let src = document.querySelector("#videoAssetPath")?.value.trim() || "";
+    let sourceType = "asset";
+    if (file) {
+      src = URL.createObjectURL(file);
+      state.sessionBlobUrls.push(src);
+      sourceType = "blob";
+    } else if (src) {
+      if (
+        !src.startsWith("http") &&
+        !src.startsWith("/") &&
+        !src.startsWith("assets/")
+      ) {
+        src = `assets/media/${src.replace(/^\/?assets\/media\//, "")}`;
+      }
+      if (src.startsWith("assets/")) src = `${assetBase}${src}`;
+      sourceType = "asset";
+    } else {
+      showToast("请选择本地视频或填写 assets/media 路径");
+      return;
+    }
+    const emojis = ["🟢", "🟦", "⭐", "🍎", "🐱"];
+    const colors = ["#9ed9c4", "#6db6e8", "#f7c94b", "#ff6b5e", "#c9b9d9"];
+    const entry = normalizeVideoEntry(
+      {
+        id: makeId("video"),
+        title,
+        description: "Watch, then tap a picture.",
+        durationLabel: "short",
+        sourceType,
+        src,
+        poster: `${assetBase}assets/fox-hero.png`,
+        questions: [
+          {
+            id: makeId("video-q"),
+            visual: "🎬",
+            prompt,
+            speech: prompt,
+            answer,
+            choices: uniqueChoices.map((value, index) => ({
+              label: value,
+              emoji: emojis[index % emojis.length],
+              value,
+              color: colors[index % colors.length],
+            })),
+          },
+        ],
+      },
+      { allowBlob: true },
+    );
+    if (!entry) {
+      showToast("视频题目格式不正确");
+      return;
+    }
+    const custom = [
+      ...state.videoLibrary.filter(
+        (video) => !video.demo && video.sourceType !== "blob",
+      ),
+      ...(entry.sourceType === "blob" ? [] : [entry]),
+    ];
+    saveVideoLibrary(custom);
+    state.videoLibrary = mergeVideoShelf(createDemoVideos(assetBase), [
+      ...custom,
+      ...(entry.sourceType === "blob" ? [entry] : []),
+    ]);
+    render();
+    showToast("本地视频已加入 Play shelf");
+  });
+  document.querySelectorAll("[data-remove-video]").forEach((btn) =>
+    btn.addEventListener("click", () => {
+      const id = btn.dataset.removeVideo;
+      const custom = loadVideoLibrary().filter((video) => video.id !== id);
+      saveVideoLibrary(custom);
+      state.videoLibrary = mergeVideoShelf(createDemoVideos(assetBase), custom);
+      render();
+      showToast("已移除自定义视频");
     }),
   );
   document
@@ -1463,7 +1788,12 @@ function bindEvents() {
     state.speechFeedback = "";
     state.baselineTest = false;
     state.baselineCorrect = 0;
+    state.baselineAnswers = [];
+    state.baselinePool = [];
     completeSession(state.activityComplete ? "completed" : "quit");
+    state.videoMode = false;
+    state.activeVideoId = null;
+    state.videoPhase = "watch";
     state.offlineTaskDone = false;
     state.answered = false;
     state.encouragement = "";
@@ -1499,7 +1829,10 @@ function bindEvents() {
     render();
   });
   document.querySelector("#nextQuestion")?.addEventListener("click", () => {
-    state.questionIndex = Math.min(2, state.questionIndex + 1);
+    state.questionIndex = Math.min(
+      sessionQuestionTotal() - 1,
+      state.questionIndex + 1,
+    );
     state.answered = false;
     state.correct = false;
     state.selectedChoice = null;
@@ -1508,6 +1841,10 @@ function bindEvents() {
     state.speechPractice = "idle";
     state.speechFeedback = "";
     render();
+    if (state.baselineTest || state.videoMode) {
+      if (state.activeSession) speak(currentQuestion().speech);
+      return;
+    }
     void planQuestionWithAI().then(() => {
       if (state.activeSession) speak(currentQuestion().speech);
     });
@@ -1525,6 +1862,10 @@ function bindEvents() {
       state.aiPlanMessage = "";
       state.baselineTest = false;
       state.baselineCorrect = 0;
+      state.baselineAnswers = [];
+      state.baselinePool = [];
+      state.videoMode = false;
+      state.activeVideoId = null;
       state.sessionQuestionIds = [];
       state.answered = false;
       state.encouragement = "";
@@ -1588,6 +1929,10 @@ async function init() {
     '<div class="loading-screen"><span>🦊</span><b>Little Sprout is getting ready…</b></div>';
   children = await loadChildren();
   await loadQuestionPack();
+  state.videoLibrary = mergeVideoShelf(
+    createDemoVideos(assetBase),
+    loadVideoLibrary(),
+  );
   if (!children.length) children = [createDefaultChild()];
   activeChildId = children[0].id;
   profile = children[0].profile;
