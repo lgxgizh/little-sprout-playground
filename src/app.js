@@ -281,6 +281,7 @@ const state = {
   encouragement: "",
   parentGate: false,
   parentUnlocked: false,
+  parentTab: "child",
   activeSession: null,
   offlineTaskDone: false,
   activityCourse: "english",
@@ -1026,8 +1027,9 @@ function childProfileSettings() {
 
 function saveChildForm() {
   const child = activeChild();
-  if (!child) return;
-  const nickname = document.querySelector("#childNickname")?.value.trim();
+  const nicknameInput = document.querySelector("#childNickname");
+  if (!child || !nicknameInput) return;
+  const nickname = nicknameInput.value.trim();
   child.nickname = nickname || "Sunny";
   child.age = Number(document.querySelector("#childAge")?.value) || 3;
   child.gender = document.querySelector("#childGender")?.value || "unspecified";
@@ -1248,8 +1250,9 @@ function modelSettingsModal() {
   if (state.parentGate && !state.parentUnlocked) {
     return `<div class="modal-backdrop" id="modalBackdrop"><div class="modal parent-gate"><div class="modal-icon">🔒</div><h3>家长入口</h3><p>为了不让小朋友误触，请家长长按下面按钮 1 秒钟。</p><button class="hold-btn" id="parentHold"><span>长按进入设置</span><i></i></button><button class="reset-btn" id="parentCancel">先不设置</button></div></div>`;
   }
-  const select = (type, label, icon) =>
-    `<label class="model-setting"><span class="model-setting-label"><span class="model-setting-icon">${icon}</span><span><b>${label}</b><small>${type === "image" ? "生成学习插画与封面" : type === "voice" ? "朗读题目和鼓励语" : type === "video" ? "只分析故事架本地短片" : "选择题目难度与题库策略"}</small></span></span><select data-model="${type}">${catalogOptions(
+  const tab = state.parentTab || "child";
+  const select = (type, label, icon, hint) =>
+    `<label class="model-setting"><span class="model-setting-label"><span class="model-setting-icon">${icon}</span><span><b>${label}</b><small>${hint}</small></span></span><select data-model="${type}">${catalogOptions(
       type,
     )
       .map(
@@ -1257,7 +1260,30 @@ function modelSettingsModal() {
           `<option value="${item.id}" ${models[type] === item.id ? "selected" : ""}>${item.name} · ${item.note}</option>`,
       )
       .join("")}</select></label>`;
-  return `<div class="modal-backdrop" id="modalBackdrop"><div class="modal model-modal"><button class="modal-close" id="closeModal">×</button><div class="modal-icon">⚙️</div><h3>家长设置</h3>${profileSummary()}${weeklyGrowthCard()}<div class="config-divider"><span>孩子档案</span></div>${childProfileSettings()}<div class="config-divider"><span>模型与能力</span></div><p>远程模型都是可选项。SuperGrok 会员不能代替 API Key。没配密钥时自动用本机图片和浏览器语音。</p><div class="model-settings">${select("image", "图片生成", "🖼️")}${select("voice", "语音提问", "🔊")}${select("vocab", "词汇量测试", "🧩")}${select("video", "视频理解", "🎬")}</div><div class="config-tip">当前语音：<b>${modelName("voice")}</b> · 当前题目：<b>${modelName("vocab")}</b></div><div class="data-tools"><button class="small-action" id="exportData">导出学习档案</button><button class="small-action" id="importData">导入学习档案</button><input id="importFile" type="file" accept="application/json,.json" hidden /></div><div class="modal-actions"><button class="reset-btn" id="resetModels">恢复默认</button><button class="primary-btn" id="closeModal2">保存配置 <span class="arrow">→</span></button></div></div></div>`;
+  const panel =
+    tab === "growth"
+      ? `<div class="parent-panel-grid">${profileSummary()}${weeklyGrowthCard()}</div>`
+      : tab === "models"
+        ? `<p class="parent-lead">远程模型都是可选项。SuperGrok 会员不能代替 API Key。没配密钥时自动用本机图片和浏览器语音。</p><div class="model-settings">${select("image", "图片", "🖼️", "学习插画与封面")}${select("voice", "语音", "🔊", "朗读题目和鼓励语")}${select("vocab", "选题", "🧩", "题目难度与题库")}${select("video", "视频理解", "🎬", "只分析故事架本地短片")}</div><div class="config-tip">当前语音：<b>${modelName("voice")}</b> · 当前题目：<b>${modelName("vocab")}</b> · 当前图片：<b>${modelName("image")}</b></div><div class="data-tools"><button class="small-action" id="exportData">导出学习档案</button><button class="small-action" id="importData">导入学习档案</button><input id="importFile" type="file" accept="application/json,.json" hidden /></div>`
+        : childProfileSettings();
+  return `<div class="modal-backdrop" id="modalBackdrop">
+    <div class="modal model-modal parent-sheet">
+      <button class="modal-close" id="closeModal" aria-label="关闭">×</button>
+      <div class="parent-sheet-head">
+        <h3>家长设置</h3>
+        <div class="parent-tabs" role="tablist">
+          <button type="button" class="parent-tab ${tab === "child" ? "active" : ""}" data-parent-tab="child">孩子</button>
+          <button type="button" class="parent-tab ${tab === "growth" ? "active" : ""}" data-parent-tab="growth">成长</button>
+          <button type="button" class="parent-tab ${tab === "models" ? "active" : ""}" data-parent-tab="models">设置</button>
+        </div>
+      </div>
+      <div class="parent-sheet-body">${panel}</div>
+      <div class="parent-sheet-foot modal-actions">
+        ${tab === "models" ? '<button class="reset-btn" id="resetModels">恢复默认</button>' : "<span></span>"}
+        <button class="primary-btn" id="closeModal2">完成 <span class="arrow">→</span></button>
+      </div>
+    </div>
+  </div>`;
 }
 
 function bindEvents() {
@@ -1798,10 +1824,19 @@ function bindEvents() {
       render();
     });
   });
+  document.querySelectorAll("[data-parent-tab]").forEach((btn) =>
+    btn.addEventListener("click", () => {
+      saveChildForm();
+      state.parentTab = btn.dataset.parentTab;
+      render();
+    }),
+  );
   ["openParent", "openParent2", "openParent3", "openSetup"].forEach((id) =>
     document.querySelector("#" + id)?.addEventListener("click", () => {
       state.parentGate = !state.parentUnlocked;
       state.modal = true;
+      state.parentTab =
+        id === "openSetup" ? "child" : state.parentTab || "child";
       render();
     }),
   );
@@ -1827,15 +1862,18 @@ function bindEvents() {
     }),
   );
   document.querySelector("#closeModal")?.addEventListener("click", () => {
+    saveChildForm();
     state.modal = false;
     render();
   });
   document.querySelector("#closeModal2")?.addEventListener("click", () => {
+    saveChildForm();
     state.modal = false;
     render();
   });
   document.querySelector("#modalBackdrop")?.addEventListener("click", (e) => {
     if (e.target.id === "modalBackdrop") {
+      saveChildForm();
       state.modal = false;
       render();
     }
