@@ -1257,7 +1257,7 @@ function modelSettingsModal() {
     )
       .map(
         (item) =>
-          `<option value="${item.id}" ${models[type] === item.id ? "selected" : ""}>${item.name} · ${item.note}</option>`,
+          `<option value="${item.id}" ${models[type] === item.id ? "selected" : ""} title="${item.name} · ${item.note}">${item.name} · ${item.note}</option>`,
       )
       .join("")}</select></label>`;
   const panel =
