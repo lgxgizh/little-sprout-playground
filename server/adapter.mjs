@@ -33,11 +33,14 @@ const PORT = Number(process.env.ADAPTER_PORT || 8787);
 const KEYS = {
   xai: process.env.XAI_API_KEY || "",
   openai: process.env.OPENAI_API_KEY || "",
+  google: process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || "",
+  custom: process.env.CUSTOM_API_KEY || "",
 };
+const CUSTOM_API_BASE = (process.env.CUSTOM_API_BASE || "").replace(/\/$/, "");
 
 function providerOf(body = {}) {
-  if (body.provider === "openai" || body.provider === "xai")
-    return body.provider;
+  const named = String(body.provider || "");
+  if (["openai", "xai", "google", "custom"].includes(named)) return named;
   const model = String(body.model || "");
   if (
     model.startsWith("gpt-") ||
@@ -45,16 +48,50 @@ function providerOf(body = {}) {
     model.startsWith("dall-e")
   )
     return "openai";
+  if (model.startsWith("gemini-") || model.startsWith("imagen-"))
+    return "google";
   return "xai";
 }
 
-function upstream(provider) {
+function usesOpenAICompat(provider) {
+  return (
+    provider === "openai" || provider === "google" || provider === "custom"
+  );
+}
+
+function safeBaseUrl(value) {
+  const url = String(value || "")
+    .trim()
+    .replace(/\/$/, "");
+  if (!url || url.length > 240) return "";
+  if (!/^https?:\/\/[^\s<>]+$/i.test(url)) return "";
+  return url;
+}
+
+function upstream(provider, requestBaseUrl = "") {
   if (provider === "openai") {
     return {
       provider,
       base: "https://api.openai.com/v1",
       key: KEYS.openai,
       missing: "missing_openai_key",
+    };
+  }
+  if (provider === "google") {
+    return {
+      provider,
+      base: "https://generativelanguage.googleapis.com/v1beta/openai",
+      key: KEYS.google,
+      missing: "missing_gemini_key",
+    };
+  }
+  if (provider === "custom") {
+    const base = safeBaseUrl(requestBaseUrl) || CUSTOM_API_BASE;
+    return {
+      provider,
+      base,
+      key: KEYS.custom || KEYS.openai || "local",
+      missing: base ? "" : "missing_custom_base",
     };
   }
   return {
@@ -96,9 +133,16 @@ async function readJson(request) {
   return raw ? JSON.parse(raw) : {};
 }
 
-async function providerJson(provider, path, body, timeoutMs = 20000) {
-  const { base, key, missing } = upstream(provider);
-  if (!key) throw new Error(missing);
+async function providerJson(
+  provider,
+  path,
+  body,
+  timeoutMs = 20000,
+  requestBaseUrl = "",
+) {
+  const { base, key, missing } = upstream(provider, requestBaseUrl);
+  if (!base) throw new Error(missing || "missing_custom_base");
+  if (!key) throw new Error(missing || "missing_api_key");
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
   try {
@@ -133,12 +177,24 @@ function parseJsonFromText(text) {
   }
 }
 
-async function chatJson(provider, model, messages) {
-  const response = await providerJson(provider, "/chat/completions", {
-    model: model || (provider === "openai" ? "gpt-4o-mini" : "grok-4.6"),
-    temperature: 0,
-    messages,
-  });
+async function chatJson(provider, model, messages, baseUrl = "") {
+  const fallback =
+    provider === "xai"
+      ? "grok-4.6"
+      : provider === "google"
+        ? "gemini-2.5-flash"
+        : "gpt-4o-mini";
+  const response = await providerJson(
+    provider,
+    "/chat/completions",
+    {
+      model: model || fallback,
+      temperature: 0,
+      messages,
+    },
+    20000,
+    baseUrl,
+  );
   const payload = await response.json();
   return parseJsonFromText(payload.choices?.[0]?.message?.content);
 }
@@ -148,20 +204,25 @@ async function handleNextQuestion(body) {
   const ids = candidates.map((item) => item.id).filter(Boolean);
   if (!ids.length) return null;
   const provider = providerOf(body);
-  const result = await chatJson(provider, body.model, [
-    {
-      role: "system",
-      content:
-        'You pick one preschool question. Reply with JSON only: {"questionId":"<id>"}. Choose only from the given ids.',
-    },
-    {
-      role: "user",
-      content: JSON.stringify({
-        learningContext: body.learningContext,
-        candidateIds: ids,
-      }),
-    },
-  ]);
+  const result = await chatJson(
+    provider,
+    body.model,
+    [
+      {
+        role: "system",
+        content:
+          'You pick one preschool question. Reply with JSON only: {"questionId":"<id>"}. Choose only from the given ids.',
+      },
+      {
+        role: "user",
+        content: JSON.stringify({
+          learningContext: body.learningContext,
+          candidateIds: ids,
+        }),
+      },
+    ],
+    body.baseUrl,
+  );
   const questionId = ids.includes(result?.questionId)
     ? result.questionId
     : ids[0];
@@ -172,21 +233,27 @@ async function handleSpeak(body, response) {
   const text = String(body.text || "").slice(0, 240);
   if (!text) return send(response, 400, { error: "missing_text" });
   const provider = providerOf(body);
-  const voice = body.voiceId || (provider === "openai" ? "nova" : "eve");
-  const payload =
-    provider === "openai"
-      ? {
-          model: body.model || "tts-1",
-          input: text,
-          voice,
-        }
-      : {
-          text,
-          voice_id: voice,
-          language: body.language || "en",
-        };
-  const path = provider === "openai" ? "/audio/speech" : "/tts";
-  const upstreamResponse = await providerJson(provider, path, payload);
+  const compat = usesOpenAICompat(provider);
+  const voice = body.voiceId || (compat ? "nova" : "eve");
+  const payload = compat
+    ? {
+        model: body.model || "tts-1",
+        input: text,
+        voice,
+      }
+    : {
+        text,
+        voice_id: voice,
+        language: body.language || "en",
+      };
+  const path = compat ? "/audio/speech" : "/tts";
+  const upstreamResponse = await providerJson(
+    provider,
+    path,
+    payload,
+    20000,
+    body.baseUrl,
+  );
   const buffer = Buffer.from(await upstreamResponse.arrayBuffer());
   sendBinary(
     response,
@@ -199,25 +266,26 @@ async function handleImage(body) {
   const prompt = String(body.prompt || "").slice(0, 500);
   if (!prompt) return null;
   const provider = providerOf(body);
-  const payload =
-    provider === "openai"
-      ? {
-          model: body.model || "gpt-image-1",
-          prompt,
-          n: 1,
-          size: "1024x1024",
-        }
-      : {
-          model: body.model || "grok-imagine-image-2.0",
-          prompt,
-          n: 1,
-          aspect_ratio: "1:1",
-        };
+  const compat = usesOpenAICompat(provider);
+  const payload = compat
+    ? {
+        model: body.model || "gpt-image-1",
+        prompt,
+        n: 1,
+        size: "1024x1024",
+      }
+    : {
+        model: body.model || "grok-imagine-image-2.0",
+        prompt,
+        n: 1,
+        aspect_ratio: "1:1",
+      };
   const upstreamResponse = await providerJson(
     provider,
     "/images/generations",
     payload,
     30000,
+    body.baseUrl,
   );
   const result = await upstreamResponse.json();
   const imageUrl = result.data?.[0]?.url;
@@ -273,7 +341,12 @@ async function handleVideoAnalyze(body) {
       content: `Describe this preschool media titled ${media.title || media.id || "story"}.`,
     });
   }
-  const result = await chatJson(providerOf(body), body.model, messages);
+  const result = await chatJson(
+    providerOf(body),
+    body.model,
+    messages,
+    body.baseUrl,
+  );
   if (!result?.summary) return null;
   return {
     title: String(result.title || media.title || "Picture story").slice(0, 80),
@@ -324,13 +397,27 @@ const server = createServer(async (request, response) => {
     send(response, 404, { error: "not_found" });
   } catch (error) {
     const message = error instanceof Error ? error.message : "adapter_failed";
-    if (message === "missing_xai_key" || message === "missing_openai_key") {
+    if (
+      [
+        "missing_xai_key",
+        "missing_openai_key",
+        "missing_gemini_key",
+        "missing_custom_base",
+      ].includes(message)
+    ) {
+      const hints = {
+        missing_openai_key:
+          "Set OPENAI_API_KEY in .env, then restart npm run adapter.",
+        missing_gemini_key:
+          "Set GEMINI_API_KEY in .env, then restart npm run adapter.",
+        missing_custom_base:
+          "Set CUSTOM_API_BASE in .env or fill the custom endpoint in parent settings.",
+        missing_xai_key:
+          "Set XAI_API_KEY in .env, then restart npm run adapter. SuperGrok does not include API credits.",
+      };
       send(response, 503, {
         error: message,
-        hint:
-          message === "missing_openai_key"
-            ? "Set OPENAI_API_KEY in .env, then restart npm run adapter."
-            : "Set XAI_API_KEY in .env, then restart npm run adapter. SuperGrok does not include API credits.",
+        hint: hints[message],
       });
       return;
     }
@@ -342,6 +429,8 @@ server.listen(PORT, "127.0.0.1", () => {
   const keyState = [
     KEYS.xai ? "XAI_API_KEY ready" : "XAI_API_KEY missing",
     KEYS.openai ? "OPENAI_API_KEY ready" : "OPENAI_API_KEY optional",
+    KEYS.google ? "GEMINI_API_KEY ready" : "GEMINI_API_KEY optional",
+    CUSTOM_API_BASE ? "CUSTOM_API_BASE ready" : "CUSTOM_API_BASE optional",
   ].join(", ");
   console.log(
     `Little Sprout adapter on http://127.0.0.1:${PORT} (${keyState})`,

@@ -412,6 +412,7 @@ export function serializeLearningData(children, modelSettings = {}) {
         voice: modelSettings.voice,
         vocab: modelSettings.vocab,
         video: modelSettings.video,
+        custom: modelSettings.custom || undefined,
       },
     },
     null,
@@ -477,6 +478,12 @@ export function parseLearningData(input) {
   for (const key of ["image", "voice", "vocab", "video"]) {
     if (typeof payload.modelSettings?.[key] === "string")
       modelSettings[key] = payload.modelSettings[key].slice(0, 80);
+  }
+  if (
+    payload.modelSettings?.custom &&
+    typeof payload.modelSettings.custom === "object"
+  ) {
+    modelSettings.custom = payload.modelSettings.custom;
   }
   return { schemaVersion: 1, children, modelSettings };
 }

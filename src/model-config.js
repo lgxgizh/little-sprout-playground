@@ -1,5 +1,12 @@
 export const MODEL_STORAGE_KEY = "little-sprout-models";
+export const CUSTOM_STORAGE_KEY = "little-sprout-custom-models";
 export const MODEL_CAPABILITIES = ["image", "voice", "vocab", "video"];
+export const CUSTOM_IDS = {
+  image: "custom-image",
+  voice: "custom-voice",
+  vocab: "custom-vocab",
+  video: "custom-video",
+};
 
 export function hasRemoteAdapter() {
   return Boolean(
@@ -68,6 +75,41 @@ export const modelCatalog = {
         "openai",
         "dall-e-3",
       ),
+      adapterOption(
+        "openai-gpt-image-2",
+        "GPT Image 2",
+        "OpenAI · 新旗舰生图",
+        "openai",
+        "gpt-image-2",
+      ),
+      adapterOption(
+        "google-gemini-flash-image",
+        "Gemini 2.5 Flash Image",
+        "Google · Nano Banana 生图",
+        "google",
+        "gemini-2.5-flash-image",
+      ),
+      adapterOption(
+        "flux-schnell-compat",
+        "FLUX Schnell",
+        "兼容网关 · 快速生图",
+        "custom",
+        "black-forest-labs/flux-schnell",
+      ),
+      adapterOption(
+        "flux-2-pro-compat",
+        "FLUX.2 Pro",
+        "兼容网关 · 高质量生图",
+        "custom",
+        "black-forest-labs/flux-2-pro",
+      ),
+      adapterOption(
+        CUSTOM_IDS.image,
+        "自定义生图模型",
+        "自己填模型 ID 和接口",
+        "custom",
+        "",
+      ),
     ],
   },
   voice: {
@@ -131,6 +173,22 @@ export const modelCatalog = {
         "tts-1-hd",
         { voiceId: "nova" },
       ),
+      adapterOption(
+        "openai-gpt-4o-mini-tts",
+        "GPT-4o mini TTS",
+        "OpenAI · 更新的语音",
+        "openai",
+        "gpt-4o-mini-tts",
+        { voiceId: "nova" },
+      ),
+      adapterOption(
+        CUSTOM_IDS.voice,
+        "自定义语音模型",
+        "自己填模型 ID 和接口",
+        "custom",
+        "",
+        { voiceId: "alloy" },
+      ),
     ],
   },
   vocab: {
@@ -171,6 +229,41 @@ export const modelCatalog = {
         "openai",
         "gpt-4o",
       ),
+      adapterOption(
+        "google-gemini-2.5-flash",
+        "Gemini 2.5 Flash",
+        "Google · 选题",
+        "google",
+        "gemini-2.5-flash",
+      ),
+      adapterOption(
+        "google-gemini-2.0-flash",
+        "Gemini 2.0 Flash",
+        "Google · 更快选题",
+        "google",
+        "gemini-2.0-flash",
+      ),
+      adapterOption(
+        "deepseek-chat",
+        "DeepSeek Chat",
+        "兼容网关 · 便宜选题",
+        "custom",
+        "deepseek-chat",
+      ),
+      adapterOption(
+        "qwen-plus",
+        "Qwen Plus",
+        "兼容网关 · 通义选题",
+        "custom",
+        "qwen-plus",
+      ),
+      adapterOption(
+        CUSTOM_IDS.vocab,
+        "自定义选题模型",
+        "自己填模型 ID 和接口",
+        "custom",
+        "",
+      ),
     ],
   },
   video: {
@@ -208,6 +301,34 @@ export const modelCatalog = {
         "openai",
         "gpt-4o",
       ),
+      adapterOption(
+        "google-gemini-2.5-flash-vision",
+        "Gemini 2.5 Flash 看一看",
+        "Google · 读图读视频",
+        "google",
+        "gemini-2.5-flash",
+      ),
+      adapterOption(
+        "google-gemini-2.0-flash-vision",
+        "Gemini 2.0 Flash 看一看",
+        "Google · 更快理解",
+        "google",
+        "gemini-2.0-flash",
+      ),
+      adapterOption(
+        "qwen-vl-max",
+        "Qwen-VL Max",
+        "兼容网关 · 读视频",
+        "custom",
+        "qwen-vl-max",
+      ),
+      adapterOption(
+        CUSTOM_IDS.video,
+        "自定义读视频模型",
+        "自己填模型 ID 和接口",
+        "custom",
+        "",
+      ),
     ],
   },
 };
@@ -224,8 +345,42 @@ export function modelName(type, models) {
   return modelOption(type, models?.[type])?.name || models?.[type] || "";
 }
 
+export function isCustomModel(id) {
+  return Object.values(CUSTOM_IDS).includes(id);
+}
+
 export function isAdapterModel(type, id) {
   return modelOption(type, id)?.mode === "adapter";
+}
+
+export function emptyCustomConfig() {
+  return Object.fromEntries(
+    MODEL_CAPABILITIES.map((type) => [
+      type,
+      { model: "", baseUrl: "", voiceId: "" },
+    ]),
+  );
+}
+
+export function normalizeCustomConfig(saved = {}) {
+  const defaults = emptyCustomConfig();
+  const source = saved && typeof saved === "object" ? saved : {};
+  for (const type of MODEL_CAPABILITIES) {
+    const item =
+      source[type] && typeof source[type] === "object" ? source[type] : {};
+    defaults[type] = {
+      model: String(item.model || "")
+        .trim()
+        .slice(0, 120),
+      baseUrl: String(item.baseUrl || "")
+        .trim()
+        .slice(0, 240),
+      voiceId: String(item.voiceId || "")
+        .trim()
+        .slice(0, 40),
+    };
+  }
+  return defaults;
 }
 
 export function defaultModels() {
@@ -242,6 +397,23 @@ export function resolveModels(saved = {}) {
     if (modelOption(type, mapped)) resolved[type] = mapped;
   }
   return resolved;
+}
+
+export function adapterFields(type, modelId, custom = {}) {
+  const option = modelOption(type, modelId);
+  const override = custom[type] || {};
+  const provider = option?.provider || "xai";
+  const model =
+    (provider === "custom" && override.model) || option?.remoteModel || modelId;
+  const fields = {
+    provider,
+    model,
+  };
+  if (provider === "custom" && override.baseUrl)
+    fields.baseUrl = override.baseUrl;
+  if (type === "voice")
+    fields.voiceId = override.voiceId || option?.voiceId || "alloy";
+  return fields;
 }
 
 export function imagePromptFor(question) {

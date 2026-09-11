@@ -33,10 +33,13 @@ import {
   updateEnglishPlan,
 } from "./learning-plan.js";
 import {
+  CUSTOM_STORAGE_KEY,
   catalogOptions,
   defaultModels,
+  emptyCustomConfig,
   isAdapterModel,
   modelName as catalogModelName,
+  normalizeCustomConfig,
   resolveModels,
 } from "./model-config.js";
 import { choiceGridMarkup, escapeHtml, listenButtonMarkup } from "./quiz-ui.js";
@@ -251,6 +254,15 @@ const savedModels = (() => {
   }
 })();
 const models = resolveModels(savedModels);
+const customModels = (() => {
+  try {
+    return normalizeCustomConfig(
+      JSON.parse(localStorage.getItem(CUSTOM_STORAGE_KEY) || "{}"),
+    );
+  } catch {
+    return emptyCustomConfig();
+  }
+})();
 
 let profile = createDefaultProfile();
 let children = [];
@@ -1041,6 +1053,7 @@ function saveChildForm() {
 function saveModels() {
   try {
     localStorage.setItem("little-sprout-models", JSON.stringify(models));
+    localStorage.setItem(CUSTOM_STORAGE_KEY, JSON.stringify(customModels));
   } catch {
     /* 隐私模式下仍可继续使用当前会话设置 */
   }
@@ -1127,6 +1140,7 @@ async function planQuestionWithAI() {
     activityCourse: courseId,
     child: activeChild(),
     candidates,
+    custom: customModels,
   });
 
   if (
@@ -1251,6 +1265,23 @@ function modelSettingsModal() {
     return `<div class="modal-backdrop" id="modalBackdrop"><div class="modal parent-gate"><div class="modal-icon">🔒</div><h3>家长入口</h3><p>为了不让小朋友误触，请家长长按下面按钮 1 秒钟。</p><button class="hold-btn" id="parentHold"><span>长按进入设置</span><i></i></button><button class="reset-btn" id="parentCancel">先不设置</button></div></div>`;
   }
   const tab = state.parentTab || "child";
+  const customFields = (type) => {
+    const option = catalogOptions(type).find(
+      (item) => item.id === models[type],
+    );
+    if (option?.provider !== "custom") return "";
+    const cfg = customModels[type] || {};
+    const modelValue = cfg.model || option.remoteModel || "";
+    return `<div class="custom-model-fields">
+      <label><span>模型 ID</span><input data-custom-type="${type}" data-custom-field="model" value="${escapeHtml(modelValue)}" placeholder="例如 gpt-4o-mini 或 flux-schnell" /></label>
+      <label><span>OpenAI 兼容接口</span><input data-custom-type="${type}" data-custom-field="baseUrl" value="${escapeHtml(cfg.baseUrl || "")}" placeholder="https://openrouter.ai/api/v1 ，可留空用 .env CUSTOM_API_BASE" /></label>
+      ${
+        type === "voice"
+          ? `<label><span>音色 ID</span><input data-custom-type="${type}" data-custom-field="voiceId" value="${escapeHtml(cfg.voiceId || "")}" placeholder="alloy / nova / eve" /></label>`
+          : ""
+      }
+    </div>`;
+  };
   const select = (type, label, icon, hint) =>
     `<label class="model-setting"><span class="model-setting-label"><span class="model-setting-icon">${icon}</span><span><b>${label}</b><small>${hint}</small></span></span><select data-model="${type}">${catalogOptions(
       type,
@@ -1259,12 +1290,12 @@ function modelSettingsModal() {
         (item) =>
           `<option value="${item.id}" ${models[type] === item.id ? "selected" : ""} title="${item.name} · ${item.note}">${item.name} · ${item.note}</option>`,
       )
-      .join("")}</select></label>`;
+      .join("")}</select>${customFields(type)}</label>`;
   const panel =
     tab === "growth"
       ? `<div class="parent-panel-grid">${profileSummary()}${weeklyGrowthCard()}</div>`
       : tab === "models"
-        ? `<p class="parent-lead">远程模型都是可选项。SuperGrok 会员不能代替 API Key。没配密钥时自动用本机图片和浏览器语音。</p><div class="model-settings">${select("image", "图片", "🖼️", "学习插画与封面")}${select("voice", "语音", "🔊", "朗读题目和鼓励语")}${select("vocab", "选题", "🧩", "题目难度与题库")}${select("video", "视频理解", "🎬", "只分析故事架本地短片")}</div><div class="config-tip">当前语音：<b>${modelName("voice")}</b> · 当前题目：<b>${modelName("vocab")}</b> · 当前图片：<b>${modelName("image")}</b></div><div class="data-tools"><button class="small-action" id="exportData">导出学习档案</button><button class="small-action" id="importData">导入学习档案</button><input id="importFile" type="file" accept="application/json,.json" hidden /></div>`
+        ? `<p class="parent-lead">默认用本机。xAI / OpenAI / Gemini 用对应密钥；FLUX、Qwen、DeepSeek 等走 OpenAI 兼容网关。也可以选「自定义」填任意模型 ID，不被绑定在一家。</p><div class="model-settings">${select("image", "图片", "🖼️", "学习插画与封面")}${select("voice", "语音", "🔊", "朗读题目和鼓励语")}${select("vocab", "选题", "🧩", "题目难度与题库")}${select("video", "视频理解", "🎬", "读本地短片，不是生成视频")}</div><div class="config-tip">当前语音：<b>${modelName("voice")}</b> · 当前题目：<b>${modelName("vocab")}</b> · 当前图片：<b>${modelName("image")}</b></div><div class="data-tools"><button class="small-action" id="exportData">导出学习档案</button><button class="small-action" id="importData">导入学习档案</button><input id="importFile" type="file" accept="application/json,.json" hidden /></div>`
         : childProfileSettings();
   return `<div class="modal-backdrop" id="modalBackdrop">
     <div class="modal model-modal parent-sheet">
@@ -1645,13 +1676,17 @@ function bindEvents() {
     select.addEventListener("change", () => {
       models[select.dataset.model] = select.value;
       saveModels();
-      const tip = document.querySelector(".config-tip");
-      if (tip)
-        tip.innerHTML = `当前语音：<b>${modelName("voice")}</b> · 当前题目：<b>${modelName("vocab")}</b>`;
-      const chip = document.querySelector(".model-chip b");
-      if (chip) chip.textContent = modelName("vocab");
-      const imageBadge = document.querySelector(".active-model");
-      if (imageBadge) imageBadge.textContent = `图片：${modelName("image")}`;
+      render();
+    }),
+  );
+  document.querySelectorAll("[data-custom-field]").forEach((input) =>
+    input.addEventListener("change", () => {
+      const type = input.dataset.customType;
+      const field = input.dataset.customField;
+      if (!customModels[type])
+        customModels[type] = { model: "", baseUrl: "", voiceId: "" };
+      customModels[type][field] = input.value.trim();
+      saveModels();
     }),
   );
   document
@@ -1689,7 +1724,10 @@ function bindEvents() {
     speak(currentQuestion().speech);
   });
   document.querySelector("#exportData")?.addEventListener("click", () => {
-    const content = serializeLearningData(children, models);
+    const content = serializeLearningData(children, {
+      ...models,
+      custom: customModels,
+    });
     const blob = new Blob([content], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
@@ -1717,6 +1755,10 @@ function bindEvents() {
         activeChildId = children[0].id;
         profile = children[0].profile;
         Object.assign(models, resolveModels(imported.modelSettings));
+        Object.assign(
+          customModels,
+          normalizeCustomConfig(imported.modelSettings?.custom),
+        );
         saveModels();
         resetActiveActivity();
         state.modal = true;
@@ -1729,6 +1771,7 @@ function bindEvents() {
     });
   document.querySelector("#resetModels")?.addEventListener("click", () => {
     Object.assign(models, defaultModels());
+    Object.assign(customModels, emptyCustomConfig());
     saveModels();
     render();
   });

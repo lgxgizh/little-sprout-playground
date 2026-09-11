@@ -1,5 +1,6 @@
 import { stageDefinition } from "./learning-plan.js";
 import {
+  adapterFields,
   hasRemoteAdapter,
   imagePromptFor,
   isAdapterModel,
@@ -136,11 +137,9 @@ export async function adapterPost(path, body, timeoutMs = 8000) {
   }
 }
 
-function adapterPayload(type, modelId, extra = {}) {
-  const option = modelOption(type, modelId);
+function adapterPayload(type, modelId, extra = {}, custom = {}) {
   return {
-    provider: option?.provider || "xai",
-    model: option?.remoteModel || modelId,
+    ...adapterFields(type, modelId, custom),
     ...extra,
   };
 }
@@ -151,10 +150,11 @@ export async function requestNextQuestion({
   activityCourse,
   child,
   candidates,
+  custom = {},
 }) {
   if (!isAdapterModel("vocab", model)) return null;
   const result = await adapterPost("/learning/next-question", {
-    ...adapterPayload("vocab", model),
+    ...adapterPayload("vocab", model, {}, custom),
     learningContext: buildLearningContext(profile, activityCourse, child),
     candidates: candidates.map(
       ({ id, difficulty, stage, ageMin, ageMax, concept, prompt }) => ({
@@ -174,14 +174,18 @@ export async function requestNextQuestion({
   return chosen ? { questionId: chosen.id, source: "ai" } : null;
 }
 
-export async function requestSpeech({ model, text }) {
+export async function requestSpeech({ model, text, custom = {} }) {
   const option = modelOption("voice", model);
   if (option?.mode !== "adapter" || !text) return null;
   const result = await adapterPost("/learning/speak", {
-    ...adapterPayload("voice", model, {
-      voiceId: option.voiceId || "eve",
-      language: "en",
-    }),
+    ...adapterPayload(
+      "voice",
+      model,
+      {
+        language: "en",
+      },
+      custom,
+    ),
     text: String(text).slice(0, 240),
   });
   if (!result) return null;
@@ -201,14 +205,14 @@ export async function requestSpeech({ model, text }) {
   return null;
 }
 
-export async function requestImage({ model, question }) {
+export async function requestImage({ model, question, custom = {} }) {
   if (!isAdapterModel("image", model) || !question) return null;
   const prompt = imagePromptFor(question);
   if (!prompt) return null;
   const result = await adapterPost(
     "/learning/image",
     {
-      ...adapterPayload("image", model, { questionId: question.id }),
+      ...adapterPayload("image", model, { questionId: question.id }, custom),
       prompt,
     },
     20000,
@@ -222,12 +226,12 @@ export async function requestImage({ model, question }) {
   return null;
 }
 
-export async function requestVideoAnalysis({ model, media }) {
+export async function requestVideoAnalysis({ model, media, custom = {} }) {
   if (!isAdapterModel("video", model) || !media?.url) return null;
   const result = await adapterPost(
     "/learning/video-analyze",
     {
-      ...adapterPayload("video", model),
+      ...adapterPayload("video", model, {}, custom),
       media: {
         id: String(media.id || "").slice(0, 80),
         type: media.type === "video" ? "video" : "image",

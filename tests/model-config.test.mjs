@@ -1,11 +1,15 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
+  CUSTOM_IDS,
+  adapterFields,
   catalogOptions,
   defaultModels,
   imagePromptFor,
   isAdapterModel,
+  isCustomModel,
   modelName,
+  normalizeCustomConfig,
   resolveModels,
 } from "../src/model-config.js";
 
@@ -61,6 +65,24 @@ test("mainstream xAI and OpenAI models are optional adapter choices", () => {
   );
   assert.ok(videos.includes("openai-gpt-4o-vision"));
   assert.equal(isAdapterModel("vocab", "openai-gpt-4o-mini"), true);
+  assert.ok(images.includes("google-gemini-flash-image"));
+  assert.ok(images.includes(CUSTOM_IDS.image));
+  assert.ok(planners.includes("deepseek-chat"));
+  assert.ok(videos.includes("qwen-vl-max"));
+  assert.ok(isCustomModel(CUSTOM_IDS.video));
+});
+
+test("custom OpenAI-compatible fields override the catalog model id", () => {
+  const custom = normalizeCustomConfig({
+    image: {
+      model: "my-flux",
+      baseUrl: "https://openrouter.ai/api/v1",
+    },
+  });
+  const fields = adapterFields("image", CUSTOM_IDS.image, custom);
+  assert.equal(fields.provider, "custom");
+  assert.equal(fields.model, "my-flux");
+  assert.equal(fields.baseUrl, "https://openrouter.ai/api/v1");
 });
 
 test("image prompts stay English and preschool-safe", () => {
