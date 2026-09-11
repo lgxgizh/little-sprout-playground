@@ -22,6 +22,22 @@ export const LISTENING_FEATURE = {
   tone: "sky",
 };
 
+/**
+ * Keep showing the same question after an answer is recorded.
+ * Do not re-pick from the unseen list until lockedId is cleared.
+ */
+export function pickSessionQuestion(
+  pool = [],
+  { lockedId = null, sessionQuestionIds = [] } = {},
+) {
+  if (!Array.isArray(pool) || !pool.length) return null;
+  if (lockedId) {
+    const locked = pool.find((item) => item.id === lockedId);
+    if (locked) return locked;
+  }
+  return pool.find((item) => !sessionQuestionIds.includes(item.id)) || pool[0];
+}
+
 export function choiceImageSrc(key, assetBase = "/") {
   const file = CHOICE_ASSET_FILES[key];
   if (!file) return "";

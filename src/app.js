@@ -22,6 +22,7 @@ import {
   LISTENING_FEATURE,
   createListeningSeedQuestions,
   enrichQuestionImages,
+  pickSessionQuestion,
   withChoiceImages,
 } from "./listening.js";
 import {
@@ -305,6 +306,7 @@ const state = {
   demoChoice: null,
   demoAnswered: false,
   demoCorrect: false,
+  activeQuestionId: null,
 };
 
 function todayKey(date = new Date()) {
@@ -372,6 +374,7 @@ function resetActiveActivity() {
   state.selectedChoice = null;
   state.activityComplete = false;
   state.sessionQuestionIds = [];
+  state.activeQuestionId = null;
 }
 
 function switchChild(childId) {
@@ -422,14 +425,21 @@ function sessionQuestionTotal() {
   return 3;
 }
 
+function lockQuestion(question) {
+  if (question?.id && !state.activeQuestionId)
+    state.activeQuestionId = question.id;
+  return question;
+}
+
 function currentQuestion() {
   let question = null;
   if (state.animationMode) {
     const item = activeAnimation();
     const questions = item?.questions || [];
-    question = questions[
-      state.questionIndex % Math.max(1, questions.length)
-    ] || {
+    question = pickSessionQuestion(questions, {
+      lockedId: state.activeQuestionId,
+      sessionQuestionIds: state.sessionQuestionIds,
+    }) || {
       id: "animation-empty",
       visual: "🎞️",
       prompt: "Watch the animation, then tap a picture",
@@ -440,11 +450,15 @@ function currentQuestion() {
         { label: "Ball", emoji: "⚽", value: "ball", color: "#6db6e8" },
       ],
     };
+    lockQuestion(question);
     return enrichQuestionImages(question, assetBase);
   }
   const questions = questionBank[state.activityCourse] || questionBank.colors;
   const aiQuestion = questions.find((item) => item.id === state.aiQuestionId);
-  if (aiQuestion) return enrichQuestionImages(aiQuestion, assetBase);
+  if (aiQuestion) {
+    lockQuestion(aiQuestion);
+    return enrichQuestionImages(aiQuestion, assetBase);
+  }
   if (state.activityCourse === "english") {
     const child = activeChild();
     const candidates = state.baselineTest
@@ -458,14 +472,12 @@ function currentQuestion() {
           sessionQuestionIds: state.sessionQuestionIds,
           age: child?.age,
         });
-    const unseen = candidates.filter(
-      (item) => !state.sessionQuestionIds.includes(item.id),
-    );
-    const pool = unseen.length ? unseen : candidates;
     question =
-      pool[Math.min(state.questionIndex, pool.length - 1)] ||
-      pool[0] ||
-      questions[0];
+      pickSessionQuestion(candidates, {
+        lockedId: state.activeQuestionId,
+        sessionQuestionIds: state.sessionQuestionIds,
+      }) || questions[0];
+    lockQuestion(question);
     return enrichQuestionImages(question, assetBase);
   }
   const skill = profile.skills[state.activityCourse] || {
@@ -477,11 +489,12 @@ function currentQuestion() {
   const available = questions.filter(
     (item) => item.difficulty <= targetDifficulty,
   );
-  const unseen = available.filter(
-    (item) => !state.sessionQuestionIds.includes(item.id),
-  );
-  const pool = unseen.length ? unseen : available;
-  question = pool[state.questionIndex % pool.length] || questions[0];
+  question =
+    pickSessionQuestion(available, {
+      lockedId: state.activeQuestionId,
+      sessionQuestionIds: state.sessionQuestionIds,
+    }) || questions[0];
+  lockQuestion(question);
   return enrichQuestionImages(question, assetBase);
 }
 
@@ -498,6 +511,7 @@ function beginSession(courseId, baselineTest = false, options = {}) {
   state.activityCourse = courseId;
   state.questionIndex = 0;
   state.sessionQuestionIds = [];
+  state.activeQuestionId = null;
   state.answered = false;
   state.correct = false;
   state.selectedChoice = null;
@@ -875,6 +889,7 @@ function homeTryMarkup() {
       answered: state.demoAnswered,
       prompt: question.prompt,
       dataAttr: "demo-choice",
+      showLabels: false,
     })}
     ${
       state.demoAnswered
@@ -1029,6 +1044,23 @@ function saveModels() {
   }
 }
 
+let advanceTimer = 0;
+
+function clearAdvanceTimer() {
+  if (advanceTimer) {
+    clearTimeout(advanceTimer);
+    advanceTimer = 0;
+  }
+}
+
+function scheduleAdvance() {
+  clearAdvanceTimer();
+  if (!state.answered || !state.correct || state.activityComplete) return;
+  advanceTimer = setTimeout(() => {
+    document.querySelector("#nextQuestion")?.click();
+  }, 1100);
+}
+
 function speak(text) {
   if (!state.soundOn || !("speechSynthesis" in window)) return;
   window.speechSynthesis.cancel();
@@ -1178,14 +1210,14 @@ function render() {
             ${
               state.animationMode && state.animationPhase === "watch"
                 ? `<div class="video-watch-hint"><p>When the animation ends, tap <b>Ready to answer</b>.</p><button class="primary-btn" id="animationReady"><span>Ready to answer</span><span class="arrow">→</span></button></div>`
-                : `<div class="question-visual"><span class="question-emoji">${escapeHtml(question.visual)}</span><span class="question-bubble">${escapeHtml(question.prompt)}<br/><b>Look and choose</b></span></div>
+                : `<div class="question-visual"><span class="question-emoji" aria-hidden="true">${state.animationMode ? "🎞️" : "🎧"}</span><span class="question-bubble">${escapeHtml(question.prompt)}<br/><b>Listen, then tap a picture</b></span></div>
             ${choiceGridMarkup(question.choices, {
               answer: question.answer,
               selectedChoice: state.selectedChoice,
               answered: state.answered,
               disabled: state.aiPlanning,
               prompt: question.prompt,
-              showLabels: true,
+              showLabels: false,
             })}
             ${state.answered ? `<div class="feedback ${state.correct ? "good" : "try"}">${state.encouragement || (state.correct ? "You found it! ✨" : "That's okay—let's look again")}</div>${state.activityComplete ? (state.baselineTest ? baselineResultMarkup() : state.animationMode ? animationResultMarkup() : offlineTaskMarkup(state.activityCourse)) : `<button class="next-question" id="nextQuestion">${state.correct ? "Next one" : "Try another"} <span>→</span></button>`}` : '<div class="hint">Tap a picture to answer · Find a star!</div>'}`
             }
@@ -1205,6 +1237,7 @@ function render() {
       <div class="toast" id="toast">Ready to play</div>
     </div>`;
   bindEvents();
+  scheduleAdvance();
 }
 
 function courseCard(course, recommended = false) {
@@ -1455,6 +1488,7 @@ function bindEvents() {
     state.answered = false;
     state.correct = false;
     state.selectedChoice = null;
+    state.activeQuestionId = null;
     state.activityComplete = false;
     state.encouragement = "";
     render();
@@ -1673,6 +1707,7 @@ function bindEvents() {
     render();
   });
   document.querySelector("#finishSession")?.addEventListener("click", () => {
+    clearAdvanceTimer();
     state.aiPlanToken += 1;
     state.aiPlanning = false;
     state.aiQuestionId = null;
@@ -1686,6 +1721,7 @@ function bindEvents() {
     state.animationPhase = "watch";
     state.offlineTaskDone = false;
     state.answered = false;
+    state.activeQuestionId = null;
     state.encouragement = "";
     speak("Play time is complete!");
     render();
@@ -1719,6 +1755,7 @@ function bindEvents() {
     render();
   });
   document.querySelector("#nextQuestion")?.addEventListener("click", () => {
+    clearAdvanceTimer();
     state.questionIndex = Math.min(
       sessionQuestionTotal() - 1,
       state.questionIndex + 1,
@@ -1728,6 +1765,7 @@ function bindEvents() {
     state.selectedChoice = null;
     state.encouragement = "";
     state.aiQuestionId = null;
+    state.activeQuestionId = null;
     render();
     if (state.baselineTest || state.animationMode) {
       if (state.activeSession) speak(currentQuestion().speech);
