@@ -7,8 +7,9 @@ import {
 
 test("video-comprehension shim re-exports animation demo GIF", () => {
   const demos = createDemoVideos("/");
-  assert.equal(demos.length, 1);
+  assert.ok(demos.length >= 2);
   assert.match(demos[0].src, /fox-apple\.gif$/);
+  assert.match(demos[1].src, /shapes-hello\.mp4$/);
   const ok = normalizeVideoEntry({
     id: "ok",
     title: "OK",

@@ -131,6 +131,46 @@ export function createDemoAnimations(assetBase = "/") {
         },
       ],
     },
+    {
+      id: "demo-shapes-hello",
+      title: "Shapes say hello",
+      description:
+        "A short original clip of colors and shapes. Watch, then tap.",
+      durationLabel: "~8 sec",
+      sourceType: "asset",
+      mediaType: "video",
+      src: `${base}assets/media/shapes-hello.mp4`,
+      poster: `${base}assets/stories/fox-apple/01.png`,
+      demo: true,
+      questions: [
+        {
+          id: "anim-shapes-round",
+          visual: "🔵",
+          prompt: "Find something round",
+          speech: "Can you find something round?",
+          answer: "ball",
+          choices: [
+            card("star", "Star", "#f7c94b", "⭐"),
+            card("ball", "Ball", "#6db6e8", "⚽"),
+            card("cup", "Cup", "#9ed9c4", "🥤"),
+            card("apple", "Apple", "#ff6b5e", "🍎"),
+          ],
+        },
+        {
+          id: "anim-shapes-star",
+          visual: "⭐",
+          prompt: "Find the star",
+          speech: "Can you find the star?",
+          answer: "star",
+          choices: [
+            card("fish", "Fish", "#6db6e8", "🐟"),
+            card("star", "Star", "#f7c94b", "⭐"),
+            card("dog", "Dog", "#d9a66f", "🐶"),
+            card("banana", "Banana", "#f7c94b", "🍌"),
+          ],
+        },
+      ],
+    },
   ];
 }
 

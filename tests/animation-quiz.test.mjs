@@ -16,9 +16,11 @@ import { choiceGridMarkup, choiceLetter } from "../src/quiz-ui.js";
 
 test("demo shelf uses fox-apple GIF with picture choices", () => {
   const demos = createDemoAnimations("/");
-  assert.equal(demos.length, 1);
+  assert.ok(demos.length >= 2);
   assert.match(demos[0].src, /fox-apple\.gif$/);
   assert.equal(demos[0].mediaType, "image");
+  assert.match(demos[1].src, /shapes-hello\.mp4$/);
+  assert.equal(demos[1].mediaType, "video");
   assert.ok(demos[0].questions.length >= 2);
   assert.ok(
     demos[0].questions.every((question) =>
@@ -114,7 +116,7 @@ test("merge and parent summary stay gentle for animation attempts", () => {
       { assetBase: "/" },
     ),
   ]);
-  assert.equal(merged.length, 2);
+  assert.equal(merged.length, 3);
   const stats = summarizeAnimationAttempts(
     [
       {

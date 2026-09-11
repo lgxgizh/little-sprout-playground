@@ -1,4 +1,23 @@
 {
   "schemaVersion": 1,
-  "items": []
+  "items": [
+    {
+      "id": "fox-apple",
+      "type": "image",
+      "title": "Fox finds an apple",
+      "prompt": "Watch the little fox story, then tap what you saw.",
+      "src": "assets/stories/fox-apple.gif",
+      "duration": "~12 sec",
+      "speech": "What fruit did you see?"
+    },
+    {
+      "id": "shapes-hello",
+      "type": "video",
+      "title": "Shapes say hello",
+      "prompt": "A short original clip of colors and shapes.",
+      "src": "assets/media/shapes-hello.mp4",
+      "duration": "~8 sec",
+      "speech": "Can you find something round?"
+    }
+  ]
 }
