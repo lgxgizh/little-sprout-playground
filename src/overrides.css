@@ -1309,3 +1309,27 @@
     max-height: 220px;
   }
 }
+
+.demo-quiz {
+  padding: 16px;
+  border: 1px solid #f1e2c4;
+  border-radius: 24px;
+  background: linear-gradient(180deg, #fffdf8, #fff7ea);
+  box-shadow: 0 12px 28px rgba(128, 95, 49, 0.1);
+  text-align: left;
+}
+.demo-quiz h2 {
+  margin: 6px 0 8px;
+  font-size: clamp(22px, 3vw, 32px);
+}
+.demo-quiz p {
+  margin: 0 0 10px;
+  color: #75858a;
+}
+.demo-quiz .choice-grid {
+  margin-top: 12px;
+}
+.demo-quiz .primary-btn,
+.demo-quiz .text-btn {
+  margin-top: 12px;
+}

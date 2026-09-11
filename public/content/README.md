@@ -49,6 +49,7 @@
 - `concept`: optional stable English concept key such as `apple` or `greeting`; keep it short and reuse it for related questions / 可选的稳定概念标识，如 `apple` 或 `greeting`；请保持简短，相关题目复用同一个标识。
 - `baseline`: set `true` for English-check pool items (about 8–12 age-safe listening/picture questions; the app may stop early) / 英语测评题库条目设为 `true`（约 8–12 道适龄听力图片题，应用可自适应提前结束）。日常练习题一般填 `false`。
 - `visual`: optional emoji hero; picture cards are the main kid UI / 可选 emoji 主视觉；孩子主界面以图片卡片为主。
+- `image` and `audio`: optional local asset paths / 可选本地资源路径。选项也可以带 `image` 或 `imageKey`。
 - `prompt` and `speech`: child-facing English only. Keep them short and concrete / 面向孩子的英文短句，尽量短、具体。
 - `answer`: must exactly match one choice `value` / 必须与某个选项的 `value` 完全一致。
 - `choices`: 2–4 choices with `label`, `value`, hex `color`, plus `emoji` and/or `imageKey`/`imageSrc` (prefer keys under `public/assets/choices/`: apple banana cat dog ball cup star fish) / 2–4 个选项；优先使用 choices 目录下的 PNG `imageKey`。

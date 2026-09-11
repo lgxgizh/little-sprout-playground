@@ -31,6 +31,13 @@ import {
   summarizeWeek,
   updateEnglishPlan,
 } from "./learning-plan.js";
+import {
+  catalogOptions,
+  defaultModels,
+  isAdapterModel,
+  modelName as catalogModelName,
+  resolveModels,
+} from "./model-config.js";
 import { choiceGridMarkup, escapeHtml, listenButtonMarkup } from "./quiz-ui.js";
 import {
   addLearningEvent,
@@ -231,48 +238,6 @@ const offlineTasks = {
   },
 };
 
-const modelCatalog = {
-  image: [
-    { id: "gpt-image-1", name: "GPT Image 1", note: "Quality illustrations" },
-    { id: "flux-schnell", name: "FLUX Schnell", note: "Fast drafts" },
-    {
-      id: "local-image",
-      name: "Local image library",
-      note: "Use files in public/assets",
-    },
-  ],
-  voice: [
-    { id: "browser-speech", name: "Browser speech", note: "No key · default" },
-    {
-      id: "gpt-4o-mini-tts",
-      name: "OpenAI TTS",
-      note: "Natural English · needs API",
-    },
-    {
-      id: "local-audio",
-      name: "Local audio",
-      note: "Play an English audio file",
-    },
-  ],
-  vocab: [
-    {
-      id: "adaptive-picture",
-      name: "Adaptive picture quiz",
-      note: "Adjusts to recent answers",
-    },
-    {
-      id: "gpt-4o-mini",
-      name: "GPT-4o mini",
-      note: "Personalized picks · needs API",
-    },
-    {
-      id: "local-question-bank",
-      name: "Local question bank",
-      note: "Use your approved questions",
-    },
-  ],
-};
-
 const savedModels = (() => {
   try {
     return JSON.parse(
@@ -284,11 +249,7 @@ const savedModels = (() => {
     return {};
   }
 })();
-const models = {
-  image: savedModels.image || "gpt-image-1",
-  voice: savedModels.voice || "browser-speech",
-  vocab: savedModels.vocab || "adaptive-picture",
-};
+const models = resolveModels(savedModels);
 
 let profile = createDefaultProfile();
 let children = [];
@@ -341,6 +302,9 @@ const state = {
   aiPlanMessage: "",
   aiPlanToken: 0,
   showExtras: false,
+  demoChoice: null,
+  demoAnswered: false,
+  demoCorrect: false,
 };
 
 function todayKey(date = new Date()) {
@@ -890,10 +854,36 @@ function animationShelf() {
 }
 
 function modelName(type) {
-  return (
-    modelCatalog[type].find((item) => item.id === models[type])?.name ||
-    models[type]
-  );
+  return catalogModelName(type, models);
+}
+
+function homeTryQuestion() {
+  return createListeningSeedQuestions(assetBase)[0];
+}
+
+function homeTryMarkup() {
+  const question = homeTryQuestion();
+  if (!question) return "";
+  return `<div class="demo-quiz" aria-label="Try one question">
+    <div class="eyebrow">Try one now · 打开就能玩</div>
+    <h2>${escapeHtml(question.prompt)}</h2>
+    <p>Listen, then tap a picture. No sign-in.</p>
+    <button class="voice-btn" id="demoListen" type="button"><span>🔊</span> Listen</button>
+    ${choiceGridMarkup(question.choices, {
+      answer: question.answer,
+      selectedChoice: state.demoChoice,
+      answered: state.demoAnswered,
+      prompt: question.prompt,
+      dataAttr: "demo-choice",
+    })}
+    ${
+      state.demoAnswered
+        ? `<div class="feedback ${state.demoCorrect ? "good" : "try"}">${state.demoCorrect ? "You found it! That's Little Sprout." : "That's okay — look for the apple."}</div>
+           <button class="primary-btn" id="startAfterDemo" type="button"><span>${state.demoCorrect ? "Play the listening test" : "Start listening test"}</span><span class="arrow">→</span></button>
+           ${state.demoCorrect ? "" : `<button class="text-btn" id="retryDemo" type="button">Try again</button>`}`
+        : `<p class="hint">Tap a picture to try</p>`
+    }
+  </div>`;
 }
 
 function normalizeContentQuestion(question) {
@@ -1055,7 +1045,7 @@ function speak(text) {
 
 async function planQuestionWithAI() {
   if (
-    models.vocab !== "gpt-4o-mini" ||
+    !isAdapterModel("vocab", models.vocab) ||
     !state.activeSession ||
     state.answered ||
     state.animationMode ||
@@ -1167,7 +1157,7 @@ function render() {
           <div class="hero-copy">
             <div class="eyebrow"><span class="spark">✦</span> 5-MINUTE PLAY TIME</div>
             <h1>${childName} + Little Sprout<br/><em>Listening & Animation</em></h1>
-            <p>Two big play paths for little listeners.<br/>Tap pictures — no typing, no speak-back mic.</p>
+            <p>Tap a picture to try right now — no sign-in.<br/>Then play Listening test or Animation Q&amp;A.</p>
             <button class="primary-btn" id="startLesson"><span>${state.activeSession ? "Keep playing" : "Start listening test"}</span><span class="arrow">→</span></button>
             <div class="streak"><span class="streak-icon">🔥</span><span><b>${profile.streak} days in a row</b><small>${profile.streak ? "A little play every day helps" : "Finish today to light your first star"}</small></span></div>
             <div class="star-badge">⭐ ${profile.stars} stars collected</div>
@@ -1175,7 +1165,7 @@ function render() {
             ${englishPlanCard()}
             ${learnerSetupCard()}
           </div>
-          <div class="hero-art"><img src="${assetBase}assets/fox-hero.png" alt="A little fox reads a picture book by a tent"/><div class="floating-pill pill-one">Listen & tap!</div><div class="floating-pill pill-two">⭐ +1</div></div>
+          <div class="hero-art">${homeTryMarkup()}</div>
         </section>
 
         ${featureHubMarkup(next)}
@@ -1226,8 +1216,15 @@ function modelSettingsModal() {
     return `<div class="modal-backdrop" id="modalBackdrop"><div class="modal parent-gate"><div class="modal-icon">🔒</div><h3>家长入口</h3><p>为了不让小朋友误触，请家长长按下面按钮 1 秒钟。</p><button class="hold-btn" id="parentHold"><span>长按进入设置</span><i></i></button><button class="reset-btn" id="parentCancel">先不设置</button></div></div>`;
   }
   const select = (type, label, icon) =>
-    `<label class="model-setting"><span class="model-setting-label"><span class="model-setting-icon">${icon}</span><span><b>${label}</b><small>${type === "image" ? "生成学习插画与封面" : type === "voice" ? "朗读题目和鼓励语" : "选择题目难度与题库策略"}</small></span></span><select data-model="${type}">${modelCatalog[type].map((item) => `<option value="${item.id}" ${models[type] === item.id ? "selected" : ""}>${item.name} · ${item.note}</option>`).join("")}</select></label>`;
-  return `<div class="modal-backdrop" id="modalBackdrop"><div class="modal model-modal"><button class="modal-close" id="closeModal">×</button><div class="modal-icon">⚙️</div><h3>家长设置</h3>${profileSummary()}${weeklyGrowthCard()}<div class="config-divider"><span>孩子档案</span></div>${childProfileSettings()}<div class="config-divider"><span>模型与能力</span></div><p>家长可以为每项能力选择模型。设置会保存在本机，下次打开仍然生效。</p><div class="model-settings">${select("image", "图片生成", "🖼️")}${select("voice", "语音提问", "🔊")}${select("vocab", "词汇量测试", "🧩")}</div><div class="config-tip">当前语音：<b>${modelName("voice")}</b> · 当前题目：<b>${modelName("vocab")}</b></div><div class="data-tools"><button class="small-action" id="exportData">导出学习档案</button><button class="small-action" id="importData">导入学习档案</button><input id="importFile" type="file" accept="application/json,.json" hidden /></div><div class="modal-actions"><button class="reset-btn" id="resetModels">恢复默认</button><button class="primary-btn" id="closeModal2">保存配置 <span class="arrow">→</span></button></div></div></div>`;
+    `<label class="model-setting"><span class="model-setting-label"><span class="model-setting-icon">${icon}</span><span><b>${label}</b><small>${type === "image" ? "生成学习插画与封面" : type === "voice" ? "朗读题目和鼓励语" : type === "video" ? "只分析故事架本地短片" : "选择题目难度与题库策略"}</small></span></span><select data-model="${type}">${catalogOptions(
+      type,
+    )
+      .map(
+        (item) =>
+          `<option value="${item.id}" ${models[type] === item.id ? "selected" : ""}>${item.name} · ${item.note}</option>`,
+      )
+      .join("")}</select></label>`;
+  return `<div class="modal-backdrop" id="modalBackdrop"><div class="modal model-modal"><button class="modal-close" id="closeModal">×</button><div class="modal-icon">⚙️</div><h3>家长设置</h3>${profileSummary()}${weeklyGrowthCard()}<div class="config-divider"><span>孩子档案</span></div>${childProfileSettings()}<div class="config-divider"><span>模型与能力</span></div><p>远程模型都是可选项。SuperGrok 会员不能代替 API Key。没配密钥时自动用本机图片和浏览器语音。</p><div class="model-settings">${select("image", "图片生成", "🖼️")}${select("voice", "语音提问", "🔊")}${select("vocab", "词汇量测试", "🧩")}${select("video", "视频理解", "🎬")}</div><div class="config-tip">当前语音：<b>${modelName("voice")}</b> · 当前题目：<b>${modelName("vocab")}</b></div><div class="data-tools"><button class="small-action" id="exportData">导出学习档案</button><button class="small-action" id="importData">导入学习档案</button><input id="importFile" type="file" accept="application/json,.json" hidden /></div><div class="modal-actions"><button class="reset-btn" id="resetModels">恢复默认</button><button class="primary-btn" id="closeModal2">保存配置 <span class="arrow">→</span></button></div></div></div>`;
 }
 
 function bindEvents() {
@@ -1252,6 +1249,31 @@ function bindEvents() {
   document.querySelector("#soundToggle")?.addEventListener("click", () => {
     state.soundOn = !state.soundOn;
     render();
+  });
+  document.querySelector("#demoListen")?.addEventListener("click", () => {
+    speak(homeTryQuestion()?.speech || "Which one is an apple?");
+  });
+  document.querySelector("#retryDemo")?.addEventListener("click", () => {
+    state.demoChoice = null;
+    state.demoAnswered = false;
+    state.demoCorrect = false;
+    render();
+  });
+  document.querySelectorAll("[data-demo-choice]").forEach((btn) =>
+    btn.addEventListener("click", () => {
+      if (state.demoAnswered) return;
+      const question = homeTryQuestion();
+      state.demoChoice = btn.dataset.demoChoice;
+      state.demoAnswered = true;
+      state.demoCorrect = btn.dataset.demoChoice === question?.answer;
+      speak(
+        state.demoCorrect ? "You found it!" : "That's okay. Let's look again.",
+      );
+      render();
+    }),
+  );
+  document.querySelector("#startAfterDemo")?.addEventListener("click", () => {
+    document.querySelector("#startLesson")?.click();
   });
   document.querySelector("#startLesson")?.addEventListener("click", () => {
     const child = activeChild();
@@ -1634,11 +1656,7 @@ function bindEvents() {
         children = imported.children;
         activeChildId = children[0].id;
         profile = children[0].profile;
-        for (const type of ["image", "voice", "vocab"]) {
-          const modelId = imported.modelSettings[type];
-          if (modelId && modelCatalog[type].some((item) => item.id === modelId))
-            models[type] = modelId;
-        }
+        Object.assign(models, resolveModels(imported.modelSettings));
         saveModels();
         resetActiveActivity();
         state.modal = true;
@@ -1650,9 +1668,7 @@ function bindEvents() {
       }
     });
   document.querySelector("#resetModels")?.addEventListener("click", () => {
-    models.image = "gpt-image-1";
-    models.voice = "browser-speech";
-    models.vocab = "adaptive-picture";
+    Object.assign(models, defaultModels());
     saveModels();
     render();
   });

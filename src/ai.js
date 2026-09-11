@@ -1,6 +1,16 @@
 import { stageDefinition } from "./learning-plan.js";
+import {
+  hasRemoteAdapter,
+  imagePromptFor,
+  isAdapterModel,
+  modelOption,
+} from "./model-config.js";
 
-const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL || "").replace(/\/$/, "");
+const apiBaseUrl = (
+  typeof import.meta !== "undefined"
+    ? import.meta.env?.VITE_API_BASE_URL || ""
+    : ""
+).replace(/\/$/, "");
 
 function compactSkill(skill) {
   return {
@@ -102,6 +112,39 @@ export function buildLearningContext(profile, activityCourse, child = null) {
   };
 }
 
+export async function adapterPost(path, body, timeoutMs = 8000) {
+  if (!hasRemoteAdapter() || !apiBaseUrl) return null;
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const response = await fetch(`${apiBaseUrl}${path}`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      signal: controller.signal,
+      body: JSON.stringify(body),
+    });
+    if (!response.ok) return null;
+    const contentType = response.headers.get("content-type") || "";
+    if (contentType.includes("application/json")) return response.json();
+    const buffer = await response.arrayBuffer();
+    if (!buffer.byteLength) return null;
+    return { binary: buffer, contentType };
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+function adapterPayload(type, modelId, extra = {}) {
+  const option = modelOption(type, modelId);
+  return {
+    provider: option?.provider || "xai",
+    model: option?.remoteModel || modelId,
+    ...extra,
+  };
+}
+
 export async function requestNextQuestion({
   model,
   profile,
@@ -109,39 +152,105 @@ export async function requestNextQuestion({
   child,
   candidates,
 }) {
-  if (!apiBaseUrl || model !== "gpt-4o-mini") return null;
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 5000);
-  try {
-    const response = await fetch(`${apiBaseUrl}/learning/next-question`, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      signal: controller.signal,
-      body: JSON.stringify({
-        model,
-        learningContext: buildLearningContext(profile, activityCourse, child),
-        candidates: candidates.map(
-          ({ id, difficulty, stage, ageMin, ageMax, concept, prompt }) => ({
-            id,
-            difficulty,
-            stage,
-            ageMin,
-            ageMax,
-            concept,
-            prompt,
-          }),
-        ),
+  if (!isAdapterModel("vocab", model)) return null;
+  const result = await adapterPost("/learning/next-question", {
+    ...adapterPayload("vocab", model),
+    learningContext: buildLearningContext(profile, activityCourse, child),
+    candidates: candidates.map(
+      ({ id, difficulty, stage, ageMin, ageMax, concept, prompt }) => ({
+        id,
+        difficulty,
+        stage,
+        ageMin,
+        ageMax,
+        concept,
+        prompt,
       }),
-    });
-    if (!response.ok) return null;
-    const result = await response.json();
-    const chosen = candidates.find(
-      (candidate) => candidate.id === result?.questionId,
-    );
-    return chosen ? { questionId: chosen.id, source: "ai" } : null;
-  } catch {
-    return null;
-  } finally {
-    clearTimeout(timeout);
+    ),
+  });
+  const chosen = candidates.find(
+    (candidate) => candidate.id === result?.questionId,
+  );
+  return chosen ? { questionId: chosen.id, source: "ai" } : null;
+}
+
+export async function requestSpeech({ model, text }) {
+  const option = modelOption("voice", model);
+  if (option?.mode !== "adapter" || !text) return null;
+  const result = await adapterPost("/learning/speak", {
+    ...adapterPayload("voice", model, {
+      voiceId: option.voiceId || "eve",
+      language: "en",
+    }),
+    text: String(text).slice(0, 240),
+  });
+  if (!result) return null;
+  if (result.audioUrl && /^https?:\/\//i.test(result.audioUrl))
+    return { audioUrl: result.audioUrl };
+  if (result.audioBase64) {
+    return {
+      audioUrl: `data:${result.mimeType || "audio/mpeg"};base64,${result.audioBase64}`,
+    };
   }
+  if (result.binary) {
+    const blob = new Blob([result.binary], {
+      type: result.contentType || "audio/mpeg",
+    });
+    return { audioUrl: URL.createObjectURL(blob) };
+  }
+  return null;
+}
+
+export async function requestImage({ model, question }) {
+  if (!isAdapterModel("image", model) || !question) return null;
+  const prompt = imagePromptFor(question);
+  if (!prompt) return null;
+  const result = await adapterPost(
+    "/learning/image",
+    {
+      ...adapterPayload("image", model, { questionId: question.id }),
+      prompt,
+    },
+    20000,
+  );
+  const imageUrl = result?.imageUrl;
+  if (
+    typeof imageUrl === "string" &&
+    /^(https?:\/\/|data:image\/)/i.test(imageUrl)
+  )
+    return { imageUrl };
+  return null;
+}
+
+export async function requestVideoAnalysis({ model, media }) {
+  if (!isAdapterModel("video", model) || !media?.url) return null;
+  const result = await adapterPost(
+    "/learning/video-analyze",
+    {
+      ...adapterPayload("video", model),
+      media: {
+        id: String(media.id || "").slice(0, 80),
+        type: media.type === "video" ? "video" : "image",
+        url: String(media.url).slice(0, 500),
+      },
+      constraints: {
+        preschool: true,
+        language: "en",
+        maxSentences: 3,
+        noNames: true,
+      },
+    },
+    20000,
+  );
+  const summary = String(result?.summary || "")
+    .trim()
+    .slice(0, 400);
+  if (!summary) return null;
+  return {
+    title: String(result.title || media.title || "Picture story").slice(0, 80),
+    summary,
+    prompt: String(result.prompt || "")
+      .trim()
+      .slice(0, 160),
+  };
 }

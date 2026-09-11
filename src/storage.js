@@ -7,6 +7,38 @@ const LEGACY_PROFILE_KEY = "little-fun-profile";
 const CHILDREN_STORAGE_KEY = "little-sprout-children";
 const DEFAULT_PROFILE_ID = "default";
 
+function safeString(value, maxLength, fallback = "") {
+  if (typeof value !== "string") return fallback;
+  return value.replace(/[<>]/g, "").trim().slice(0, maxLength) || fallback;
+}
+
+function safeInteger(value, min, max, fallback = min) {
+  const number = Number(value);
+  if (!Number.isFinite(number)) return fallback;
+  return Math.min(max, Math.max(min, Math.floor(number)));
+}
+
+function safeIso(value) {
+  if (value === null || value === undefined || value === "") return null;
+  const date = new Date(value);
+  return Number.isFinite(date.getTime()) ? date.toISOString() : null;
+}
+
+function safeDay(value) {
+  return typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value)
+    ? value
+    : null;
+}
+
+function normalizeSkill(saved) {
+  const attempts = safeInteger(saved?.attempts, 0, 100000);
+  return {
+    attempts,
+    correct: Math.min(attempts, safeInteger(saved?.correct, 0, 100000)),
+    lastPracticed: safeIso(saved?.lastPracticed),
+  };
+}
+
 export function createDefaultProfile() {
   return {
     id: DEFAULT_PROFILE_ID,
@@ -35,10 +67,16 @@ export function createDefaultChild(options = {}) {
     id:
       options.id ||
       `child-${globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(16).slice(2)}`}`,
-    nickname: options.nickname || "Sunny",
-    age: Number(options.age) || 3,
-    gender: options.gender || "unspecified",
-    englishLevel: options.englishLevel || "not-started",
+    nickname: safeString(options.nickname, 12, "小朋友"),
+    age: safeInteger(options.age, 2, 6, 3),
+    gender: ["unspecified", "girl", "boy"].includes(options.gender)
+      ? options.gender
+      : "unspecified",
+    englishLevel: ["not-started", "songs", "words", "conversation"].includes(
+      options.englishLevel,
+    )
+      ? options.englishLevel
+      : "not-started",
     englishPlan: normalizeEnglishPlan(
       options.englishPlan || createEnglishPlan(),
     ),
@@ -72,13 +110,46 @@ function saveLocalStorage(key, value) {
 }
 
 function mergeChild(saved) {
-  const child = createDefaultChild(saved || {});
+  const source = saved && typeof saved === "object" ? saved : {};
+  const child = createDefaultChild(source);
+  const baseline =
+    source.baseline && typeof source.baseline === "object"
+      ? source.baseline
+      : {};
   return {
     ...child,
-    ...saved,
-    profile: mergeProfile(saved?.profile || saved),
-    baseline: { ...child.baseline, ...(saved?.baseline || {}) },
-    englishPlan: normalizeEnglishPlan(saved?.englishPlan),
+    id: safeString(source.id, 80, child.id),
+    nickname: safeString(source.nickname, 12, child.nickname),
+    age: safeInteger(source.age, 2, 6, child.age),
+    gender: ["unspecified", "girl", "boy"].includes(source.gender)
+      ? source.gender
+      : child.gender,
+    englishLevel: ["not-started", "songs", "words", "conversation"].includes(
+      source.englishLevel,
+    )
+      ? source.englishLevel
+      : child.englishLevel,
+    createdAt: safeIso(source.createdAt) || child.createdAt,
+    profile: mergeProfile(source.profile || source),
+    baseline: {
+      ...child.baseline,
+      status: baseline.status === "complete" ? "complete" : "not-started",
+      score:
+        baseline.status === "complete"
+          ? safeInteger(baseline.score, 0, 3, 0)
+          : null,
+      total: 3,
+      completedAt:
+        baseline.status === "complete" ? safeIso(baseline.completedAt) : null,
+      suggestedLevel: ["not-started", "songs", "words"].includes(
+        baseline.suggestedLevel,
+      )
+        ? baseline.suggestedLevel
+        : null,
+    },
+    englishPlan: normalizeEnglishPlan(
+      source.englishPlan || source.profile?.englishPlan,
+    ),
   };
 }
 
@@ -89,14 +160,75 @@ function localChildrenValue() {
 
 function mergeProfile(saved) {
   const defaults = createDefaultProfile();
+  const source = saved && typeof saved === "object" ? saved : {};
+  const skills = Object.fromEntries(
+    Object.keys(defaults.skills).map((key) => [
+      key,
+      normalizeSkill(source.skills?.[key]),
+    ]),
+  );
+  const questionStats = {};
+  if (source.questionStats && typeof source.questionStats === "object") {
+    for (const [questionId, savedStat] of Object.entries(
+      source.questionStats,
+    ).slice(0, 300)) {
+      const id = safeString(questionId, 100);
+      if (!id || !savedStat || typeof savedStat !== "object") continue;
+      const attempts = safeInteger(savedStat.attempts, 0, 100000);
+      questionStats[id] = {
+        attempts,
+        correct: Math.min(attempts, safeInteger(savedStat.correct, 0, 100000)),
+        lastPracticed: safeIso(savedStat.lastPracticed),
+        lastCorrect:
+          typeof savedStat.lastCorrect === "boolean"
+            ? savedStat.lastCorrect
+            : null,
+      };
+    }
+  }
+  const events = Array.isArray(source.events)
+    ? source.events
+        .filter((event) => event && typeof event === "object")
+        .slice(-60)
+        .map((event) => ({
+          type: safeString(event.type, 40, "unknown"),
+          courseId: safeString(event.courseId, 40, "unknown"),
+          questionId: safeString(event.questionId, 100, ""),
+          difficulty: safeInteger(event.difficulty, 1, 3, 1),
+          correct:
+            typeof event.correct === "boolean" ? event.correct : undefined,
+          at: safeIso(event.at),
+          durationMs: safeInteger(event.durationMs, 0, 86400000, 0),
+        }))
+        .filter((event) => event.at)
+    : [];
+  const awards = Array.isArray(source.awards)
+    ? source.awards
+        .filter((award) => award && typeof award === "object")
+        .slice(-100)
+        .map((award) => ({
+          id: safeString(award.id, 100, `award-${Date.now()}`),
+          label: safeString(award.label, 120, "A little win"),
+          at: safeIso(award.at) || new Date().toISOString(),
+        }))
+    : [];
   return {
     ...defaults,
-    ...(saved || {}),
+    ...source,
     id: DEFAULT_PROFILE_ID,
-    skills: { ...defaults.skills, ...(saved?.skills || {}) },
-    questionStats: { ...(saved?.questionStats || {}) },
-    events: Array.isArray(saved?.events) ? saved.events : [],
-    awards: Array.isArray(saved?.awards) ? saved.awards : [],
+    totalSessions: safeInteger(source.totalSessions, 0, 100000),
+    totalAnswers: safeInteger(source.totalAnswers, 0, 1000000),
+    correctAnswers: Math.min(
+      safeInteger(source.totalAnswers, 0, 1000000),
+      safeInteger(source.correctAnswers, 0, 1000000),
+    ),
+    stars: safeInteger(source.stars, 0, 1000000),
+    streak: safeInteger(source.streak, 0, 100000),
+    lastActive: safeDay(source.lastActive),
+    skills,
+    questionStats,
+    events,
+    awards,
   };
 }
 
@@ -223,7 +355,7 @@ export async function loadChildren() {
   const legacyProfile = await loadProfile();
   const child = createDefaultChild({
     id: "child-default",
-    nickname: "Sunny",
+    nickname: "小朋友",
     profile: legacyProfile,
   });
   await saveChild(child);
@@ -279,6 +411,7 @@ export function serializeLearningData(children, modelSettings = {}) {
         image: modelSettings.image,
         voice: modelSettings.voice,
         vocab: modelSettings.vocab,
+        video: modelSettings.video,
       },
     },
     null,
@@ -341,7 +474,7 @@ export function parseLearningData(input) {
     });
   });
   const modelSettings = {};
-  for (const key of ["image", "voice", "vocab"]) {
+  for (const key of ["image", "voice", "vocab", "video"]) {
     if (typeof payload.modelSettings?.[key] === "string")
       modelSettings[key] = payload.modelSettings[key].slice(0, 80);
   }

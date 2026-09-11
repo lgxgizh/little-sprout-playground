@@ -39,6 +39,12 @@ export const ENGLISH_STAGES = {
 
 const REVIEW_INTERVALS = [1, 3, 7];
 
+function safeIso(value) {
+  if (value === null || value === undefined || value === "") return null;
+  const date = new Date(value);
+  return Number.isFinite(date.getTime()) ? date.toISOString() : null;
+}
+
 export function createEnglishPlan() {
   return {
     stage: 1,
@@ -54,14 +60,34 @@ export function normalizeEnglishPlan(saved) {
   const stage = Math.min(4, Math.max(1, Number(saved?.stage) || 1));
   return {
     ...defaults,
-    ...(saved || {}),
+    ...(saved && typeof saved === "object" ? saved : {}),
     stage,
+    stageStartedAt: safeIso(saved?.stageStartedAt),
     masteredConcepts: Array.isArray(saved?.masteredConcepts)
-      ? saved.masteredConcepts.slice(0, 100)
+      ? saved.masteredConcepts
+          .filter((concept) => typeof concept === "string" && concept.trim())
+          .map((concept) => concept.trim().slice(0, 100))
+          .slice(0, 100)
       : [],
     reviewQueue: Array.isArray(saved?.reviewQueue)
-      ? saved.reviewQueue.slice(0, 100)
+      ? saved.reviewQueue
+          .filter(
+            (item) =>
+              item &&
+              typeof item === "object" &&
+              typeof item.questionId === "string" &&
+              item.questionId.trim(),
+          )
+          .map((item) => ({
+            questionId: item.questionId.trim().slice(0, 100),
+            intervalDays: REVIEW_INTERVALS.includes(Number(item.intervalDays))
+              ? Number(item.intervalDays)
+              : REVIEW_INTERVALS[0],
+            dueAt: safeIso(item.dueAt),
+          }))
+          .slice(0, 100)
       : [],
+    lastRecommendationAt: safeIso(saved?.lastRecommendationAt),
   };
 }
 

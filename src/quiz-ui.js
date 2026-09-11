@@ -31,6 +31,7 @@ export function choiceGridMarkup(
     disabled = false,
     prompt = "Choose a picture",
     showLabels = true,
+    dataAttr = "choice",
   } = {},
 ) {
   return `<div class="choice-grid choice-grid-pictures" role="group" aria-label="${escapeHtml(prompt)}">${choices
@@ -45,7 +46,7 @@ export function choiceGridMarkup(
       const label = showLabels
         ? `<span class="choice-label">${escapeHtml(choice.label || letter)}</span>`
         : "";
-      return `<button type="button" class="choice choice-picture ${isCorrect ? "correct" : ""} ${isWrong ? "wrong" : ""}" data-choice="${escapeHtml(choice.value)}" aria-label="${escapeHtml(prompt)}: ${escapeHtml(choice.label || letter)}" style="--choice-color:${escapeHtml(choice.color || "#9ed9c4")}" ${answered || disabled ? "disabled" : ""}><span class="choice-letter">${letter}</span>${media}${label}${isCorrect ? '<b class="check">✓</b>' : ""}</button>`;
+      return `<button type="button" class="choice choice-picture ${isCorrect ? "correct" : ""} ${isWrong ? "wrong" : ""}" data-${dataAttr}="${escapeHtml(choice.value)}" aria-label="${escapeHtml(prompt)}: ${escapeHtml(choice.label || letter)}" style="--choice-color:${escapeHtml(choice.color || "#9ed9c4")}" ${answered || disabled ? "disabled" : ""}><span class="choice-letter">${letter}</span>${media}${label}${isCorrect ? '<b class="check">✓</b>' : ""}</button>`;
     })
     .join("")}</div>`;
 }
