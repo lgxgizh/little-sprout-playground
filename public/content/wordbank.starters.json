@@ -186,7 +186,7 @@
       "object_prompt": "one bright green lime",
       "color": "#7dcc6b",
       "emoji": "🟢",
-      "status": "pending"
+      "status": "approved"
     },
     {
       "id": "food_pineapple",
@@ -248,7 +248,7 @@
       "object_prompt": "one brown coconut with a small cut face showing white inside",
       "color": "#c9a27a",
       "emoji": "🥥",
-      "status": "pending"
+      "status": "approved"
     },
     {
       "id": "food_kiwi",
@@ -310,7 +310,7 @@
       "object_prompt": "one slice of red watermelon with black seeds and green rind",
       "color": "#e85d5d",
       "emoji": "🍉",
-      "status": "pending"
+      "status": "approved"
     },
     {
       "id": "food_mango",
@@ -341,7 +341,7 @@
       "object_prompt": "one yellow-orange mango with a small leaf",
       "color": "#f0b04a",
       "emoji": "🥭",
-      "status": "pending"
+      "status": "approved"
     },
     {
       "id": "food_carrot",
@@ -365,7 +365,7 @@
       "object_prompt": "one orange carrot with a short green top",
       "color": "#f08a3a",
       "emoji": "🥕",
-      "status": "pending"
+      "status": "approved"
     },
     {
       "id": "food_tomato",
@@ -389,7 +389,7 @@
       "object_prompt": "one red tomato with a small green calyx",
       "color": "#e2554a",
       "emoji": "🍅",
-      "status": "pending"
+      "status": "approved"
     },
     {
       "id": "food_potato",
@@ -413,7 +413,7 @@
       "object_prompt": "one light brown potato",
       "color": "#cbb07a",
       "emoji": "🥔",
-      "status": "pending"
+      "status": "approved"
     },
     {
       "id": "food_onion",
@@ -437,7 +437,7 @@
       "object_prompt": "one round onion with papery gold skin",
       "color": "#d7c07a",
       "emoji": "🧅",
-      "status": "pending"
+      "status": "approved"
     },
     {
       "id": "food_bread",
@@ -461,7 +461,7 @@
       "object_prompt": "one loaf of bread",
       "color": "#e0c08a",
       "emoji": "🍞",
-      "status": "pending"
+      "status": "approved"
     },
     {
       "id": "food_cake",
@@ -485,7 +485,7 @@
       "object_prompt": "one small slice of birthday cake with frosting",
       "color": "#f3b6c8",
       "emoji": "🍰",
-      "status": "pending"
+      "status": "approved"
     },
     {
       "id": "food_burger",
@@ -509,7 +509,7 @@
       "object_prompt": "one simple hamburger",
       "color": "#d9a05a",
       "emoji": "🍔",
-      "status": "pending"
+      "status": "approved"
     },
     {
       "id": "food_egg",
@@ -533,7 +533,7 @@
       "object_prompt": "one white egg",
       "color": "#f4efe4",
       "emoji": "🥚",
-      "status": "pending"
+      "status": "approved"
     },
     {
       "id": "food_ice_cream",
@@ -557,7 +557,7 @@
       "object_prompt": "one ice cream cone with a pink scoop",
       "color": "#f7b7c9",
       "emoji": "🍦",
-      "status": "pending"
+      "status": "approved"
     },
     {
       "id": "food_juice",
@@ -581,7 +581,7 @@
       "object_prompt": "one glass of orange juice",
       "color": "#f0a24a",
       "emoji": "🧃",
-      "status": "pending"
+      "status": "approved"
     },
     {
       "id": "food_milk",
@@ -605,7 +605,7 @@
       "object_prompt": "one glass of milk",
       "color": "#f3f0ea",
       "emoji": "🥛",
-      "status": "pending"
+      "status": "approved"
     },
     {
       "id": "food_sausage",
@@ -629,7 +629,7 @@
       "object_prompt": "one cooked brown sausage",
       "color": "#c47a5a",
       "emoji": "🌭",
-      "status": "pending"
+      "status": "approved"
     },
     {
       "id": "animals_cat",
@@ -749,7 +749,7 @@
       "object_prompt": "one small grey mouse, cute, no cheese",
       "color": "#c5c0b8",
       "emoji": "🐭",
-      "status": "pending"
+      "status": "approved"
     },
     {
       "id": "animals_cow",
@@ -780,7 +780,7 @@
       "object_prompt": "one friendly black-and-white cow standing",
       "color": "#dfe4ea",
       "emoji": "🐮",
-      "status": "pending"
+      "status": "approved"
     },
     {
       "id": "animals_horse",
@@ -804,7 +804,7 @@
       "object_prompt": "one brown horse standing",
       "color": "#c48a5a",
       "emoji": "🐴",
-      "status": "pending"
+      "status": "approved"
     },
     {
       "id": "animals_sheep",
@@ -828,7 +828,7 @@
       "object_prompt": "one fluffy white sheep",
       "color": "#f2efe8",
       "emoji": "🐑",
-      "status": "pending"
+      "status": "approved"
     },
     {
       "id": "animals_duck",
@@ -852,7 +852,7 @@
       "object_prompt": "one yellow duckling",
       "color": "#f7d35a",
       "emoji": "🦆",
-      "status": "pending"
+      "status": "approved"
     },
     {
       "id": "animals_chicken",
@@ -876,7 +876,7 @@
       "object_prompt": "one red-combed chicken",
       "color": "#f0b04a",
       "emoji": "🐔",
-      "status": "pending"
+      "status": "approved"
     },
     {
       "id": "animals_goat",
@@ -900,7 +900,7 @@
       "object_prompt": "one white goat with small horns, friendly",
       "color": "#e8e0d4",
       "emoji": "🐐",
-      "status": "pending"
+      "status": "approved"
     },
     {
       "id": "animals_donkey",
@@ -924,7 +924,7 @@
       "object_prompt": "one grey donkey, friendly",
       "color": "#c0b8ae",
       "emoji": "🫏",
-      "status": "pending"
+      "status": "approved"
     },
     {
       "id": "animals_bee",
@@ -948,7 +948,7 @@
       "object_prompt": "one cartoon bee, friendly, not scary",
       "color": "#f6c84c",
       "emoji": "🐝",
-      "status": "pending"
+      "status": "approved"
     },
     {
       "id": "animals_frog",
@@ -972,7 +972,7 @@
       "object_prompt": "one cute green frog sitting",
       "color": "#7dcc6b",
       "emoji": "🐸",
-      "status": "pending"
+      "status": "approved"
     },
     {
       "id": "animals_bear",
@@ -1003,7 +1003,7 @@
       "object_prompt": "one friendly brown bear sitting",
       "color": "#c48a5a",
       "emoji": "🐻",
-      "status": "pending"
+      "status": "approved"
     },
     {
       "id": "animals_elephant",
@@ -1034,7 +1034,7 @@
       "object_prompt": "one cute grey elephant",
       "color": "#b7b7c2",
       "emoji": "🐘",
-      "status": "pending"
+      "status": "approved"
     },
     {
       "id": "animals_giraffe",
@@ -1065,7 +1065,7 @@
       "object_prompt": "one giraffe with a long neck",
       "color": "#e2b15a",
       "emoji": "🦒",
-      "status": "pending"
+      "status": "approved"
     },
     {
       "id": "animals_monkey",
@@ -1096,7 +1096,7 @@
       "object_prompt": "one cute brown monkey sitting",
       "color": "#c48a5a",
       "emoji": "🐵",
-      "status": "pending"
+      "status": "approved"
     },
     {
       "id": "animals_hippo",
@@ -1127,7 +1127,7 @@
       "object_prompt": "one cute grey hippo",
       "color": "#9aa4b2",
       "emoji": "🦛",
-      "status": "pending"
+      "status": "approved"
     },
     {
       "id": "animals_tiger",
@@ -1158,7 +1158,7 @@
       "object_prompt": "one friendly cartoon tiger, not scary, no teeth bared",
       "color": "#f08a3a",
       "emoji": "🐯",
-      "status": "pending"
+      "status": "approved"
     },
     {
       "id": "animals_zebra",
@@ -1189,7 +1189,7 @@
       "object_prompt": "one zebra standing",
       "color": "#3d3d3d",
       "emoji": "🦓",
-      "status": "pending"
+      "status": "approved"
     },
     {
       "id": "animals_polar_bear",
@@ -1220,7 +1220,7 @@
       "object_prompt": "one cute white polar bear sitting",
       "color": "#f4f6f8",
       "emoji": "🐻‍❄️",
-      "status": "pending"
+      "status": "approved"
     },
     {
       "id": "toys_ball",
@@ -1306,7 +1306,7 @@
       "object_prompt": "one simple cloth doll, friendly, preschool safe",
       "color": "#f3b6c8",
       "emoji": "🧸",
-      "status": "pending"
+      "status": "approved"
     },
     {
       "id": "toys_kite",
@@ -1361,7 +1361,7 @@
       "object_prompt": "one friendly toy robot",
       "color": "#8fb7d6",
       "emoji": "🤖",
-      "status": "pending"
+      "status": "approved"
     },
     {
       "id": "toys_teddy",
@@ -1409,7 +1409,7 @@
       "object_prompt": "one colorful toy train engine",
       "color": "#e2554a",
       "emoji": "🚂",
-      "status": "pending"
+      "status": "approved"
     },
     {
       "id": "toys_bike",
@@ -1433,7 +1433,7 @@
       "object_prompt": "one small children's bicycle",
       "color": "#6db6e8",
       "emoji": "🚲",
-      "status": "pending"
+      "status": "approved"
     },
     {
       "id": "toys_boat",
@@ -1457,7 +1457,7 @@
       "object_prompt": "one simple sailboat",
       "color": "#6db6e8",
       "emoji": "⛵",
-      "status": "pending"
+      "status": "approved"
     },
     {
       "id": "toys_plane",
@@ -1481,7 +1481,7 @@
       "object_prompt": "one toy airplane",
       "color": "#8fb7d6",
       "emoji": "✈️",
-      "status": "pending"
+      "status": "approved"
     },
     {
       "id": "toys_helicopter",
@@ -1505,7 +1505,7 @@
       "object_prompt": "one toy helicopter",
       "color": "#9ed9c4",
       "emoji": "🚁",
-      "status": "pending"
+      "status": "approved"
     },
     {
       "id": "toys_baseball",
@@ -1529,7 +1529,7 @@
       "object_prompt": "one white baseball with red stitching",
       "color": "#f4efe4",
       "emoji": "⚾",
-      "status": "pending"
+      "status": "approved"
     },
     {
       "id": "toys_basketball",
@@ -1553,7 +1553,7 @@
       "object_prompt": "one orange basketball",
       "color": "#f08a3a",
       "emoji": "🏀",
-      "status": "pending"
+      "status": "approved"
     },
     {
       "id": "toys_football",
@@ -1577,7 +1577,7 @@
       "object_prompt": "one black-and-white soccer ball",
       "color": "#3d3d3d",
       "emoji": "⚽",
-      "status": "pending"
+      "status": "approved"
     },
     {
       "id": "toys_camera",
@@ -1601,7 +1601,7 @@
       "object_prompt": "one simple toy camera",
       "color": "#8fb7d6",
       "emoji": "📷",
-      "status": "pending"
+      "status": "approved"
     },
     {
       "id": "clothes_hat",
@@ -1673,7 +1673,7 @@
       "object_prompt": "one folded blue shirt",
       "color": "#6db6e8",
       "emoji": "👕",
-      "status": "pending"
+      "status": "approved"
     },
     {
       "id": "clothes_t_shirt",
@@ -1697,7 +1697,7 @@
       "object_prompt": "one yellow T-shirt",
       "color": "#f7c94b",
       "emoji": "👕",
-      "status": "pending"
+      "status": "approved"
     },
     {
       "id": "clothes_shoe",
@@ -1745,7 +1745,7 @@
       "object_prompt": "one pair of striped socks",
       "color": "#9ed9c4",
       "emoji": "🧦",
-      "status": "pending"
+      "status": "approved"
     },
     {
       "id": "clothes_boot",
@@ -1769,7 +1769,7 @@
       "object_prompt": "one pair of yellow rain boots",
       "color": "#f7c94b",
       "emoji": "👢",
-      "status": "pending"
+      "status": "approved"
     },
     {
       "id": "clothes_jacket",
@@ -1793,7 +1793,7 @@
       "object_prompt": "one blue jacket",
       "color": "#6db6e8",
       "emoji": "🧥",
-      "status": "pending"
+      "status": "approved"
     },
     {
       "id": "clothes_jeans",
@@ -1817,7 +1817,7 @@
       "object_prompt": "one pair of blue jeans",
       "color": "#6b8fc4",
       "emoji": "👖",
-      "status": "pending"
+      "status": "approved"
     },
     {
       "id": "clothes_shorts",
@@ -1841,7 +1841,7 @@
       "object_prompt": "one pair of green shorts",
       "color": "#7dcc6b",
       "emoji": "🩳",
-      "status": "pending"
+      "status": "approved"
     },
     {
       "id": "clothes_skirt",
@@ -1865,7 +1865,7 @@
       "object_prompt": "one simple blue skirt, no person",
       "color": "#6db6e8",
       "emoji": "👗",
-      "status": "pending"
+      "status": "approved"
     },
     {
       "id": "clothes_glasses",
@@ -1889,7 +1889,7 @@
       "object_prompt": "one pair of round glasses",
       "color": "#8fb7d6",
       "emoji": "👓",
-      "status": "pending"
+      "status": "approved"
     },
     {
       "id": "clothes_bag",
@@ -1937,7 +1937,7 @@
       "object_prompt": "one blue baseball cap",
       "color": "#6db6e8",
       "emoji": "🧢",
-      "status": "pending"
+      "status": "approved"
     },
     {
       "id": "clothes_watch",
@@ -1961,7 +1961,7 @@
       "object_prompt": "one simple wristwatch",
       "color": "#d9a66f",
       "emoji": "⌚",
-      "status": "pending"
+      "status": "approved"
     },
     {
       "id": "clothes_handbag",
@@ -1985,7 +1985,7 @@
       "object_prompt": "one small red handbag",
       "color": "#ff6b5e",
       "emoji": "👜",
-      "status": "pending"
+      "status": "approved"
     },
     {
       "id": "home_bed",
@@ -2081,7 +2081,7 @@
       "object_prompt": "one blue sofa",
       "color": "#6db6e8",
       "emoji": "🛋️",
-      "status": "pending"
+      "status": "approved"
     },
     {
       "id": "home_lamp",
@@ -2129,7 +2129,7 @@
       "object_prompt": "one round wall clock with a simple face and no numbers crowded",
       "color": "#f4efe4",
       "emoji": "🕒",
-      "status": "pending"
+      "status": "approved"
     },
     {
       "id": "home_door",
@@ -2153,7 +2153,7 @@
       "object_prompt": "one closed wooden door",
       "color": "#c48a5a",
       "emoji": "🚪",
-      "status": "pending"
+      "status": "approved"
     },
     {
       "id": "home_window",
@@ -2177,7 +2177,7 @@
       "object_prompt": "one simple window with a blue sky pane, no room scene",
       "color": "#8fb7d6",
       "emoji": "🪟",
-      "status": "pending"
+      "status": "approved"
     },
     {
       "id": "home_house",
@@ -2201,7 +2201,7 @@
       "object_prompt": "one simple cartoon house",
       "color": "#ff8b76",
       "emoji": "🏠",
-      "status": "pending"
+      "status": "approved"
     },
     {
       "id": "home_bath",
@@ -2225,7 +2225,7 @@
       "object_prompt": "one empty bathtub, no person",
       "color": "#8fb7d6",
       "emoji": "🛁",
-      "status": "pending"
+      "status": "approved"
     },
     {
       "id": "home_box",
@@ -2249,7 +2249,7 @@
       "object_prompt": "one cardboard box",
       "color": "#e0c08a",
       "emoji": "📦",
-      "status": "pending"
+      "status": "approved"
     },
     {
       "id": "home_phone",
@@ -2273,7 +2273,7 @@
       "object_prompt": "one simple toy telephone",
       "color": "#9ed9c4",
       "emoji": "📞",
-      "status": "pending"
+      "status": "approved"
     },
     {
       "id": "home_computer",
@@ -2297,7 +2297,7 @@
       "object_prompt": "one simple laptop computer, screen off",
       "color": "#8fb7d6",
       "emoji": "💻",
-      "status": "pending"
+      "status": "approved"
     },
     {
       "id": "home_television",
@@ -2321,7 +2321,7 @@
       "object_prompt": "one simple television, screen off",
       "color": "#6b8fc4",
       "emoji": "📺",
-      "status": "pending"
+      "status": "approved"
     },
     {
       "id": "home_armchair",
@@ -2345,7 +2345,7 @@
       "object_prompt": "one green armchair",
       "color": "#7dcc6b",
       "emoji": "🪑",
-      "status": "pending"
+      "status": "approved"
     },
     {
       "id": "home_desk",
@@ -2369,7 +2369,7 @@
       "object_prompt": "one school desk",
       "color": "#d9a66f",
       "emoji": "🪵",
-      "status": "pending"
+      "status": "approved"
     },
     {
       "id": "transport_car",
@@ -2493,7 +2493,7 @@
       "object_prompt": "one toy motorbike, no rider",
       "color": "#3d3d3d",
       "emoji": "🏍️",
-      "status": "pending"
+      "status": "approved"
     },
     {
       "id": "transport_ship",
@@ -2596,7 +2596,7 @@
       "object_prompt": "one blue pen",
       "color": "#6db6e8",
       "emoji": "🖊️",
-      "status": "pending"
+      "status": "approved"
     },
     {
       "id": "school_crayon",
@@ -2620,7 +2620,7 @@
       "object_prompt": "one red crayon",
       "color": "#ff6b5e",
       "emoji": "🖍️",
-      "status": "pending"
+      "status": "approved"
     },
     {
       "id": "school_ruler",
@@ -2644,7 +2644,7 @@
       "object_prompt": "one wooden ruler, no tiny numbers needed",
       "color": "#e0c08a",
       "emoji": "📏",
-      "status": "pending"
+      "status": "approved"
     },
     {
       "id": "school_eraser",
@@ -2668,7 +2668,7 @@
       "object_prompt": "one pink eraser",
       "color": "#f3b6c8",
       "emoji": "🧽",
-      "status": "pending"
+      "status": "approved"
     },
     {
       "id": "school_cup",
@@ -2740,7 +2740,7 @@
       "object_prompt": "one red flower with a green stem",
       "color": "#ff6b5e",
       "emoji": "🌸",
-      "status": "pending"
+      "status": "approved"
     },
     {
       "id": "world_tree",
@@ -2764,7 +2764,7 @@
       "object_prompt": "one simple green tree",
       "color": "#7dcc6b",
       "emoji": "🌳",
-      "status": "pending"
+      "status": "approved"
     },
     {
       "id": "world_sun",
@@ -2788,7 +2788,7 @@
       "object_prompt": "one bright yellow sun with short rays",
       "color": "#f7c94b",
       "emoji": "☀️",
-      "status": "pending"
+      "status": "approved"
     },
     {
       "id": "school_guitar",
@@ -2812,7 +2812,7 @@
       "object_prompt": "one acoustic guitar",
       "color": "#d9a66f",
       "emoji": "🎸",
-      "status": "pending"
+      "status": "approved"
     }
   ],
   "batches": [
