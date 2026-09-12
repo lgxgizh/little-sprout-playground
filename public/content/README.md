@@ -1,14 +1,16 @@
 # English content packs / 英语内容包
 
-Kid listening comes from `wordbanks.json` plus the word JSON it points at (today `wordbank.starters.json`). The quiz engine builds picture questions from `speech` / `prompt_en` and reads them with the browser (or optional TTS). It does **not** fetch `questions.en.json` into the kid pool, and it does **not** play mp3 files from word `audio` fields.
+Kid listening comes from `wordbanks.json` plus the word JSON files it points at (`wordbank.starters.json`, `wordbank.movers-lite.json`, `wordbank.concepts.json`, …). The quiz engine builds picture questions from `speech` / `prompt_en` (or contrast pair prompts) and reads them with the browser (or optional TTS). It does **not** play mp3 files from word `audio` fields.
 
-`wordbanks.json` is the listening **word-bank catalog**. Each entry points at a word JSON file (today `wordbank.starters.json`) and may set an optional `theme` filter so parents pick a concrete pack (full Starters, food, animals, …). Add more files later (e.g. Movers) by listing them here.
+`wordbanks.json` is the listening **word-bank catalog**. Each entry points at a word JSON file and may set an optional `theme` filter so kids/parents pick a concrete pack (full Starters, Movers Lite, concepts, food, animals, …).
 
-`wordbank.starters.json` is the Cambridge YLE Starters **imageable noun** bank for picture listening. The quiz engine reads this file, picks same-theme distractors, and shuffles choices with the child id. It is a curated subset for drawing cards, not official Cambridge exam content. Cards are JPEG files under `public/assets/flashcards/`.
+- `wordbank.starters.json` — Cambridge YLE Starters–style **imageable nouns** for picture listening.
+- `wordbank.movers-lite.json` — a slightly harder curated noun pack (Movers-ish, still picture-friendly); cards under `public/assets/flashcards/movers/` plus reused Starters JPEGs.
+- `wordbank.concepts.json` — contrast / attribute listening (`question_type: "contrast"` + `pairs`) such as big/small, tall/short, full/empty, and simple color contrasts; cards under `public/assets/flashcards/concepts/`.
 
-`wordbanks.json` 是听力「单词库」目录：每项指向一份词库 JSON，并可带 `theme` 过滤成主题包。以后加 Movers 等只需新增文件并在目录里登记。
+Cards are JPEG files under `public/assets/flashcards/`. Packs are curated for drawing cards, not official Cambridge exam content.
 
-`questions.en.json` 只是旧格式说明 / 文档样例，不会再并入孩子听力池。听力只用词库的 `speech` / `prompt_en` 做浏览器朗读，不播放词条上的 mp3。
+`wordbanks.json` 是听力「单词库」目录。听力只用词库的 `speech` / `prompt_en`（或对比题 pair 提示）做浏览器朗读，不播放词条上的 mp3。
 
 ## Minimal format / 最小格式
 
@@ -73,10 +75,6 @@ The repository includes original starter examples only; it does not bundle third
 For a 3-year-old, add one concept at a time: everyday nouns (`apple`, `cup`, `door`), colors, animals, body parts, and short action phrases (`touch the ball`, `wash hands`). Prefer one idea per question, picture-first choices, and natural English that a caregiver can repeat.
 
 针对 3 岁孩子，建议一次只引入一个概念：日常名词（`apple`、`cup`、`door`）、颜色、动物、身体部位，以及简单动作短句（`touch the ball`、`wash hands`）。每道题只考一个点，优先图片和听力，并让家长可以自然复述。
-
-The included `english-open` example is stage 3, so it will stay hidden for a stage-1 or stage-2 learner until the local plan advances. This is a safe way to mix one shared pack across children with different ages and levels.
-
-示例中的 `english-open` 属于阶段 3，因此阶段 1 或阶段 2 的孩子暂时看不到它，直到本地学习路径进入阶段 3。这样一份词库就能安全地服务不同年龄和基础的孩子。
 
 ### A practical content checklist / 添加前检查
 

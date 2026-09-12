@@ -122,6 +122,112 @@ export function buildListeningQuestion(
   };
 }
 
+export function isContrastBank(wordbank) {
+  return (
+    wordbank?.question_type === "contrast" ||
+    (Array.isArray(wordbank?.pairs) && wordbank.pairs.length > 0)
+  );
+}
+
+function choiceFromConcept(choice, assetBase = "/") {
+  return {
+    label: String(choice.lemma || choice.slug || "").replace(/^./, (letter) =>
+      letter.toUpperCase(),
+    ),
+    emoji: choice.emoji || "🖼️",
+    value: choice.slug,
+    color: choice.color || "#9ed9c4",
+    imageKey: choice.slug,
+    imageSrc: wordImageSrc(
+      { image: choice.image, fallback_image: choice.fallback_image },
+      assetBase,
+    ),
+  };
+}
+
+/**
+ * Build one contrast / attribute listening question from a pair + prompt.
+ * Pure contrasts may use 2 choices; color packs often have 3–4.
+ */
+export function buildContrastQuestion(
+  pair,
+  promptSpec,
+  {
+    childId = "default",
+    assetBase = "/",
+    salt = "contrast",
+    padChoices = [],
+  } = {},
+) {
+  if (!pair || !promptSpec?.value) return null;
+  const targetAttr = promptSpec.value;
+  const answerChoice = (pair.choices || []).find((choice) =>
+    (choice.attrs || []).includes(targetAttr),
+  );
+  if (!answerChoice) return null;
+  const primary = [...(pair.choices || [])];
+  const used = new Set(primary.map((choice) => choice.slug));
+  for (const extra of padChoices) {
+    if (primary.length >= 4) break;
+    if (!extra?.slug || used.has(extra.slug)) continue;
+    // Keep the target attribute unique so the answer stays unambiguous.
+    if ((extra.attrs || []).includes(targetAttr)) continue;
+    used.add(extra.slug);
+    primary.push(extra);
+  }
+  if (primary.length < 2) return null;
+  const random = mulberry32(seedFrom(childId, pair.id, targetAttr, salt));
+  const choices = shuffleCopy(
+    primary.map((choice) => choiceFromConcept(choice, assetBase)),
+    random,
+  );
+  const prompt = promptSpec.prompt_en || `Which one is ${targetAttr}?`;
+  return {
+    id: `english-contrast-${pair.id}-${targetAttr}`,
+    difficulty: 2,
+    stage: 2,
+    ageMin: 3,
+    ageMax: 6,
+    concept: `${pair.attribute || "contrast"}-${targetAttr}`,
+    baseline: false,
+    visual: answerChoice.emoji || "🎧",
+    prompt,
+    speech: promptSpec.speech || prompt,
+    answer: answerChoice.slug,
+    question_type: "contrast",
+    choices,
+  };
+}
+
+export function contrastQuestionSpecs(wordbank) {
+  const specs = [];
+  for (const pair of wordbank?.pairs || []) {
+    for (const promptSpec of pair.prompts || []) {
+      specs.push({ pair, promptSpec });
+    }
+  }
+  return specs;
+}
+
+export function listeningPoolFromContrast(
+  wordbank,
+  { childId = "default", assetBase = "/", salt = "contrast" } = {},
+) {
+  const allChoices = (wordbank?.pairs || []).flatMap(
+    (pair) => pair.choices || [],
+  );
+  return contrastQuestionSpecs(wordbank)
+    .map(({ pair, promptSpec }) =>
+      buildContrastQuestion(pair, promptSpec, {
+        childId,
+        assetBase,
+        salt,
+        padChoices: allChoices,
+      }),
+    )
+    .filter(Boolean);
+}
+
 export const THEME_LABELS = {
   all: "全部",
   food: "食物",
@@ -213,21 +319,42 @@ export function listListeningBanks(catalog, loadedBanks = {}) {
       const wordbank = resolveLoadedBank(bank, loadedBanks);
       const theme = bank.theme || "all";
       const words = usableWords(wordbank, theme);
+      const count = isContrastBank(wordbank)
+        ? contrastQuestionSpecs(wordbank).length
+        : words.length;
       return {
         id: bank.id,
         label: bank.label || bank.id,
         description: bank.description || "",
         file: bank.file || "",
         theme,
-        count: words.length,
+        count,
         words,
         source: wordbank,
+        question_type: wordbank?.question_type || "identify",
       };
     })
     .filter((bank) => bank.id);
 }
 
 export function bankPreviewWords(bank, limit = 8) {
+  if (isContrastBank(bank?.source || bank)) {
+    const fromPairs = [];
+    const seen = new Set();
+    for (const pair of (bank?.source || bank)?.pairs || []) {
+      for (const choice of pair.choices || []) {
+        if (!choice.image || seen.has(choice.slug)) continue;
+        seen.add(choice.slug);
+        fromPairs.push({
+          lemma: choice.lemma || choice.slug,
+          image: choice.image,
+          slug: choice.slug,
+          theme: "concepts",
+        });
+      }
+    }
+    return fromPairs.slice(0, limit);
+  }
   const words = (bank?.words || []).filter((word) => word.image);
   if (!words.length) return [];
   if ((bank?.theme || "all") !== "all") return words.slice(0, limit);
@@ -280,6 +407,17 @@ export function listeningPoolFromWordbank(
     shuffle = false,
   } = {},
 ) {
+  if (isContrastBank(wordbank)) {
+    let pool = listeningPoolFromContrast(wordbank, {
+      childId,
+      assetBase,
+      salt,
+    });
+    if (shuffle) {
+      pool = shuffleCopy(pool, mulberry32(seedFrom(childId, "contrast", salt)));
+    }
+    return pool;
+  }
   const usable = usableWords(wordbank, theme).filter((word) => {
     if (availableSlugs && !availableSlugs.has(word.slug)) return false;
     return true;

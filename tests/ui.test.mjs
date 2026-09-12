@@ -2,7 +2,11 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { homeHubMarkup } from "../src/hub-ui.js";
 import { parentModelsMarkup } from "../src/parent-ui.js";
-import { playStageMarkup } from "../src/play-ui.js";
+import {
+  listeningEncouragement,
+  listeningResultMarkup,
+  playStageMarkup,
+} from "../src/play-ui.js";
 import { defaultModels } from "../src/model-config.js";
 
 test("home view is the live kid hub with Chinese chrome", () => {
@@ -56,4 +60,29 @@ test("parent models stay local-first and fold remotes away", () => {
   assert.match(html, /高级 \/ 远程模型/);
   assert.match(html, /动画提问/);
   assert.doesNotMatch(html.split('id="advancedModels"')[0], /Grok Imagine/);
+});
+
+test("listening end screen shows score bands and actions", () => {
+  const high = listeningResultMarkup({ correct: 8, total: 8 });
+  assert.match(high, /listeningResult/);
+  assert.match(high, /8 \/ 8 · 100%/);
+  assert.match(high, /太棒了/);
+  assert.match(high, /id="restartListening"/);
+  assert.match(high, /id="backHomeFromResult"/);
+  assert.match(high, /再来一次/);
+  assert.match(high, /回主页/);
+  assert.equal(listeningEncouragement(80).icon, "🌟");
+  assert.equal(listeningEncouragement(50).icon, "🎈");
+  assert.equal(listeningEncouragement(20).icon, "🌱");
+  const mid = listeningResultMarkup({ correct: 5, total: 8 });
+  assert.match(mid, /很不错/);
+  const anim = listeningResultMarkup({
+    correct: 2,
+    total: 3,
+    mode: "animation",
+    detail: "Replay anytime",
+  });
+  assert.match(anim, /animationResult/);
+  assert.match(anim, /restartAnimation/);
+  assert.match(anim, /Replay anytime/);
 });

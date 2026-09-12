@@ -1,0 +1,518 @@
+{
+  "schemaVersion": 1,
+  "source": "curated-concepts",
+  "level": "concepts",
+  "question_type": "contrast",
+  "imageFormat": "jpeg",
+  "imageSize": "768x768",
+  "pairs": [
+    {
+      "id": "size-dog",
+      "attribute": "size",
+      "prompts": [
+        {
+          "value": "big",
+          "prompt_en": "Which one is big?",
+          "speech": "Which one is big?"
+        },
+        {
+          "value": "small",
+          "prompt_en": "Which one is small?",
+          "speech": "Which one is small?"
+        }
+      ],
+      "choices": [
+        {
+          "slug": "dog-big",
+          "lemma": "big dog",
+          "image": "assets/flashcards/concepts/dog-big.jpg",
+          "attrs": ["big"],
+          "color": "#d9a66f",
+          "emoji": "🐶"
+        },
+        {
+          "slug": "dog-small",
+          "lemma": "small dog",
+          "image": "assets/flashcards/concepts/dog-small.jpg",
+          "attrs": ["small"],
+          "color": "#f2d6c9",
+          "emoji": "🐶"
+        }
+      ]
+    },
+    {
+      "id": "size-ball",
+      "attribute": "size",
+      "prompts": [
+        {
+          "value": "big",
+          "prompt_en": "Which one is big?",
+          "speech": "Which one is big?"
+        },
+        {
+          "value": "small",
+          "prompt_en": "Which one is small?",
+          "speech": "Which one is small?"
+        }
+      ],
+      "choices": [
+        {
+          "slug": "ball-big",
+          "lemma": "big ball",
+          "image": "assets/flashcards/concepts/ball-big.jpg",
+          "attrs": ["big"],
+          "color": "#6db6e8",
+          "emoji": "⚽"
+        },
+        {
+          "slug": "ball-small",
+          "lemma": "small ball",
+          "image": "assets/flashcards/concepts/ball-small.jpg",
+          "attrs": ["small"],
+          "color": "#9ed9c4",
+          "emoji": "⚽"
+        }
+      ]
+    },
+    {
+      "id": "height-tree",
+      "attribute": "height",
+      "prompts": [
+        {
+          "value": "tall",
+          "prompt_en": "Which one is tall?",
+          "speech": "Which one is tall?"
+        },
+        {
+          "value": "short",
+          "prompt_en": "Which one is short?",
+          "speech": "Which one is short?"
+        }
+      ],
+      "choices": [
+        {
+          "slug": "tree-tall",
+          "lemma": "tall tree",
+          "image": "assets/flashcards/concepts/tree-tall.jpg",
+          "attrs": ["tall"],
+          "color": "#7cb342",
+          "emoji": "🌳"
+        },
+        {
+          "slug": "tree-short",
+          "lemma": "short tree",
+          "image": "assets/flashcards/concepts/tree-short.jpg",
+          "attrs": ["short"],
+          "color": "#c9e4a8",
+          "emoji": "🌲"
+        }
+      ]
+    },
+    {
+      "id": "fill-cup",
+      "attribute": "fill",
+      "prompts": [
+        {
+          "value": "full",
+          "prompt_en": "Which one is full?",
+          "speech": "Which one is full?"
+        },
+        {
+          "value": "empty",
+          "prompt_en": "Which one is empty?",
+          "speech": "Which one is empty?"
+        }
+      ],
+      "choices": [
+        {
+          "slug": "cup-full",
+          "lemma": "full cup",
+          "image": "assets/flashcards/concepts/cup-full.jpg",
+          "attrs": ["full"],
+          "color": "#6db6e8",
+          "emoji": "🥤"
+        },
+        {
+          "slug": "cup-empty",
+          "lemma": "empty cup",
+          "image": "assets/flashcards/concepts/cup-empty.jpg",
+          "attrs": ["empty"],
+          "color": "#c9b9d9",
+          "emoji": "🥛"
+        }
+      ]
+    },
+    {
+      "id": "color-red",
+      "attribute": "color",
+      "prompts": [
+        {
+          "value": "red",
+          "prompt_en": "Which one is red?",
+          "speech": "Which one is red?"
+        }
+      ],
+      "choices": [
+        {
+          "slug": "apple",
+          "lemma": "apple",
+          "image": "assets/flashcards/food/apple.jpg",
+          "attrs": ["red"],
+          "color": "#ff6b5e",
+          "emoji": "🍎"
+        },
+        {
+          "slug": "banana",
+          "lemma": "banana",
+          "image": "assets/flashcards/food/banana.jpg",
+          "attrs": ["yellow"],
+          "color": "#f7c94b",
+          "emoji": "🍌"
+        },
+        {
+          "slug": "ball",
+          "lemma": "ball",
+          "image": "assets/flashcards/toys/ball.jpg",
+          "attrs": [],
+          "color": "#6db6e8",
+          "emoji": "⚽"
+        },
+        {
+          "slug": "dog",
+          "lemma": "dog",
+          "image": "assets/flashcards/animals/dog.jpg",
+          "attrs": [],
+          "color": "#d9a66f",
+          "emoji": "🐶"
+        }
+      ]
+    },
+    {
+      "id": "color-yellow",
+      "attribute": "color",
+      "prompts": [
+        {
+          "value": "yellow",
+          "prompt_en": "Which one is yellow?",
+          "speech": "Which one is yellow?"
+        }
+      ],
+      "choices": [
+        {
+          "slug": "banana",
+          "lemma": "banana",
+          "image": "assets/flashcards/food/banana.jpg",
+          "attrs": ["yellow"],
+          "color": "#f7c94b",
+          "emoji": "🍌"
+        },
+        {
+          "slug": "apple",
+          "lemma": "apple",
+          "image": "assets/flashcards/food/apple.jpg",
+          "attrs": ["red"],
+          "color": "#ff6b5e",
+          "emoji": "🍎"
+        },
+        {
+          "slug": "tree",
+          "lemma": "tree",
+          "image": "assets/flashcards/world/tree.jpg",
+          "attrs": ["green"],
+          "color": "#7cb342",
+          "emoji": "🌳"
+        },
+        {
+          "slug": "cup",
+          "lemma": "cup",
+          "image": "assets/flashcards/school/cup.jpg",
+          "attrs": [],
+          "color": "#9ed9c4",
+          "emoji": "🥤"
+        }
+      ]
+    }
+  ],
+  "words": [
+    {
+      "id": "concept_dog_big",
+      "lemma": "big dog",
+      "slug": "dog-big",
+      "pos": "adj-noun",
+      "level": "concepts",
+      "theme": "concepts",
+      "type": "size",
+      "age_min": 3,
+      "age_max": 6,
+      "prompt_en": "Which one is big?",
+      "speech": "Which one is big?",
+      "imageable": true,
+      "image": "assets/flashcards/concepts/dog-big.jpg",
+      "fallback_image": "assets/flashcards/concepts/dog-big.jpg",
+      "color": "#d9a66f",
+      "emoji": "🐶",
+      "status": "approved",
+      "attrs": ["big"]
+    },
+    {
+      "id": "concept_dog_small",
+      "lemma": "small dog",
+      "slug": "dog-small",
+      "pos": "adj-noun",
+      "level": "concepts",
+      "theme": "concepts",
+      "type": "size",
+      "age_min": 3,
+      "age_max": 6,
+      "prompt_en": "Which one is big?",
+      "speech": "Which one is big?",
+      "imageable": true,
+      "image": "assets/flashcards/concepts/dog-small.jpg",
+      "fallback_image": "assets/flashcards/concepts/dog-small.jpg",
+      "color": "#f2d6c9",
+      "emoji": "🐶",
+      "status": "approved",
+      "attrs": ["small"]
+    },
+    {
+      "id": "concept_ball_big",
+      "lemma": "big ball",
+      "slug": "ball-big",
+      "pos": "adj-noun",
+      "level": "concepts",
+      "theme": "concepts",
+      "type": "size",
+      "age_min": 3,
+      "age_max": 6,
+      "prompt_en": "Which one is big?",
+      "speech": "Which one is big?",
+      "imageable": true,
+      "image": "assets/flashcards/concepts/ball-big.jpg",
+      "fallback_image": "assets/flashcards/concepts/ball-big.jpg",
+      "color": "#6db6e8",
+      "emoji": "⚽",
+      "status": "approved",
+      "attrs": ["big"]
+    },
+    {
+      "id": "concept_ball_small",
+      "lemma": "small ball",
+      "slug": "ball-small",
+      "pos": "adj-noun",
+      "level": "concepts",
+      "theme": "concepts",
+      "type": "size",
+      "age_min": 3,
+      "age_max": 6,
+      "prompt_en": "Which one is big?",
+      "speech": "Which one is big?",
+      "imageable": true,
+      "image": "assets/flashcards/concepts/ball-small.jpg",
+      "fallback_image": "assets/flashcards/concepts/ball-small.jpg",
+      "color": "#9ed9c4",
+      "emoji": "⚽",
+      "status": "approved",
+      "attrs": ["small"]
+    },
+    {
+      "id": "concept_tree_tall",
+      "lemma": "tall tree",
+      "slug": "tree-tall",
+      "pos": "adj-noun",
+      "level": "concepts",
+      "theme": "concepts",
+      "type": "height",
+      "age_min": 3,
+      "age_max": 6,
+      "prompt_en": "Which one is tall?",
+      "speech": "Which one is tall?",
+      "imageable": true,
+      "image": "assets/flashcards/concepts/tree-tall.jpg",
+      "fallback_image": "assets/flashcards/concepts/tree-tall.jpg",
+      "color": "#7cb342",
+      "emoji": "🌳",
+      "status": "approved",
+      "attrs": ["tall"]
+    },
+    {
+      "id": "concept_tree_short",
+      "lemma": "short tree",
+      "slug": "tree-short",
+      "pos": "adj-noun",
+      "level": "concepts",
+      "theme": "concepts",
+      "type": "height",
+      "age_min": 3,
+      "age_max": 6,
+      "prompt_en": "Which one is tall?",
+      "speech": "Which one is tall?",
+      "imageable": true,
+      "image": "assets/flashcards/concepts/tree-short.jpg",
+      "fallback_image": "assets/flashcards/concepts/tree-short.jpg",
+      "color": "#c9e4a8",
+      "emoji": "🌲",
+      "status": "approved",
+      "attrs": ["short"]
+    },
+    {
+      "id": "concept_cup_full",
+      "lemma": "full cup",
+      "slug": "cup-full",
+      "pos": "adj-noun",
+      "level": "concepts",
+      "theme": "concepts",
+      "type": "fill",
+      "age_min": 3,
+      "age_max": 6,
+      "prompt_en": "Which one is full?",
+      "speech": "Which one is full?",
+      "imageable": true,
+      "image": "assets/flashcards/concepts/cup-full.jpg",
+      "fallback_image": "assets/flashcards/concepts/cup-full.jpg",
+      "color": "#6db6e8",
+      "emoji": "🥤",
+      "status": "approved",
+      "attrs": ["full"]
+    },
+    {
+      "id": "concept_cup_empty",
+      "lemma": "empty cup",
+      "slug": "cup-empty",
+      "pos": "adj-noun",
+      "level": "concepts",
+      "theme": "concepts",
+      "type": "fill",
+      "age_min": 3,
+      "age_max": 6,
+      "prompt_en": "Which one is full?",
+      "speech": "Which one is full?",
+      "imageable": true,
+      "image": "assets/flashcards/concepts/cup-empty.jpg",
+      "fallback_image": "assets/flashcards/concepts/cup-empty.jpg",
+      "color": "#c9b9d9",
+      "emoji": "🥛",
+      "status": "approved",
+      "attrs": ["empty"]
+    },
+    {
+      "id": "concept_apple",
+      "lemma": "apple",
+      "slug": "apple",
+      "pos": "adj-noun",
+      "level": "concepts",
+      "theme": "concepts",
+      "type": "color",
+      "age_min": 3,
+      "age_max": 6,
+      "prompt_en": "Which one is red?",
+      "speech": "Which one is red?",
+      "imageable": true,
+      "image": "assets/flashcards/food/apple.jpg",
+      "fallback_image": "assets/flashcards/food/apple.jpg",
+      "color": "#ff6b5e",
+      "emoji": "🍎",
+      "status": "approved",
+      "attrs": ["red"]
+    },
+    {
+      "id": "concept_banana",
+      "lemma": "banana",
+      "slug": "banana",
+      "pos": "adj-noun",
+      "level": "concepts",
+      "theme": "concepts",
+      "type": "color",
+      "age_min": 3,
+      "age_max": 6,
+      "prompt_en": "Which one is red?",
+      "speech": "Which one is red?",
+      "imageable": true,
+      "image": "assets/flashcards/food/banana.jpg",
+      "fallback_image": "assets/flashcards/food/banana.jpg",
+      "color": "#f7c94b",
+      "emoji": "🍌",
+      "status": "approved",
+      "attrs": ["yellow"]
+    },
+    {
+      "id": "concept_ball",
+      "lemma": "ball",
+      "slug": "ball",
+      "pos": "adj-noun",
+      "level": "concepts",
+      "theme": "concepts",
+      "type": "color",
+      "age_min": 3,
+      "age_max": 6,
+      "prompt_en": "Which one is red?",
+      "speech": "Which one is red?",
+      "imageable": true,
+      "image": "assets/flashcards/toys/ball.jpg",
+      "fallback_image": "assets/flashcards/toys/ball.jpg",
+      "color": "#6db6e8",
+      "emoji": "⚽",
+      "status": "approved",
+      "attrs": []
+    },
+    {
+      "id": "concept_dog",
+      "lemma": "dog",
+      "slug": "dog",
+      "pos": "adj-noun",
+      "level": "concepts",
+      "theme": "concepts",
+      "type": "color",
+      "age_min": 3,
+      "age_max": 6,
+      "prompt_en": "Which one is red?",
+      "speech": "Which one is red?",
+      "imageable": true,
+      "image": "assets/flashcards/animals/dog.jpg",
+      "fallback_image": "assets/flashcards/animals/dog.jpg",
+      "color": "#d9a66f",
+      "emoji": "🐶",
+      "status": "approved",
+      "attrs": []
+    },
+    {
+      "id": "concept_tree",
+      "lemma": "tree",
+      "slug": "tree",
+      "pos": "adj-noun",
+      "level": "concepts",
+      "theme": "concepts",
+      "type": "color",
+      "age_min": 3,
+      "age_max": 6,
+      "prompt_en": "Which one is yellow?",
+      "speech": "Which one is yellow?",
+      "imageable": true,
+      "image": "assets/flashcards/world/tree.jpg",
+      "fallback_image": "assets/flashcards/world/tree.jpg",
+      "color": "#7cb342",
+      "emoji": "🌳",
+      "status": "approved",
+      "attrs": ["green"]
+    },
+    {
+      "id": "concept_cup",
+      "lemma": "cup",
+      "slug": "cup",
+      "pos": "adj-noun",
+      "level": "concepts",
+      "theme": "concepts",
+      "type": "color",
+      "age_min": 3,
+      "age_max": 6,
+      "prompt_en": "Which one is yellow?",
+      "speech": "Which one is yellow?",
+      "imageable": true,
+      "image": "assets/flashcards/school/cup.jpg",
+      "fallback_image": "assets/flashcards/school/cup.jpg",
+      "color": "#9ed9c4",
+      "emoji": "🥤",
+      "status": "approved",
+      "attrs": []
+    }
+  ]
+}

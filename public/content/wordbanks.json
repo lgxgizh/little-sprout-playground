@@ -9,6 +9,18 @@
       "description": "全部能画名词，适合综合听力"
     },
     {
+      "id": "movers-lite",
+      "label": "进阶名词 · Movers Lite",
+      "file": "wordbank.movers-lite.json",
+      "description": "比 Starters 名词稍难一点，仍适合看图点选"
+    },
+    {
+      "id": "concepts",
+      "label": "对比概念 · 大小高低",
+      "file": "wordbank.concepts.json",
+      "description": "听属性：大/小、高/矮、满/空，还有颜色对比"
+    },
+    {
       "id": "starters-food",
       "label": "食物",
       "file": "wordbank.starters.json",

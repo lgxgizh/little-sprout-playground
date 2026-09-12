@@ -5,6 +5,7 @@ import { existsSync } from "node:fs";
 import { join } from "node:path";
 import {
   bankIdFromTheme,
+  buildContrastQuestion,
   buildListeningQuestion,
   catalogBankFiles,
   clampListeningCount,
@@ -28,9 +29,19 @@ const wordbank = JSON.parse(
 const catalog = JSON.parse(
   await readFile("public/content/wordbanks.json", "utf8"),
 );
+const movers = JSON.parse(
+  await readFile("public/content/wordbank.movers-lite.json", "utf8"),
+);
+const concepts = JSON.parse(
+  await readFile("public/content/wordbank.concepts.json", "utf8"),
+);
 const loadedBanks = {
   "wordbank.starters.json": wordbank,
   starters: wordbank,
+  "wordbank.movers-lite.json": movers,
+  "movers-lite": movers,
+  "wordbank.concepts.json": concepts,
+  concepts: concepts,
 };
 
 test("starters wordbank only keeps imageable nouns", () => {
@@ -48,7 +59,11 @@ test("starters wordbank only keeps imageable nouns", () => {
 
 test("wordbank catalog lists full pack and theme packs", () => {
   assert.equal(catalog.schemaVersion, 1);
-  assert.deepEqual(catalogBankFiles(catalog), ["wordbank.starters.json"]);
+  assert.deepEqual(catalogBankFiles(catalog), [
+    "wordbank.starters.json",
+    "wordbank.movers-lite.json",
+    "wordbank.concepts.json",
+  ]);
   const banks = listListeningBanks(catalog, loadedBanks);
   const full = banks.find((bank) => bank.id === "starters");
   const food = banks.find((bank) => bank.id === "starters-food");
@@ -174,4 +189,57 @@ test("recommended listening counts hide oversized chips", () => {
   assert.deepEqual(visibleListeningCounts(5), [5]);
   assert.deepEqual(visibleListeningCounts(8), [5, 8]);
   assert.deepEqual(visibleListeningCounts(24), [5, 8, 10, 12]);
+});
+
+test("movers-lite bank is registered and image-backed", () => {
+  assert.ok(movers.words.length >= 20);
+  assert.ok(movers.words.every((word) => word.level === "movers-lite"));
+  for (const slug of ["butterfly", "rabbit", "strawberry", "crocodile"]) {
+    assert.ok(
+      movers.words.some((word) => word.slug === slug),
+      slug,
+    );
+  }
+  const banks = listListeningBanks(catalog, loadedBanks);
+  const entry = banks.find((bank) => bank.id === "movers-lite");
+  assert.ok(entry);
+  assert.match(entry.label, /Movers Lite|进阶/);
+  const pool = listeningPoolForBank(entry, loadedBanks, { assetBase: "/" });
+  assert.equal(pool.length, entry.count);
+  assert.ok(pool[0].choices.length >= 2);
+});
+
+test("concepts bank builds contrast attribute prompts", () => {
+  assert.equal(concepts.question_type, "contrast");
+  const pair = concepts.pairs.find((item) => item.id === "size-dog");
+  const big = buildContrastQuestion(
+    pair,
+    pair.prompts.find((item) => item.value === "big"),
+    { childId: "kid-a", assetBase: "/", salt: "t1" },
+  );
+  assert.equal(big.answer, "dog-big");
+  assert.match(big.prompt, /big/i);
+  assert.match(big.speech, /big/i);
+  assert.equal(big.question_type, "contrast");
+  assert.ok(big.choices.length >= 2);
+  assert.ok(
+    big.choices.every((choice) => choice.imageSrc.includes("/assets/")),
+  );
+
+  const banks = listListeningBanks(catalog, loadedBanks);
+  const entry = banks.find((bank) => bank.id === "concepts");
+  assert.ok(entry);
+  assert.ok(entry.count >= 8);
+  const pool = listeningPoolForBank(entry, loadedBanks, {
+    childId: "kid-b",
+    assetBase: "/",
+  });
+  assert.equal(pool.length, entry.count);
+  assert.ok(
+    pool.some((question) => /Which one is tall/i.test(question.prompt)),
+  );
+  assert.ok(
+    pool.some((question) => /Which one is empty/i.test(question.prompt)),
+  );
+  assert.ok(pool.some((question) => /Which one is red/i.test(question.prompt)));
 });

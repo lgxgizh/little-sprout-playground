@@ -198,9 +198,9 @@ The recommendation rule prioritizes topics that are new or need gentle practice 
 - 四宫格生图脚本：`scripts/flashcards/`（Grok Imagine 一次 4 词，再切成 JPEG）。 / Batch 2×2 Grok Imagine grids, then split to JPEG.
 - 演示动画为 `public/assets/stories/fox-apple.gif`；家长可在设置中登记其它本地 GIF/图片。 / Demo animation is `public/assets/stories/fox-apple.gif`; parents can register other local GIFs/images.
 - 可选本地音频模型才读取 `public/assets/audio/{questionId}.mp3`；词库本身不带 mp3 路径。 / Optional local-audio model may play `public/assets/audio/{questionId}.mp3`; word banks do not store mp3 paths.
-- 旧版 `public/assets/media/shapes-hello.mp4` 已降级，不再作为主演示。 / Legacy `shapes-hello.mp4` is demoted and no longer the primary demo.
+- 动画主演示只用 `public/assets/stories/fox-apple.gif`。 / Animation demo is fox-apple.gif only.
 - 自定义题目可以抽取为 JSON，由本地题库适配器加载。 / Store custom questions as JSON and load them through a local question-bank adapter.
-- 听力题来自 `public/content/wordbanks.json` 和词库 JSON（当前 `wordbank.starters.json`），用 `speech` / `prompt_en` 走浏览器朗读，不播词库里的 mp3。`questions.en.json` 只作旧格式说明，不再并入孩子听力池。 / Listening comes from the word-bank catalog and word JSON via browser TTS (`speech` / `prompt_en`). `questions.en.json` is legacy/docs only.
+- 听力题来自 `public/content/wordbanks.json` 与词库 JSON（Starters / Movers Lite / Concepts 等），用 `speech` / `prompt_en` 或对比题提示走浏览器朗读。 / Listening comes from the word-bank catalog (Starters, Movers Lite, Concepts, …) via browser TTS.
 - 每道题可用 `stage`、`ageMin`、`ageMax` 和 `concept` 控制阶段、适龄范围与复习归类；应用会在本地自动过滤不适合当前孩子的题目。 / Use `stage`, `ageMin`, `ageMax`, and `concept` to control level, age fit, and review grouping; the app filters unsuitable questions locally.
 - 远程模型应由后端保存密钥并提供受控 API。 / Keep provider secrets on a backend and expose a controlled API.
 

@@ -121,13 +121,22 @@ export function listeningHubMarkup({
   const visibleCounts = visibleListeningCounts(pool, counts);
   const nextCount = recommendedListeningCount(pool, selectedCount);
   const bankLabel = activeBankLabel || selected?.label || "";
-  const optionButtons = options
+  const bankDesc = selected?.description || "";
+  const unit = selected?.question_type === "contrast" ? "题" : "词";
+  const selectOptions = options
     .map((item) => {
-      const active = item.id === selected?.id ? "is-active" : "";
-      const attr = useBanks ? "data-listening-bank" : "data-listening-theme";
-      return `<button class="chip ${active}" type="button" ${attr}="${escapeHtml(item.id)}">${escapeHtml(item.label)} <span class="chip-count">${item.count}</span></button>`;
+      const selectedAttr = item.id === selected?.id ? " selected" : "";
+      return `<option value="${escapeHtml(item.id)}"${selectedAttr}>${escapeHtml(item.label)}（${item.count}）</option>`;
     })
     .join("");
+  const bankPicker = useBanks
+    ? `<label class="listen-bank-select"><span class="vis-hidden">单词库</span><select id="listeningBankSelect">${selectOptions}</select></label>`
+    : `<div class="chip-row bank-row">${options
+        .map((item) => {
+          const active = item.id === selected?.id ? "is-active" : "";
+          return `<button class="chip ${active}" type="button" data-listening-theme="${escapeHtml(item.id)}">${escapeHtml(item.label)} <span class="chip-count">${item.count}</span></button>`;
+        })
+        .join("")}</div>`;
   const countButtons = visibleCounts
     .map((count) => {
       const active = count === nextCount ? "is-active" : "";
@@ -150,8 +159,9 @@ export function listeningHubMarkup({
     <div class="listen-setup">
       <div class="listen-group">
         <h2>单词库</h2>
-        <p class="listen-active">当前：${escapeHtml(bankLabel || "未选择")}${pool ? ` · ${pool} 词` : ""}</p>
-        <div class="chip-row bank-row">${optionButtons}</div>
+        <p class="listen-active">当前：${escapeHtml(bankLabel || "未选择")}${pool ? ` · ${pool} ${unit}` : ""}</p>
+        ${bankPicker}
+        ${bankDesc ? `<p class="listen-bank-desc">${escapeHtml(bankDesc)}</p>` : ""}
         ${preview}
       </div>
       <div class="listen-group">

@@ -1,8 +1,8 @@
 # Local media / 本地视频
 
-`shapes-hello.mp4` is an original, copyright-free placeholder clip (colored shapes and simple English labels) generated for this project. It is safe to keep in a public demo.
+This folder holds optional local MP4/WebM clips parents can register under **Parent settings → 本地动画理解**. The kid-facing Animation Q&A demo is `public/assets/stories/fox-apple.gif` (not an MP4 in this folder).
 
-`shapes-hello.mp4` 是为本项目生成的原创占位短片（纯色形状与简单英文标签），不含第三方动画或商标，可用于公开演示。
+本目录用于家长在「本地动画理解」中登记的可选短片。孩子主演示是 `public/assets/stories/fox-apple.gif`，不再附带占位 MP4。
 
 ## Replace or add clips / 替换与添加
 
@@ -16,6 +16,3 @@
 Do **not** commit commercial cartoons, streaming rips, trademarked characters, or any media you cannot redistribute.
 
 请勿提交商业动画片、流媒体资源、商标角色，或任何无权再分发的素材。
-
-> Note / 说明: The kid-facing demo now prefers `public/assets/stories/fox-apple.gif`. This MP4 folder remains for optional/legacy clips only.
-> 孩子主演示已改为 `fox-apple.gif`；本目录仅保留可选/旧版短片。

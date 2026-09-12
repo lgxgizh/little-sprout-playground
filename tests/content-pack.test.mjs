@@ -1,50 +1,52 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
+import { join } from "node:path";
 
-test("English content pack follows the safe question schema", async () => {
-  const source = await readFile("public/content/questions.en.json", "utf8");
-  const pack = JSON.parse(source);
-  assert.equal(pack.schemaVersion, 1);
-  assert.equal(pack.locale, "en-US");
-  assert.ok(Array.isArray(pack.questions));
-  assert.ok(pack.questions.length > 0);
+test("word bank catalog and packs stay image-backed", async () => {
+  const catalog = JSON.parse(
+    await readFile("public/content/wordbanks.json", "utf8"),
+  );
+  assert.equal(catalog.schemaVersion, 1);
+  assert.ok(catalog.banks.some((bank) => bank.id === "movers-lite"));
+  assert.ok(catalog.banks.some((bank) => bank.id === "concepts"));
 
-  for (const question of pack.questions) {
-    assert.match(question.id, /^english-/);
-    assert.ok([1, 2, 3].includes(question.difficulty));
-    assert.ok(
-      Number.isInteger(question.stage) &&
-        question.stage >= 1 &&
-        question.stage <= 4,
+  for (const fileName of [
+    "wordbank.starters.json",
+    "wordbank.movers-lite.json",
+    "wordbank.concepts.json",
+  ]) {
+    const pack = JSON.parse(
+      await readFile(`public/content/${fileName}`, "utf8"),
     );
-    assert.ok(
-      Number.isInteger(question.ageMin) &&
-        question.ageMin >= 2 &&
-        question.ageMin <= 6,
-    );
-    assert.ok(
-      Number.isInteger(question.ageMax) &&
-        question.ageMax >= question.ageMin &&
-        question.ageMax <= 6,
-    );
-    assert.equal(typeof question.concept, "string");
-    assert.equal(typeof question.prompt, "string");
-    assert.equal(typeof question.speech, "string");
-    assert.equal(typeof question.answer, "string");
-    assert.ok(question.choices.length >= 2 && question.choices.length <= 4);
-    assert.ok(
-      question.choices.some((choice) => choice.value === question.answer),
-    );
-    for (const choice of question.choices) {
-      assert.ok(choice.emoji || choice.imageKey || choice.imageSrc);
+    assert.equal(pack.schemaVersion, 1);
+    if (fileName === "wordbank.concepts.json") {
+      assert.equal(pack.question_type, "contrast");
+      assert.ok(pack.pairs.length >= 4);
+      for (const pair of pack.pairs) {
+        assert.ok(pair.prompts?.length >= 1);
+        assert.ok(pair.choices?.length >= 2);
+        for (const choice of pair.choices) {
+          assert.ok(existsSync(join("public", choice.image)));
+        }
+      }
+      continue;
     }
-    for (const text of [
-      question.prompt,
-      question.speech,
-      ...question.choices.map((choice) => choice.label),
-    ]) {
-      assert.doesNotMatch(text, /[\u4e00-\u9fff]/);
+    assert.ok(Array.isArray(pack.words));
+    assert.ok(pack.words.length >= 20);
+    for (const word of pack.words) {
+      assert.equal(typeof word.prompt_en, "string");
+      assert.equal(typeof word.speech, "string");
+      assert.match(word.image, /\.jpg$/);
+      assert.ok(existsSync(join("public", word.image)), word.image);
+      for (const text of [word.prompt_en, word.speech, word.lemma]) {
+        assert.doesNotMatch(text, /[\u4e00-\u9fff]/);
+      }
     }
   }
+});
+
+test("legacy questions.en.json is gone from content", async () => {
+  assert.equal(existsSync("public/content/questions.en.json"), false);
 });

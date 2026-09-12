@@ -26,7 +26,7 @@ import {
 } from "./listening.js";
 import { homeHubMarkup, listeningHubMarkup, videoHubMarkup } from "./hub-ui.js";
 import { parentModelsMarkup } from "./parent-ui.js";
-import { playStageMarkup } from "./play-ui.js";
+import { listeningResultMarkup, playStageMarkup } from "./play-ui.js";
 import {
   bankIdFromTheme,
   bankPreviewWords,
@@ -197,6 +197,8 @@ const state = {
   listeningGoal: 8,
   listeningQueue: [],
   activeQuestionId: null,
+  listeningCorrect: 0,
+  listeningAnswered: 0,
 };
 
 function todayKey(date = new Date()) {
@@ -249,6 +251,8 @@ function resetActiveActivity() {
   state.activityComplete = false;
   state.sessionQuestionIds = [];
   state.activeQuestionId = null;
+  state.listeningCorrect = 0;
+  state.listeningAnswered = 0;
 }
 
 function switchChild(childId) {
@@ -383,6 +387,8 @@ function beginSession(courseId, baselineTest = false, options = {}) {
   state.selectedChoice = null;
   state.activityComplete = false;
   state.offlineTaskDone = false;
+  state.listeningCorrect = 0;
+  state.listeningAnswered = 0;
   state.baselineTest = baselineTest;
   state.baselineCorrect = 0;
   state.baselineAnswers = [];
@@ -677,11 +683,31 @@ function baselineResultMarkup() {
 }
 
 function animationResultMarkup() {
+  const correct = Number(state.listeningCorrect) || 0;
+  const total = Math.max(
+    Number(state.listeningAnswered) || 0,
+    activeAnimation()?.questions?.length || 1,
+  );
   const stats = summarizeAnimationAttempts(
     profile.events,
     state.activeAnimationId,
   );
-  return `<div class="baseline-result"><span class="baseline-result-icon">🎬</span><span><b>Nice watching!</b><small>${escapeHtml(parentAnimationSummary(stats))}</small></span></div>`;
+  return listeningResultMarkup({
+    correct,
+    total,
+    mode: "animation",
+    detail: parentAnimationSummary(stats),
+  });
+}
+
+function englishListeningResultMarkup() {
+  const correct = Number(state.listeningCorrect) || 0;
+  const total = Math.max(
+    Number(state.listeningAnswered) || 0,
+    Number(state.listeningGoal) || 0,
+    1,
+  );
+  return listeningResultMarkup({ correct, total, mode: "listening" });
 }
 function modelName(type) {
   return catalogModelName(type, models);
@@ -798,8 +824,10 @@ async function loadWordbankFile(fileName) {
   });
   if (!response.ok) return null;
   const payload = await response.json();
-  if (payload?.schemaVersion !== 1 || !Array.isArray(payload.words))
-    return null;
+  if (payload?.schemaVersion !== 1) return null;
+  const hasWords = Array.isArray(payload.words) && payload.words.length > 0;
+  const hasPairs = Array.isArray(payload.pairs) && payload.pairs.length > 0;
+  if (!hasWords && !hasPairs) return null;
   return payload;
 }
 
@@ -838,6 +866,13 @@ async function loadWordbank() {
     }
   }
   loadedWordbanks = nextLoaded;
+  if (wordbankCatalog?.banks) {
+    for (const bank of wordbankCatalog.banks) {
+      if (bank?.id && bank?.file && nextLoaded[bank.file]) {
+        loadedWordbanks[bank.id] = nextLoaded[bank.file];
+      }
+    }
+  }
 
   if (!wordbankCatalog && startersWordbank) {
     wordbankCatalog = {
@@ -1047,6 +1082,7 @@ function playResultHtml() {
   if (!state.activityComplete) return "";
   if (state.baselineTest) return baselineResultMarkup();
   if (state.animationMode) return animationResultMarkup();
+  if (state.activityCourse === "english") return englishListeningResultMarkup();
   return offlineTaskMarkup(state.activityCourse);
 }
 
@@ -1161,6 +1197,19 @@ function bindEvents() {
     state.kidView = "home";
     render();
   });
+  document
+    .querySelector("#listeningBankSelect")
+    ?.addEventListener("change", (event) => {
+      state.listeningBankId = event.target.value || "starters";
+      const bank = selectedListeningBank();
+      state.listeningTheme = bank?.theme || "all";
+      state.listeningCount = clampListeningCount(
+        state.listeningCount,
+        bank?.count || 0,
+      );
+      persistListeningPrefs();
+      render();
+    });
   document.querySelectorAll("[data-listening-bank]").forEach((btn) =>
     btn.addEventListener("click", () => {
       state.listeningBankId = btn.dataset.listeningBank || "starters";
@@ -1244,6 +1293,10 @@ function bindEvents() {
       state.answered = true;
       state.selectedChoice = btn.dataset.choice;
       state.correct = btn.dataset.choice === question.answer;
+      if (!state.baselineTest) {
+        state.listeningAnswered += 1;
+        if (state.correct) state.listeningCorrect += 1;
+      }
       const courseId = state.animationMode ? "animation" : state.activityCourse;
       recordAnswer(courseId, state.correct, question);
       if (state.baselineTest) {
@@ -1538,6 +1591,43 @@ function bindEvents() {
     saveModels();
     render();
   });
+  document.querySelector("#restartListening")?.addEventListener("click", () => {
+    clearAdvanceTimer();
+    completeSession(state.activityComplete ? "completed" : "quit");
+    state.kidView = "listening";
+    applyWordbankPool();
+    beginSession("english", false, { force: true });
+    render();
+    speak(currentQuestion()?.speech || "");
+  });
+  document.querySelector("#restartAnimation")?.addEventListener("click", () => {
+    clearAdvanceTimer();
+    const animationId = state.activeAnimationId;
+    completeSession(state.activityComplete ? "completed" : "quit");
+    if (!animationId) {
+      state.kidView = "video";
+      render();
+      return;
+    }
+    beginSession("animation", false, { animationId, force: true });
+    state.animationPhase = "watch";
+    state.kidView = "video";
+    render();
+  });
+  document
+    .querySelector("#backHomeFromResult")
+    ?.addEventListener("click", () => {
+      clearAdvanceTimer();
+      completeSession(state.activityComplete ? "completed" : "quit");
+      state.kidView = "home";
+      state.animationMode = false;
+      state.activeAnimationId = null;
+      state.animationPhase = "watch";
+      state.answered = false;
+      state.activeQuestionId = null;
+      state.encouragement = "";
+      render();
+    });
   document.querySelector("#finishSession")?.addEventListener("click", () => {
     clearAdvanceTimer();
     state.aiPlanToken += 1;

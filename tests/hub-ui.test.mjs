@@ -51,8 +51,18 @@ test("video hub shows its own fox demo, not a listening quiz", () => {
 test("listening hub lets you pick a concrete word bank and question count", () => {
   const html = listeningHubMarkup({
     banks: [
-      { id: "starters", label: "剑桥 Starters 全库", count: 110 },
-      { id: "starters-food", label: "食物", count: 24 },
+      {
+        id: "starters",
+        label: "剑桥 Starters 全库",
+        count: 110,
+        description: "全部能画名词",
+      },
+      {
+        id: "starters-food",
+        label: "食物",
+        count: 24,
+        description: "Starters 食物主题包",
+      },
     ],
     selectedBankId: "starters-food",
     counts: [5, 8, 10, 12],
@@ -65,11 +75,15 @@ test("listening hub lets you pick a concrete word bank and question count", () =
   assert.match(html, /单词库/);
   assert.match(html, /当前：食物/);
   assert.match(html, /每次几题/);
-  assert.match(html, /data-listening-bank="starters-food"/);
+  assert.match(html, /id="listeningBankSelect"/);
+  assert.match(html, /<select id="listeningBankSelect">/);
+  assert.match(html, /option value="starters-food"[^>]*selected/);
+  assert.match(html, /Starters 食物主题包/);
   assert.match(html, /data-listening-count="8"/);
   assert.match(html, /开始 8 题/);
   assert.match(html, /随机抽/);
   assert.match(html, /flashcards\/food\/apple\.jpg/);
+  assert.doesNotMatch(html, /data-listening-bank=/);
   assert.doesNotMatch(html, /Try one now/);
 });
 
