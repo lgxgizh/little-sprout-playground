@@ -19,14 +19,8 @@
       "prompt_en": "Which one is the butterfly?",
       "speech": "Which one is the butterfly?",
       "imageable": true,
-      "distractor_pool": [
-        "bee",
-        "bird",
-        "frog"
-      ],
-      "adjacent_types": [
-        "animal"
-      ],
+      "distractor_pool": ["bee", "bird", "frog"],
+      "adjacent_types": ["animal"],
       "image_id": "img_butterfly_v1",
       "image": "assets/flashcards/movers/butterfly.jpg",
       "fallback_image": "assets/flashcards/movers/butterfly.jpg",
@@ -48,14 +42,8 @@
       "prompt_en": "Which one is the rabbit?",
       "speech": "Which one is the rabbit?",
       "imageable": true,
-      "distractor_pool": [
-        "cat",
-        "dog",
-        "mouse"
-      ],
-      "adjacent_types": [
-        "insect"
-      ],
+      "distractor_pool": ["cat", "dog", "mouse"],
+      "adjacent_types": ["insect"],
       "image_id": "img_rabbit_v1",
       "image": "assets/flashcards/movers/rabbit.jpg",
       "fallback_image": "assets/flashcards/movers/rabbit.jpg",
@@ -77,14 +65,8 @@
       "prompt_en": "Which one is the strawberry?",
       "speech": "Which one is the strawberry?",
       "imageable": true,
-      "distractor_pool": [
-        "apple",
-        "grape",
-        "banana"
-      ],
-      "adjacent_types": [
-        "vegetable"
-      ],
+      "distractor_pool": ["apple", "grape", "banana"],
+      "adjacent_types": ["vegetable"],
       "image_id": "img_strawberry_v1",
       "image": "assets/flashcards/movers/strawberry.jpg",
       "fallback_image": "assets/flashcards/movers/strawberry.jpg",
@@ -106,14 +88,8 @@
       "prompt_en": "Which one is the crocodile?",
       "speech": "Which one is the crocodile?",
       "imageable": true,
-      "distractor_pool": [
-        "hippo",
-        "frog",
-        "fish"
-      ],
-      "adjacent_types": [
-        "insect"
-      ],
+      "distractor_pool": ["hippo", "frog", "fish"],
+      "adjacent_types": ["insect"],
       "image_id": "img_crocodile_v1",
       "image": "assets/flashcards/movers/crocodile.jpg",
       "fallback_image": "assets/flashcards/movers/crocodile.jpg",
@@ -143,10 +119,7 @@
         "tiger",
         "zebra"
       ],
-      "adjacent_types": [
-        "farm",
-        "pet"
-      ],
+      "adjacent_types": ["farm", "pet"],
       "image_id": "img_giraffe_v1",
       "image": "assets/flashcards/movers/giraffe.jpg",
       "fallback_image": "assets/flashcards/movers/giraffe.jpg",
@@ -176,10 +149,7 @@
         "tiger",
         "zebra"
       ],
-      "adjacent_types": [
-        "farm",
-        "pet"
-      ],
+      "adjacent_types": ["farm", "pet"],
       "image_id": "img_elephant_v1",
       "image": "assets/flashcards/movers/elephant.jpg",
       "fallback_image": "assets/flashcards/movers/elephant.jpg",
@@ -209,10 +179,7 @@
         "tiger",
         "zebra"
       ],
-      "adjacent_types": [
-        "farm",
-        "pet"
-      ],
+      "adjacent_types": ["farm", "pet"],
       "image_id": "img_hippo_v1",
       "image": "assets/flashcards/movers/hippo.jpg",
       "fallback_image": "assets/flashcards/movers/hippo.jpg",
@@ -242,10 +209,7 @@
         "hippo",
         "tiger"
       ],
-      "adjacent_types": [
-        "farm",
-        "pet"
-      ],
+      "adjacent_types": ["farm", "pet"],
       "image_id": "img_zebra_v1",
       "image": "assets/flashcards/movers/zebra.jpg",
       "fallback_image": "assets/flashcards/movers/zebra.jpg",
@@ -275,10 +239,7 @@
         "tiger",
         "zebra"
       ],
-      "adjacent_types": [
-        "farm",
-        "pet"
-      ],
+      "adjacent_types": ["farm", "pet"],
       "image_id": "img_monkey_v1",
       "image": "assets/flashcards/movers/monkey.jpg",
       "fallback_image": "assets/flashcards/movers/monkey.jpg",
@@ -308,10 +269,7 @@
         "hippo",
         "zebra"
       ],
-      "adjacent_types": [
-        "farm",
-        "pet"
-      ],
+      "adjacent_types": ["farm", "pet"],
       "image_id": "img_tiger_v1",
       "image": "assets/flashcards/movers/tiger.jpg",
       "fallback_image": "assets/flashcards/movers/tiger.jpg",
@@ -341,10 +299,7 @@
         "hippo",
         "tiger"
       ],
-      "adjacent_types": [
-        "farm",
-        "pet"
-      ],
+      "adjacent_types": ["farm", "pet"],
       "image_id": "img_polar-bear_v1",
       "image": "assets/flashcards/movers/polar-bear.jpg",
       "fallback_image": "assets/flashcards/movers/polar-bear.jpg",
@@ -366,17 +321,8 @@
       "prompt_en": "Which one is the helicopter?",
       "speech": "Which one is the helicopter?",
       "imageable": true,
-      "distractor_pool": [
-        "train",
-        "bike",
-        "boat",
-        "plane",
-        "car",
-        "bus"
-      ],
-      "adjacent_types": [
-        "play"
-      ],
+      "distractor_pool": ["train", "bike", "boat", "plane", "car", "bus"],
+      "adjacent_types": ["play"],
       "image_id": "img_helicopter_v1",
       "image": "assets/flashcards/movers/helicopter.jpg",
       "fallback_image": "assets/flashcards/movers/helicopter.jpg",
@@ -406,9 +352,7 @@
         "helicopter",
         "car"
       ],
-      "adjacent_types": [
-        "play"
-      ],
+      "adjacent_types": ["play"],
       "image_id": "img_motorbike_v1",
       "image": "assets/flashcards/movers/motorbike.jpg",
       "fallback_image": "assets/flashcards/movers/motorbike.jpg",
@@ -438,9 +382,7 @@
         "helicopter",
         "car"
       ],
-      "adjacent_types": [
-        "play"
-      ],
+      "adjacent_types": ["play"],
       "image_id": "img_truck_v1",
       "image": "assets/flashcards/movers/truck.jpg",
       "fallback_image": "assets/flashcards/movers/truck.jpg",
@@ -470,11 +412,7 @@
         "grape",
         "lemon"
       ],
-      "adjacent_types": [
-        "vegetable",
-        "meal",
-        "drink"
-      ],
+      "adjacent_types": ["vegetable", "meal", "drink"],
       "image_id": "img_pineapple_v1",
       "image": "assets/flashcards/movers/pineapple.jpg",
       "fallback_image": "assets/flashcards/movers/pineapple.jpg",
@@ -504,11 +442,7 @@
         "grape",
         "lemon"
       ],
-      "adjacent_types": [
-        "vegetable",
-        "meal",
-        "drink"
-      ],
+      "adjacent_types": ["vegetable", "meal", "drink"],
       "image_id": "img_watermelon_v1",
       "image": "assets/flashcards/movers/watermelon.jpg",
       "fallback_image": "assets/flashcards/movers/watermelon.jpg",
@@ -538,11 +472,7 @@
         "grape",
         "lemon"
       ],
-      "adjacent_types": [
-        "vegetable",
-        "meal",
-        "drink"
-      ],
+      "adjacent_types": ["vegetable", "meal", "drink"],
       "image_id": "img_mango_v1",
       "image": "assets/flashcards/movers/mango.jpg",
       "fallback_image": "assets/flashcards/movers/mango.jpg",
@@ -572,11 +502,7 @@
         "grape",
         "lemon"
       ],
-      "adjacent_types": [
-        "vegetable",
-        "meal",
-        "drink"
-      ],
+      "adjacent_types": ["vegetable", "meal", "drink"],
       "image_id": "img_coconut_v1",
       "image": "assets/flashcards/movers/coconut.jpg",
       "fallback_image": "assets/flashcards/movers/coconut.jpg",
@@ -606,11 +532,7 @@
         "grape",
         "lemon"
       ],
-      "adjacent_types": [
-        "vegetable",
-        "meal",
-        "drink"
-      ],
+      "adjacent_types": ["vegetable", "meal", "drink"],
       "image_id": "img_kiwi_v1",
       "image": "assets/flashcards/movers/kiwi.jpg",
       "fallback_image": "assets/flashcards/movers/kiwi.jpg",
@@ -632,14 +554,7 @@
       "prompt_en": "Which one is the glasses?",
       "speech": "Which one is the glasses?",
       "imageable": true,
-      "distractor_pool": [
-        "hat",
-        "dress",
-        "shirt",
-        "t-shirt",
-        "shoe",
-        "sock"
-      ],
+      "distractor_pool": ["hat", "dress", "shirt", "t-shirt", "shoe", "sock"],
       "adjacent_types": [],
       "image_id": "img_glasses_v1",
       "image": "assets/flashcards/movers/glasses.jpg",
@@ -662,14 +577,7 @@
       "prompt_en": "Which one is the jeans?",
       "speech": "Which one is the jeans?",
       "imageable": true,
-      "distractor_pool": [
-        "hat",
-        "dress",
-        "shirt",
-        "t-shirt",
-        "shoe",
-        "sock"
-      ],
+      "distractor_pool": ["hat", "dress", "shirt", "t-shirt", "shoe", "sock"],
       "adjacent_types": [],
       "image_id": "img_jeans_v1",
       "image": "assets/flashcards/movers/jeans.jpg",
@@ -692,14 +600,7 @@
       "prompt_en": "Which one is the jacket?",
       "speech": "Which one is the jacket?",
       "imageable": true,
-      "distractor_pool": [
-        "hat",
-        "dress",
-        "shirt",
-        "t-shirt",
-        "shoe",
-        "sock"
-      ],
+      "distractor_pool": ["hat", "dress", "shirt", "t-shirt", "shoe", "sock"],
       "adjacent_types": [],
       "image_id": "img_jacket_v1",
       "image": "assets/flashcards/movers/jacket.jpg",
@@ -722,17 +623,8 @@
       "prompt_en": "Which one is the computer?",
       "speech": "Which one is the computer?",
       "imageable": true,
-      "distractor_pool": [
-        "lamp",
-        "clock",
-        "door",
-        "window",
-        "bath",
-        "box"
-      ],
-      "adjacent_types": [
-        "furniture"
-      ],
+      "distractor_pool": ["lamp", "clock", "door", "window", "bath", "box"],
+      "adjacent_types": ["furniture"],
       "image_id": "img_computer_v1",
       "image": "assets/flashcards/movers/computer.jpg",
       "fallback_image": "assets/flashcards/movers/computer.jpg",
@@ -754,17 +646,8 @@
       "prompt_en": "Which one is the television?",
       "speech": "Which one is the television?",
       "imageable": true,
-      "distractor_pool": [
-        "lamp",
-        "clock",
-        "door",
-        "window",
-        "bath",
-        "box"
-      ],
-      "adjacent_types": [
-        "furniture"
-      ],
+      "distractor_pool": ["lamp", "clock", "door", "window", "bath", "box"],
+      "adjacent_types": ["furniture"],
       "image_id": "img_television_v1",
       "image": "assets/flashcards/movers/television.jpg",
       "fallback_image": "assets/flashcards/movers/television.jpg",
@@ -786,17 +669,8 @@
       "prompt_en": "Which one is the guitar?",
       "speech": "Which one is the guitar?",
       "imageable": true,
-      "distractor_pool": [
-        "book",
-        "pencil",
-        "pen",
-        "crayon",
-        "ruler",
-        "eraser"
-      ],
-      "adjacent_types": [
-        "object"
-      ],
+      "distractor_pool": ["book", "pencil", "pen", "crayon", "ruler", "eraser"],
+      "adjacent_types": ["object"],
       "image_id": "img_guitar_v1",
       "image": "assets/flashcards/movers/guitar.jpg",
       "fallback_image": "assets/flashcards/movers/guitar.jpg",
@@ -818,18 +692,8 @@
       "prompt_en": "Which one is the camera?",
       "speech": "Which one is the camera?",
       "imageable": true,
-      "distractor_pool": [
-        "ball",
-        "balloon",
-        "doll",
-        "kite",
-        "robot",
-        "teddy"
-      ],
-      "adjacent_types": [
-        "sport",
-        "vehicle"
-      ],
+      "distractor_pool": ["ball", "balloon", "doll", "kite", "robot", "teddy"],
+      "adjacent_types": ["sport", "vehicle"],
       "image_id": "img_camera_v1",
       "image": "assets/flashcards/movers/camera.jpg",
       "fallback_image": "assets/flashcards/movers/camera.jpg",
@@ -851,18 +715,8 @@
       "prompt_en": "Which one is the robot?",
       "speech": "Which one is the robot?",
       "imageable": true,
-      "distractor_pool": [
-        "ball",
-        "balloon",
-        "doll",
-        "kite",
-        "teddy",
-        "camera"
-      ],
-      "adjacent_types": [
-        "sport",
-        "vehicle"
-      ],
+      "distractor_pool": ["ball", "balloon", "doll", "kite", "teddy", "camera"],
+      "adjacent_types": ["sport", "vehicle"],
       "image_id": "img_robot_v1",
       "image": "assets/flashcards/movers/robot.jpg",
       "fallback_image": "assets/flashcards/movers/robot.jpg",
@@ -884,16 +738,8 @@
       "prompt_en": "Which one is the armchair?",
       "speech": "Which one is the armchair?",
       "imageable": true,
-      "distractor_pool": [
-        "bed",
-        "chair",
-        "table",
-        "sofa",
-        "desk"
-      ],
-      "adjacent_types": [
-        "object"
-      ],
+      "distractor_pool": ["bed", "chair", "table", "sofa", "desk"],
+      "adjacent_types": ["object"],
       "image_id": "img_armchair_v1",
       "image": "assets/flashcards/movers/armchair.jpg",
       "fallback_image": "assets/flashcards/movers/armchair.jpg",
@@ -906,66 +752,31 @@
   "batches": [
     {
       "id": "movers-grid-01",
-      "slugs": [
-        "butterfly",
-        "rabbit",
-        "strawberry",
-        "crocodile"
-      ]
+      "slugs": ["butterfly", "rabbit", "strawberry", "crocodile"]
     },
     {
       "id": "movers-grid-02",
-      "slugs": [
-        "giraffe",
-        "elephant",
-        "hippo",
-        "zebra"
-      ]
+      "slugs": ["giraffe", "elephant", "hippo", "zebra"]
     },
     {
       "id": "movers-grid-03",
-      "slugs": [
-        "monkey",
-        "tiger",
-        "polar-bear",
-        "helicopter"
-      ]
+      "slugs": ["monkey", "tiger", "polar-bear", "helicopter"]
     },
     {
       "id": "movers-grid-04",
-      "slugs": [
-        "motorbike",
-        "truck",
-        "pineapple",
-        "watermelon"
-      ]
+      "slugs": ["motorbike", "truck", "pineapple", "watermelon"]
     },
     {
       "id": "movers-grid-05",
-      "slugs": [
-        "mango",
-        "coconut",
-        "kiwi",
-        "glasses"
-      ]
+      "slugs": ["mango", "coconut", "kiwi", "glasses"]
     },
     {
       "id": "movers-grid-06",
-      "slugs": [
-        "jeans",
-        "jacket",
-        "computer",
-        "television"
-      ]
+      "slugs": ["jeans", "jacket", "computer", "television"]
     },
     {
       "id": "movers-grid-07",
-      "slugs": [
-        "guitar",
-        "camera",
-        "robot",
-        "armchair"
-      ]
+      "slugs": ["guitar", "camera", "robot", "armchair"]
     }
   ]
 }

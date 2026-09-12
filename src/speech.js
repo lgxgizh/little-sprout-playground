@@ -1,9 +1,10 @@
 let currentAudio = null;
+let remoteVoiceToastShown = false;
 
 export function speak(text, soundOn) {
-  if (!soundOn || !("speechSynthesis" in window)) return;
+  if (!soundOn || !text || !("speechSynthesis" in window)) return;
   stopSpeech();
-  const utterance = new SpeechSynthesisUtterance(text);
+  const utterance = new SpeechSynthesisUtterance(String(text));
   utterance.lang = "en-US";
   const englishVoice = window.speechSynthesis
     .getVoices()
@@ -44,6 +45,79 @@ export function stopSpeech() {
   }
 }
 
+function audioCandidateUrls(question, assetBase = "/") {
+  const base = assetBase.endsWith("/") ? assetBase : `${assetBase}/`;
+  const ids = [
+    question?.id,
+    question?.answer,
+    question?.concept,
+    question?.audioId,
+  ]
+    .map((value) => String(value || "").trim())
+    .filter(Boolean);
+  const urls = [];
+  for (const id of ids) {
+    const slug = id.replace(/^english-/, "").replace(/[^a-z0-9-_]/gi, "");
+    if (!slug) continue;
+    urls.push(`${base}assets/audio/${slug}.mp3`);
+    if (id !== slug) urls.push(`${base}assets/audio/${id}.mp3`);
+  }
+  return [...new Set(urls)];
+}
+
+/**
+ * Honor models.voice: browser TTS, local-audio file then TTS, adapter then TTS.
+ * Never leave Listen as a dead button.
+ */
+export async function speakWithVoice({
+  text,
+  soundOn = true,
+  voiceId = "browser-speech",
+  question = null,
+  assetBase = "/",
+  requestSpeech = null,
+  custom = {},
+  onToast = null,
+} = {}) {
+  if (!soundOn || !text) return { mode: "silent" };
+  const voice = voiceId || "browser-speech";
+
+  if (voice === "local-audio") {
+    for (const url of audioCandidateUrls(question, assetBase)) {
+      const played = await playAudioUrl(url, true);
+      if (played) return { mode: "local-audio", url };
+    }
+    speak(text, true);
+    return { mode: "tts-fallback" };
+  }
+
+  if (voice !== "browser-speech" && typeof requestSpeech === "function") {
+    try {
+      const result = await requestSpeech({
+        model: voice,
+        text,
+        custom,
+      });
+      if (result?.audioUrl) {
+        const played = await playAudioUrl(result.audioUrl, true);
+        if (played) return { mode: "adapter", url: result.audioUrl };
+      }
+    } catch {
+      /* fall through to browser TTS */
+    }
+    if (!remoteVoiceToastShown) {
+      remoteVoiceToastShown = true;
+      onToast?.("远程语音暂不可用，已改用浏览器朗读");
+    }
+    speak(text, true);
+    return { mode: "tts-fallback" };
+  }
+
+  speak(text, true);
+  return { mode: "browser-speech" };
+}
+
+/** Kept for compatibility; kid path does not use speech recognition. */
 export function startSpeechPractice({ question, onState }) {
   const Recognition =
     window.SpeechRecognition || window.webkitSpeechRecognition;

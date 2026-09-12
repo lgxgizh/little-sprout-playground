@@ -2050,3 +2050,11 @@ body:has(.app-shell.is-hub) {
   align-items: flex-start;
   gap: 10px;
 }
+
+.model-unwired-note {
+  margin: -0.35rem 0 0.75rem;
+  padding: 0 0.15rem;
+  color: #6b7280;
+  font-size: 0.82rem;
+  line-height: 1.35;
+}

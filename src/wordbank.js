@@ -145,9 +145,53 @@ function choiceFromConcept(choice, assetBase = "/") {
   };
 }
 
+/** Attribute families that should stay as pure 2-choice contrasts. */
+const STRICT_CONTRAST_ATTRS = new Set([
+  "big",
+  "small",
+  "tall",
+  "short",
+  "full",
+  "empty",
+]);
+
+const ATTR_FAMILY = {
+  big: "size",
+  small: "size",
+  tall: "height",
+  short: "height",
+  full: "fill",
+  empty: "fill",
+  red: "color",
+  yellow: "color",
+  green: "color",
+  blue: "color",
+};
+
+function attrFamily(attr) {
+  return ATTR_FAMILY[attr] || null;
+}
+
+function isNeutralPadChoice(choice, targetAttr) {
+  const attrs = choice?.attrs || [];
+  if (attrs.includes(targetAttr)) return false;
+  const targetFamily = attrFamily(targetAttr);
+  if (!targetFamily) return true;
+  // Competing attrs from a *different* strict family confuse kids
+  // (e.g. tree-tall inside "Which one is big?").
+  for (const attr of attrs) {
+    const family = attrFamily(attr);
+    if (family && family !== targetFamily && STRICT_CONTRAST_ATTRS.has(attr)) {
+      return false;
+    }
+  }
+  return true;
+}
+
 /**
  * Build one contrast / attribute listening question from a pair + prompt.
- * Pure contrasts may use 2 choices; color packs often have 3–4.
+ * Size/height/fill stay pure 2-choice; color packs may pad within family
+ * or with neutral non-competing distractors only.
  */
 export function buildContrastQuestion(
   pair,
@@ -157,6 +201,7 @@ export function buildContrastQuestion(
     assetBase = "/",
     salt = "contrast",
     padChoices = [],
+    allowPad = true,
   } = {},
 ) {
   if (!pair || !promptSpec?.value) return null;
@@ -167,13 +212,19 @@ export function buildContrastQuestion(
   if (!answerChoice) return null;
   const primary = [...(pair.choices || [])];
   const used = new Set(primary.map((choice) => choice.slug));
-  for (const extra of padChoices) {
-    if (primary.length >= 4) break;
-    if (!extra?.slug || used.has(extra.slug)) continue;
-    // Keep the target attribute unique so the answer stays unambiguous.
-    if ((extra.attrs || []).includes(targetAttr)) continue;
-    used.add(extra.slug);
-    primary.push(extra);
+  const shouldPad =
+    allowPad &&
+    !STRICT_CONTRAST_ATTRS.has(targetAttr) &&
+    Array.isArray(padChoices) &&
+    padChoices.length;
+  if (shouldPad) {
+    for (const extra of padChoices) {
+      if (primary.length >= 4) break;
+      if (!extra?.slug || used.has(extra.slug)) continue;
+      if (!isNeutralPadChoice(extra, targetAttr)) continue;
+      used.add(extra.slug);
+      primary.push(extra);
+    }
   }
   if (primary.length < 2) return null;
   const random = mulberry32(seedFrom(childId, pair.id, targetAttr, salt));
@@ -213,18 +264,29 @@ export function listeningPoolFromContrast(
   wordbank,
   { childId = "default", assetBase = "/", salt = "contrast" } = {},
 ) {
-  const allChoices = (wordbank?.pairs || []).flatMap(
-    (pair) => pair.choices || [],
-  );
+  const pairs = wordbank?.pairs || [];
+  const byAttribute = new Map();
+  for (const pair of pairs) {
+    const key = pair.attribute || "contrast";
+    if (!byAttribute.has(key)) byAttribute.set(key, []);
+    byAttribute.get(key).push(...(pair.choices || []));
+  }
   return contrastQuestionSpecs(wordbank)
-    .map(({ pair, promptSpec }) =>
-      buildContrastQuestion(pair, promptSpec, {
+    .map(({ pair, promptSpec }) => {
+      const family =
+        pair.attribute || attrFamily(promptSpec.value) || "contrast";
+      const sameFamily = byAttribute.get(family) || pair.choices || [];
+      const strict = STRICT_CONTRAST_ATTRS.has(promptSpec.value);
+      return buildContrastQuestion(pair, promptSpec, {
         childId,
         assetBase,
         salt,
-        padChoices: allChoices,
-      }),
-    )
+        // Size/height/fill: keep the pair as-is (usually 2 choices).
+        // Color: pad only within the same attribute family.
+        padChoices: strict ? [] : sameFamily,
+        allowPad: !strict,
+      });
+    })
     .filter(Boolean);
 }
 
@@ -299,10 +361,19 @@ export function findListeningBank(catalog, bankId) {
   );
 }
 
+function bankHasContent(bank) {
+  if (!bank || typeof bank !== "object") return false;
+  if (Array.isArray(bank.words) && bank.words.length) return true;
+  if (Array.isArray(bank.pairs) && bank.pairs.length) return true;
+  return false;
+}
+
 export function resolveLoadedBank(bankEntry, loadedBanks = {}) {
   if (!bankEntry) return null;
-  if (loadedBanks[bankEntry.id]?.words) return loadedBanks[bankEntry.id];
-  if (bankEntry.file && loadedBanks[bankEntry.file]?.words) {
+  if (bankHasContent(loadedBanks[bankEntry.id])) {
+    return loadedBanks[bankEntry.id];
+  }
+  if (bankEntry.file && bankHasContent(loadedBanks[bankEntry.file])) {
     return loadedBanks[bankEntry.file];
   }
   return null;

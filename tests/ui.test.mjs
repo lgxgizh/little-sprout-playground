@@ -86,3 +86,60 @@ test("listening end screen shows score bands and actions", () => {
   assert.match(anim, /restartAnimation/);
   assert.match(anim, /Replay anytime/);
 });
+
+test("wrong answer dock offers retry same question, not next", () => {
+  const wrong = playStageMarkup({
+    question: {
+      id: "english-apple",
+      prompt: "Which one is an apple?",
+      answer: "apple",
+      choices: [
+        { label: "Apple", emoji: "🍎", value: "apple", color: "#ff6b5e" },
+        { label: "Banana", emoji: "🍌", value: "banana", color: "#f7c94b" },
+      ],
+    },
+    state: {
+      animationMode: false,
+      baselineTest: false,
+      questionIndex: 0,
+      answered: true,
+      correct: false,
+      selectedChoice: "banana",
+      activityComplete: false,
+      soundOn: true,
+      aiPlanning: false,
+      encouragement: "再试一次 · Try this one again",
+    },
+    total: 8,
+  });
+  assert.match(wrong, /id="retryQuestion"/);
+  assert.match(wrong, /再选一次/);
+  assert.doesNotMatch(wrong, /id="nextQuestion"/);
+
+  const right = playStageMarkup({
+    question: {
+      id: "english-apple",
+      prompt: "Which one is an apple?",
+      answer: "apple",
+      choices: [
+        { label: "Apple", emoji: "🍎", value: "apple", color: "#ff6b5e" },
+        { label: "Banana", emoji: "🍌", value: "banana", color: "#f7c94b" },
+      ],
+    },
+    state: {
+      animationMode: false,
+      baselineTest: false,
+      questionIndex: 0,
+      answered: true,
+      correct: true,
+      selectedChoice: "apple",
+      activityComplete: false,
+      soundOn: true,
+      aiPlanning: false,
+      encouragement: "对了 · You found it!",
+    },
+    total: 8,
+  });
+  assert.match(right, /id="nextQuestion"/);
+  assert.doesNotMatch(right, /id="retryQuestion"/);
+});

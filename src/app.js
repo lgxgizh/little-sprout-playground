@@ -1,6 +1,6 @@
 import "./styles.css";
 import "./overrides.css";
-import { requestNextQuestion } from "./ai.js";
+import { requestNextQuestion, requestSpeech } from "./ai.js";
 import {
   BASELINE_MAX_ITEMS,
   selectBaselineQuestions,
@@ -24,7 +24,12 @@ import {
   enrichQuestionImages,
   pickSessionQuestion,
 } from "./listening.js";
-import { homeHubMarkup, listeningHubMarkup, videoHubMarkup } from "./hub-ui.js";
+import {
+  homeHubMarkup,
+  listeningHubMarkup,
+  animationHubMarkup,
+  videoHubMarkup,
+} from "./hub-ui.js";
 import { parentModelsMarkup } from "./parent-ui.js";
 import { listeningResultMarkup, playStageMarkup } from "./play-ui.js";
 import {
@@ -58,6 +63,7 @@ import {
   resolveModels,
 } from "./model-config.js";
 import { escapeHtml } from "./quiz-ui.js";
+import { speakWithVoice } from "./speech.js";
 import {
   addLearningEvent,
   clearLearningData,
@@ -197,8 +203,8 @@ const state = {
   listeningGoal: 8,
   listeningQueue: [],
   activeQuestionId: null,
-  listeningCorrect: 0,
-  listeningAnswered: 0,
+  roundCorrect: 0,
+  roundAnswered: 0,
 };
 
 function todayKey(date = new Date()) {
@@ -251,8 +257,8 @@ function resetActiveActivity() {
   state.activityComplete = false;
   state.sessionQuestionIds = [];
   state.activeQuestionId = null;
-  state.listeningCorrect = 0;
-  state.listeningAnswered = 0;
+  state.roundCorrect = 0;
+  state.roundAnswered = 0;
 }
 
 function switchChild(childId) {
@@ -387,8 +393,8 @@ function beginSession(courseId, baselineTest = false, options = {}) {
   state.selectedChoice = null;
   state.activityComplete = false;
   state.offlineTaskDone = false;
-  state.listeningCorrect = 0;
-  state.listeningAnswered = 0;
+  state.roundCorrect = 0;
+  state.roundAnswered = 0;
   state.baselineTest = baselineTest;
   state.baselineCorrect = 0;
   state.baselineAnswers = [];
@@ -511,7 +517,12 @@ function recordAnswer(courseId, correct, question) {
   questionStat.lastPracticed = event.at;
   questionStat.lastCorrect = correct;
   profile.questionStats[question.id] = questionStat;
-  if (courseId === "english" && !state.baselineTest) {
+  // Slim listening path uses word-bank queues; do not write review-queue chrome.
+  if (
+    courseId === "english" &&
+    !state.baselineTest &&
+    !state.listeningQueue.length
+  ) {
     const child = activeChild();
     if (child)
       child.englishPlan = updateEnglishPlan(
@@ -683,9 +694,9 @@ function baselineResultMarkup() {
 }
 
 function animationResultMarkup() {
-  const correct = Number(state.listeningCorrect) || 0;
+  const correct = Number(state.roundCorrect) || 0;
   const total = Math.max(
-    Number(state.listeningAnswered) || 0,
+    Number(state.roundAnswered) || 0,
     activeAnimation()?.questions?.length || 1,
   );
   const stats = summarizeAnimationAttempts(
@@ -701,9 +712,9 @@ function animationResultMarkup() {
 }
 
 function englishListeningResultMarkup() {
-  const correct = Number(state.listeningCorrect) || 0;
+  const correct = Number(state.roundCorrect) || 0;
   const total = Math.max(
-    Number(state.listeningAnswered) || 0,
+    Number(state.roundAnswered) || 0,
     Number(state.listeningGoal) || 0,
     1,
   );
@@ -713,13 +724,16 @@ function modelName(type) {
   return catalogModelName(type, models);
 }
 
-function featuredVideoDemo() {
+function featuredAnimationDemo() {
   return (
     state.animationLibrary.find((item) => item.id === "demo-fox-apple") ||
     state.animationLibrary.find((item) => item.demo) ||
     createDemoAnimations(assetBase)[0]
   );
 }
+
+/** @deprecated Prefer featuredAnimationDemo */
+const featuredVideoDemo = featuredAnimationDemo;
 
 function listeningBanks() {
   if (wordbankCatalog) {
@@ -926,7 +940,7 @@ function childProfileSettings() {
     )
     .join(
       "",
-    )}</select></label></div><div class="baseline-row"><span>当前英语路径：<b>第 ${stage.id} 阶段 · ${stage.label}</b><small>${baseline}</small></span><button class="small-action" id="startBaseline">开始听力图片测评</button></div><div class="video-register"><div class="config-divider"><span>本地动画理解（GIF/图片）</span></div><p class="video-register-note">添加本地 GIF 或图片（本机文件或 <code>public/assets/stories</code> 路径）。孩子流程：观看 → 听题 → 点大图。旧版 MP4 已降级，不再作为主演示。</p><label><span>标题</span><input id="animationTitle" maxlength="40" placeholder="例如：Fox finds an apple" /></label><label><span>资源路径或选择文件</span><input id="animationAssetPath" maxlength="160" placeholder="assets/stories/fox-apple.gif" /><input id="animationFile" type="file" accept="image/gif,image/png,image/webp,image/jpeg,video/mp4,video/webm" /></label><label><span>题目英文提示</span><input id="animationPrompt" maxlength="80" placeholder="What fruit did you see?" value="What fruit did you see?" /></label><label><span>正确答案</span><input id="animationAnswer" maxlength="40" placeholder="apple" value="apple" /></label><div class="video-choice-row"><label><span>选项 A</span><input id="animationChoiceA" maxlength="20" value="apple" /></label><label><span>选项 B</span><input id="animationChoiceB" maxlength="20" value="banana" /></label><label><span>选项 C</span><input id="animationChoiceC" maxlength="20" value="ball" /></label><label><span>选项 D</span><input id="animationChoiceD" maxlength="20" value="cup" /></label></div><button class="small-action" id="addAnimationClip">＋ 登记本地动画</button><div class="video-library-list">${(state.animationLibrary.filter((v) => !v.demo) || []).map((item) => `<div class="video-library-item"><b>${escapeHtml(item.title)}</b><small>${escapeHtml(item.src)}</small><button class="text-btn" data-remove-animation="${escapeHtml(item.id)}">移除</button></div>`).join("") || "<small>还没有自定义动画</small>"}</div></div><button class="save-child-btn" id="saveChildProfile">保存孩子信息</button></div>`;
+    )}</select></label></div><div class="baseline-row"><span>当前英语路径：<b>第 ${stage.id} 阶段 · ${stage.label}</b><small>${baseline} · 听力主路径为词库抽题</small></span></div><div class="video-register"><div class="config-divider"><span>本地动画理解（GIF/图片）</span></div><p class="video-register-note">添加本地 GIF 或图片（本机文件或 <code>public/assets/stories</code> 路径）。孩子流程：观看 → 听题 → 点大图。旧版 MP4 已降级，不再作为主演示。</p><label><span>标题</span><input id="animationTitle" maxlength="40" placeholder="例如：Fox finds an apple" /></label><label><span>资源路径或选择文件</span><input id="animationAssetPath" maxlength="160" placeholder="assets/stories/fox-apple.gif" /><input id="animationFile" type="file" accept="image/gif,image/png,image/webp,image/jpeg,video/mp4,video/webm" /></label><label><span>题目英文提示</span><input id="animationPrompt" maxlength="80" placeholder="What fruit did you see?" value="What fruit did you see?" /></label><label><span>正确答案</span><input id="animationAnswer" maxlength="40" placeholder="apple" value="apple" /></label><div class="video-choice-row"><label><span>选项 A</span><input id="animationChoiceA" maxlength="20" value="apple" /></label><label><span>选项 B</span><input id="animationChoiceB" maxlength="20" value="banana" /></label><label><span>选项 C</span><input id="animationChoiceC" maxlength="20" value="ball" /></label><label><span>选项 D</span><input id="animationChoiceD" maxlength="20" value="cup" /></label></div><button class="small-action" id="addAnimationClip">＋ 登记本地动画</button><div class="video-library-list">${(state.animationLibrary.filter((v) => !v.demo) || []).map((item) => `<div class="video-library-item"><b>${escapeHtml(item.title)}</b><small>${escapeHtml(item.src)}</small><button class="text-btn" data-remove-animation="${escapeHtml(item.id)}">移除</button></div>`).join("") || "<small>还没有自定义动画</small>"}</div></div><button class="save-child-btn" id="saveChildProfile">保存孩子信息</button></div>`;
 }
 
 function saveChildForm() {
@@ -968,18 +982,17 @@ function scheduleAdvance() {
   }, 1100);
 }
 
-function speak(text) {
-  if (!state.soundOn || !("speechSynthesis" in window)) return;
-  window.speechSynthesis.cancel();
-  const utterance = new SpeechSynthesisUtterance(text);
-  utterance.lang = "en-US";
-  const englishVoice = window.speechSynthesis
-    .getVoices()
-    .find((voice) => /^en(-|_)/i.test(voice.lang));
-  if (englishVoice) utterance.voice = englishVoice;
-  utterance.rate = 0.82;
-  utterance.pitch = 1.15;
-  window.speechSynthesis.speak(utterance);
+function speak(text, question = null) {
+  void speakWithVoice({
+    text,
+    soundOn: state.soundOn,
+    voiceId: models.voice,
+    question: question || currentQuestion(),
+    assetBase,
+    requestSpeech,
+    custom: customModels,
+    onToast: showToast,
+  });
 }
 
 async function planQuestionWithAI() {
@@ -1083,7 +1096,8 @@ function playResultHtml() {
   if (state.baselineTest) return baselineResultMarkup();
   if (state.animationMode) return animationResultMarkup();
   if (state.activityCourse === "english") return englishListeningResultMarkup();
-  return offlineTaskMarkup(state.activityCourse);
+  // Kid path only uses listening / animation result markups.
+  return animationResultMarkup();
 }
 
 function render() {
@@ -1128,8 +1142,8 @@ function render() {
     bindEvents();
     return;
   }
-  if (state.kidView === "video") {
-    const demo = featuredVideoDemo();
+  if (state.kidView === "animation" || state.kidView === "video") {
+    const demo = featuredAnimationDemo();
     const others = state.animationLibrary.filter(
       (item) => item.id !== demo?.id && !item.demo,
     );
@@ -1137,7 +1151,7 @@ function render() {
       ? summarizeAnimationAttempts(profile.events, demo.id)
       : { answers: 0 };
     document.querySelector("#app").innerHTML = kidChrome(
-      videoHubMarkup({
+      animationHubMarkup({
         demo,
         others,
         parentSummary: stats.answers
@@ -1258,7 +1272,7 @@ function bindEvents() {
     if (!animationId) return;
     beginSession("animation", false, { animationId, force: true });
     state.animationPhase = "watch";
-    state.kidView = "video";
+    state.kidView = "animation";
     render();
     showToast("先看，再点图");
     const player = document.querySelector("#comprehensionAnimation");
@@ -1273,7 +1287,7 @@ function bindEvents() {
       event.stopPropagation();
       const feature = btn.dataset.feature;
       if (feature === "video" || feature === "animation") {
-        state.kidView = "video";
+        state.kidView = "animation";
         render();
         return;
       }
@@ -1282,20 +1296,21 @@ function bindEvents() {
     }),
   );
   document.querySelector("#voicePrompt")?.addEventListener("click", () => {
-    if (models.voice === "local-audio")
-      showToast("Add the English audio file to public/assets/audio");
-    else speak(currentQuestion().speech);
+    const question = currentQuestion();
+    speak(question?.speech || question?.prompt || "", question);
   });
   document.querySelectorAll("[data-choice]").forEach((btn) =>
     btn.addEventListener("click", () => {
       if (state.aiPlanning || state.answered) return;
       const question = currentQuestion();
+      const firstSubmit = !state.sessionQuestionIds.includes(question.id);
       state.answered = true;
       state.selectedChoice = btn.dataset.choice;
       state.correct = btn.dataset.choice === question.answer;
-      if (!state.baselineTest) {
-        state.listeningAnswered += 1;
-        if (state.correct) state.listeningCorrect += 1;
+      // Round score counts only the first submit per question.
+      if (firstSubmit && !state.baselineTest) {
+        state.roundAnswered += 1;
+        if (state.correct) state.roundCorrect += 1;
       }
       const courseId = state.animationMode ? "animation" : state.activityCourse;
       recordAnswer(courseId, state.correct, question);
@@ -1315,11 +1330,14 @@ function bindEvents() {
         ) {
           state.activityComplete = true;
         }
-      } else if (state.animationMode) {
-        const total = activeAnimation()?.questions?.length || 1;
-        if (state.questionIndex >= total - 1) state.activityComplete = true;
-      } else if (state.questionIndex >= sessionQuestionTotal() - 1) {
-        state.activityComplete = true;
+      } else if (state.correct) {
+        // Wrong answers stay on the same questionIndex for「再选一次」.
+        if (state.animationMode) {
+          const total = activeAnimation()?.questions?.length || 1;
+          if (state.questionIndex >= total - 1) state.activityComplete = true;
+        } else if (state.questionIndex >= sessionQuestionTotal() - 1) {
+          state.activityComplete = true;
+        }
       }
       if (state.baselineTest && state.activityComplete) {
         const child = activeChild();
@@ -1353,9 +1371,11 @@ function bindEvents() {
           persistActiveChild();
         }
       }
-      state.encouragement = state.correct ? "对了" : "再试一次";
-      if (state.correct) speak("You found it!");
-      else speak("That's okay. Let's try another one.");
+      state.encouragement = state.correct
+        ? "对了 · You found it!"
+        : "再试一次 · Try this one again";
+      if (state.correct) speak("You found it!", question);
+      else speak("That's okay. Try this one again.", question);
       render();
     }),
   );
@@ -1364,7 +1384,7 @@ function bindEvents() {
       const animationId = btn.dataset.animation;
       beginSession("animation", false, { animationId, force: true });
       state.animationPhase = "watch";
-      state.kidView = "video";
+      state.kidView = "animation";
       render();
       showToast("先看，再点图");
       const player = document.querySelector("#comprehensionAnimation");
@@ -1605,13 +1625,13 @@ function bindEvents() {
     const animationId = state.activeAnimationId;
     completeSession(state.activityComplete ? "completed" : "quit");
     if (!animationId) {
-      state.kidView = "video";
+      state.kidView = "animation";
       render();
       return;
     }
     beginSession("animation", false, { animationId, force: true });
     state.animationPhase = "watch";
-    state.kidView = "video";
+    state.kidView = "animation";
     render();
   });
   document
@@ -1678,8 +1698,28 @@ function bindEvents() {
     speak("Great job playing with your grown-up!");
     render();
   });
+  document.querySelector("#retryQuestion")?.addEventListener("click", () => {
+    clearAdvanceTimer();
+    // Same question again — do not advance questionIndex or clear activeQuestionId.
+    state.answered = false;
+    state.correct = false;
+    state.selectedChoice = null;
+    state.encouragement = "";
+    render();
+    if (state.activeSession) speak(currentQuestion().speech);
+  });
   document.querySelector("#nextQuestion")?.addEventListener("click", () => {
     clearAdvanceTimer();
+    if (!state.correct) {
+      // Safety: Next only advances after a correct answer.
+      state.answered = false;
+      state.correct = false;
+      state.selectedChoice = null;
+      state.encouragement = "";
+      render();
+      if (state.activeSession) speak(currentQuestion().speech);
+      return;
+    }
     state.questionIndex = Math.min(
       sessionQuestionTotal() - 1,
       state.questionIndex + 1,

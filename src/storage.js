@@ -49,11 +49,8 @@ export function createDefaultProfile() {
     streak: 0,
     lastActive: null,
     skills: {
-      colors: { attempts: 0, correct: 0, lastPracticed: null },
-      animals: { attempts: 0, correct: 0, lastPracticed: null },
-      shapes: { attempts: 0, correct: 0, lastPracticed: null },
       english: { attempts: 0, correct: 0, lastPracticed: null },
-      video: { attempts: 0, correct: 0, lastPracticed: null },
+      animation: { attempts: 0, correct: 0, lastPracticed: null },
     },
     questionStats: {},
     events: [],
@@ -161,10 +158,16 @@ function localChildrenValue() {
 function mergeProfile(saved) {
   const defaults = createDefaultProfile();
   const source = saved && typeof saved === "object" ? saved : {};
+  const sourceSkills =
+    source.skills && typeof source.skills === "object" ? source.skills : {};
+  // Migrate legacy video → animation; tolerate old colors/animals/shapes.
+  if (!sourceSkills.animation && sourceSkills.video) {
+    sourceSkills.animation = sourceSkills.video;
+  }
   const skills = Object.fromEntries(
     Object.keys(defaults.skills).map((key) => [
       key,
-      normalizeSkill(source.skills?.[key]),
+      normalizeSkill(sourceSkills[key]),
     ]),
   );
   const questionStats = {};

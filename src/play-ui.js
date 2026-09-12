@@ -64,6 +64,23 @@ export function playProgressDots(index = 0, total = 3) {
   ).join("");
 }
 
+function playDockMarkup(state, resultHtml) {
+  if (!state.answered) {
+    return `<p class="play-hint">Tap a picture</p>`;
+  }
+  const good = Boolean(state.correct);
+  const zh = good ? "对了" : "再试一次";
+  const en = good ? "You found it! ✨" : "That's okay—try this one again";
+  const feedback = escapeHtml(state.encouragement || `${zh} · ${en}`);
+  if (state.activityComplete) {
+    return `<div class="play-dock"><div class="feedback ${good ? "good" : "try"}">${feedback}</div>${resultHtml}</div>`;
+  }
+  if (good) {
+    return `<div class="play-dock"><div class="feedback good">${feedback}</div><button class="next-question" id="nextQuestion" type="button">下一题 · Next one <span>→</span></button></div>`;
+  }
+  return `<div class="play-dock"><div class="feedback try">${feedback}</div><button class="next-question retry-question" id="retryQuestion" type="button">再选一次 · Try again <span>↻</span></button></div>`;
+}
+
 export function playStageMarkup({
   question,
   state,
@@ -92,11 +109,7 @@ export function playStageMarkup({
          prompt,
          showLabels: false,
        })}
-       ${
-         state.answered
-           ? `<div class="play-dock"><div class="feedback ${state.correct ? "good" : "try"}">${escapeHtml(state.encouragement || (state.correct ? "You found it! ✨" : "That's okay—let's look again"))}</div>${state.activityComplete ? resultHtml : `<button class="next-question" id="nextQuestion" type="button">${state.correct ? "Next one" : "Try another"} <span>→</span></button>`}</div>`
-           : `<p class="play-hint">Tap a picture</p>`
-       }`;
+       ${playDockMarkup(state, resultHtml)}`;
 
   return `<section class="play-stage" id="quizPanel" aria-label="${escapeHtml(title)}">
     <header class="play-bar">

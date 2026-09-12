@@ -6,6 +6,7 @@ import { join } from "node:path";
 import {
   bankIdFromTheme,
   buildContrastQuestion,
+  resolveLoadedBank,
   buildListeningQuestion,
   catalogBankFiles,
   clampListeningCount,
@@ -242,4 +243,53 @@ test("concepts bank builds contrast attribute prompts", () => {
     pool.some((question) => /Which one is empty/i.test(question.prompt)),
   );
   assert.ok(pool.some((question) => /Which one is red/i.test(question.prompt)));
+});
+
+test("size/height/fill contrasts stay pure 2-choice without cross-attribute pads", () => {
+  const pair = concepts.pairs.find((item) => item.id === "size-dog");
+  const allChoices = concepts.pairs.flatMap((item) => item.choices || []);
+  const big = buildContrastQuestion(
+    pair,
+    pair.prompts.find((item) => item.value === "big"),
+    { childId: "pad-a", padChoices: allChoices, allowPad: true },
+  );
+  assert.equal(big.choices.length, 2);
+  assert.deepEqual(big.choices.map((choice) => choice.value).sort(), [
+    "dog-big",
+    "dog-small",
+  ]);
+  assert.ok(!big.choices.some((choice) => choice.value === "tree-tall"));
+
+  const pool = listeningPoolForBank(
+    { id: "concepts", file: "wordbank.concepts.json", theme: "all" },
+    loadedBanks,
+    { childId: "pad-b", assetBase: "/" },
+  );
+  const tall = pool.find((question) => /tall/i.test(question.prompt));
+  assert.ok(tall);
+  assert.equal(tall.choices.length, 2);
+  assert.ok(
+    !tall.choices.some(
+      (choice) =>
+        /big|small|full|empty/.test(choice.value) &&
+        !choice.value.includes("tree"),
+    ),
+  );
+});
+
+test("resolveLoadedBank accepts pairs-only banks", () => {
+  const pairsOnly = {
+    schemaVersion: 1,
+    question_type: "contrast",
+    pairs: concepts.pairs,
+  };
+  const resolved = resolveLoadedBank(
+    { id: "concepts-only", file: "pairs-only.json" },
+    { "pairs-only.json": pairsOnly },
+  );
+  assert.equal(resolved, pairsOnly);
+  assert.equal(
+    resolveLoadedBank({ id: "missing", file: "nope.json" }, {}),
+    null,
+  );
 });

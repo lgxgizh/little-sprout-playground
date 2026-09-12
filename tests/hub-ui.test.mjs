@@ -6,13 +6,13 @@ import {
   videoHubMarkup,
 } from "../src/hub-ui.js";
 
-test("kid home only offers listening and video Q&A", () => {
+test("kid home only offers listening and animation Q&A", () => {
   const html = homeHubMarkup({ childName: "小米" });
   assert.match(html, /嗨，小米/);
   assert.match(html, /英语听力测试/);
   assert.match(html, /动画提问/);
   assert.match(html, /data-feature="listening"/);
-  assert.match(html, /data-feature="video"/);
+  assert.match(html, /data-feature="animation"/);
   assert.match(html, /flashcards\/food\/apple\.jpg/);
   assert.match(html, /fox-apple\.gif/);
   assert.doesNotMatch(html, /Try one now/);

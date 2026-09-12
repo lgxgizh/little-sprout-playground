@@ -78,6 +78,22 @@ function remoteSelect(type, models) {
   </label>`;
 }
 
+function unwiredRemoteNote(type) {
+  if (type === "vocab") {
+    return `<p class="model-unwired-note">听力目前用本地词库随机抽题；远程选题暂不可用</p>`;
+  }
+  if (type === "image" || type === "video") {
+    return `<p class="model-unwired-note">暂未接入孩子流程</p>`;
+  }
+  return "";
+}
+
+function remoteSelectMarked(type, models) {
+  const markup = remoteSelect(type, models);
+  if (!markup) return "";
+  return `${markup}${unwiredRemoteNote(type)}`;
+}
+
 export function parentModelsMarkup({ models = {}, customModels = {} } = {}) {
   const primaryTypes = ["image", "voice", "vocab"];
   const anyRemote = MODEL_CAPABILITIES.some((type) =>
@@ -86,6 +102,7 @@ export function parentModelsMarkup({ models = {}, customModels = {} } = {}) {
   const localPanel = primaryTypes
     .map((type) => localSelect(type, models))
     .join("");
+  const vocabHonesty = `<p class="model-unwired-note" id="localVocabNote">听力目前用本地词库随机抽题；远程选题暂不可用</p>`;
   const animationNote = `<div class="model-setting model-local-note" id="localAnimationNote">
     <span class="model-setting-label">
       <span class="model-setting-icon">🎬</span>
@@ -94,18 +111,18 @@ export function parentModelsMarkup({ models = {}, customModels = {} } = {}) {
   </div>`;
   const remoteOrder = ["image", "voice", "vocab", "video"];
   const remotePanel = remoteOrder
-    .map((type) => remoteSelect(type, models))
+    .map((type) => remoteSelectMarked(type, models))
     .join("");
   const customs = MODEL_CAPABILITIES.map((type) =>
     customFields(type, models, customModels),
   ).join("");
   return `<p class="parent-lead">默认用本机。远程模型收进「高级」。xAI / OpenAI / Gemini 用对应密钥；FLUX、Qwen、DeepSeek 等走 OpenAI 兼容网关。也可以选「自定义」填任意模型 ID。</p>
-    <div class="model-settings" id="localModelPanel">${localPanel}${animationNote}</div>
+    <div class="model-settings" id="localModelPanel">${localPanel}${vocabHonesty}${animationNote}</div>
     <details class="model-advanced" id="advancedModels"${anyRemote ? " open" : ""}>
       <summary>高级 / 远程模型</summary>
       <div class="model-settings">${remotePanel}</div>
     </details>
     ${customs}
-    <div class="config-tip">当前语音：<b>${escapeHtml(modelName("voice", models))}</b> · 当前题目：<b>${escapeHtml(modelName("vocab", models))}</b> · 当前图片：<b>${escapeHtml(modelName("image", models))}</b></div>
+    <div class="config-tip">当前语音：<b>${escapeHtml(modelName("voice", models))}</b> · 听力选题：本地词库 · 当前图片：<b>${escapeHtml(modelName("image", models))}</b></div>
     <div class="data-tools"><button class="small-action" id="exportData">导出学习档案</button><button class="small-action" id="importData">导入学习档案</button><input id="importFile" type="file" accept="application/json,.json" hidden /></div>`;
 }

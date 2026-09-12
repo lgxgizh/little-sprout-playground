@@ -30,7 +30,7 @@ export function homeHubMarkup({ childName = "Sunny", assetBase = "/" } = {}) {
         </div>
         <button class="primary-btn feature-start" data-feature="listening" type="button"><span>开始</span><span class="arrow">→</span></button>
       </article>
-      <article class="home-feature home-feature-video" data-feature="video">
+      <article class="home-feature home-feature-video" data-feature="animation">
         <div class="home-feature-pics home-feature-pics-wide">
           <img src="${escapeHtml(base)}assets/stories/fox-apple.gif" alt="" />
         </div>
@@ -38,13 +38,13 @@ export function homeHubMarkup({ childName = "Sunny", assetBase = "/" } = {}) {
           <h2>动画提问</h2>
           <p>先看动画，再听问题、点图片。</p>
         </div>
-        <button class="primary-btn feature-start" data-feature="video" type="button"><span>开始</span><span class="arrow">→</span></button>
+        <button class="primary-btn feature-start" data-feature="animation" type="button"><span>开始</span><span class="arrow">→</span></button>
       </article>
     </div>
   </section>`;
 }
 
-export function videoHubMarkup({
+export function animationHubMarkup({
   demo,
   others = [],
   parentSummary = "Picture answers after watching",
@@ -173,3 +173,6 @@ export function listeningHubMarkup({
     </div>
   </section>`;
 }
+
+/** @deprecated Prefer animationHubMarkup */
+export const videoHubMarkup = animationHubMarkup;

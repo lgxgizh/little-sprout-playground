@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { parseLearningData } from "../src/storage.js";
+import { createDefaultProfile, parseLearningData } from "../src/storage.js";
 
 function payloadWith(overrides = {}) {
   return {
@@ -82,4 +82,50 @@ test("import still rejects missing learning profile data", () => {
       ),
     /学习档案数据不完整/,
   );
+});
+
+test("default skills are english and animation only", () => {
+  const profile = createDefaultProfile();
+  assert.deepEqual(Object.keys(profile.skills).sort(), [
+    "animation",
+    "english",
+  ]);
+});
+
+test("import migrates legacy video skill into animation", () => {
+  const parsed = parseLearningData(
+    payloadWith({
+      children: [
+        {
+          id: "child-one",
+          nickname: "Sunny",
+          age: 3,
+          profile: {
+            totalSessions: 1,
+            totalAnswers: 2,
+            correctAnswers: 1,
+            stars: 1,
+            streak: 1,
+            lastActive: "2026-09-03",
+            skills: {
+              video: {
+                attempts: 4,
+                correct: 2,
+                lastPracticed: "2026-09-03T10:00:00.000Z",
+              },
+              english: { attempts: 1, correct: 1, lastPracticed: null },
+            },
+            questionStats: {},
+            events: [],
+            awards: [],
+          },
+        },
+      ],
+    }),
+  );
+  const skills = parsed.children[0].profile.skills;
+  assert.equal(skills.animation.attempts, 4);
+  assert.equal(skills.animation.correct, 2);
+  assert.equal(skills.english.attempts, 1);
+  assert.equal(skills.colors, undefined);
 });

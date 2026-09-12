@@ -42,3 +42,13 @@ test("a remote selection stays visible on the primary select", () => {
   assert.match(advanced, /data-model="video"/);
   assert.match(advanced, /动画提问/);
 });
+
+test("parent UI states remote vocab does not drive listening", () => {
+  const html = parentModelsMarkup({
+    models: defaultModels(),
+    customModels: {},
+  });
+  assert.match(html, /听力目前用本地词库随机抽题；远程选题暂不可用/);
+  const advanced = html.split('id="advancedModels"')[1] || "";
+  assert.match(advanced, /暂未接入孩子流程/);
+});
