@@ -1340,7 +1340,9 @@
         "giraffe",
         "elephant",
         "hippo",
-        "zebra"
+        "zebra",
+        "monkey",
+        "tiger"
       ],
       "adjacent_types": [
         "animal"
@@ -1372,7 +1374,9 @@
         "giraffe",
         "elephant",
         "hippo",
-        "zebra"
+        "zebra",
+        "monkey",
+        "tiger"
       ],
       "adjacent_types": [
         "animal"
@@ -1404,7 +1408,9 @@
         "giraffe",
         "elephant",
         "hippo",
-        "zebra"
+        "zebra",
+        "monkey",
+        "tiger"
       ],
       "adjacent_types": [
         "animal"
@@ -1436,7 +1442,9 @@
         "giraffe",
         "elephant",
         "hippo",
-        "zebra"
+        "zebra",
+        "monkey",
+        "tiger"
       ],
       "adjacent_types": [
         "animal"
@@ -1563,6 +1571,278 @@
       "object_prompt": "one cave entrance in a rock",
       "color": "#78909c",
       "emoji": "🕳️",
+      "status": "approved"
+    },
+    {
+      "id": "movers_owl",
+      "lemma": "owl",
+      "slug": "owl",
+      "pos": "noun",
+      "level": "movers",
+      "theme": "animals",
+      "type": "animal",
+      "age_min": 3,
+      "age_max": 6,
+      "prompt_en": "Which one is the owl?",
+      "speech": "Which one is the owl?",
+      "imageable": true,
+      "distractor_pool": [
+        "rabbit",
+        "crocodile",
+        "giraffe",
+        "elephant",
+        "hippo",
+        "zebra",
+        "monkey",
+        "tiger"
+      ],
+      "adjacent_types": [
+        "insect"
+      ],
+      "image_id": "img_owl_v1",
+      "image": "assets/flashcards/movers/owl.jpg",
+      "fallback_image": "assets/flashcards/movers/owl.jpg",
+      "object_prompt": "one cute owl on a branch",
+      "color": "#8d6e63",
+      "emoji": "🦉",
+      "status": "approved"
+    },
+    {
+      "id": "movers_squirrel",
+      "lemma": "squirrel",
+      "slug": "squirrel",
+      "pos": "noun",
+      "level": "movers",
+      "theme": "animals",
+      "type": "animal",
+      "age_min": 3,
+      "age_max": 6,
+      "prompt_en": "Which one is the squirrel?",
+      "speech": "Which one is the squirrel?",
+      "imageable": true,
+      "distractor_pool": [
+        "rabbit",
+        "crocodile",
+        "giraffe",
+        "elephant",
+        "hippo",
+        "zebra",
+        "monkey",
+        "tiger"
+      ],
+      "adjacent_types": [
+        "insect"
+      ],
+      "image_id": "img_squirrel_v1",
+      "image": "assets/flashcards/movers/squirrel.jpg",
+      "fallback_image": "assets/flashcards/movers/squirrel.jpg",
+      "object_prompt": "one cute squirrel with an acorn",
+      "color": "#ef6c00",
+      "emoji": "🐿️",
+      "status": "approved"
+    },
+    {
+      "id": "movers_hedgehog",
+      "lemma": "hedgehog",
+      "slug": "hedgehog",
+      "pos": "noun",
+      "level": "movers",
+      "theme": "animals",
+      "type": "animal",
+      "age_min": 3,
+      "age_max": 6,
+      "prompt_en": "Which one is the hedgehog?",
+      "speech": "Which one is the hedgehog?",
+      "imageable": true,
+      "distractor_pool": [
+        "rabbit",
+        "crocodile",
+        "giraffe",
+        "elephant",
+        "hippo",
+        "zebra",
+        "monkey",
+        "tiger"
+      ],
+      "adjacent_types": [
+        "insect"
+      ],
+      "image_id": "img_hedgehog_v1",
+      "image": "assets/flashcards/movers/hedgehog.jpg",
+      "fallback_image": "assets/flashcards/movers/hedgehog.jpg",
+      "object_prompt": "one cute hedgehog",
+      "color": "#6d4c41",
+      "emoji": "🦔",
+      "status": "approved"
+    },
+    {
+      "id": "movers_lobster",
+      "lemma": "lobster",
+      "slug": "lobster",
+      "pos": "noun",
+      "level": "movers",
+      "theme": "animals",
+      "type": "animal",
+      "age_min": 3,
+      "age_max": 6,
+      "prompt_en": "Which one is the lobster?",
+      "speech": "Which one is the lobster?",
+      "imageable": true,
+      "distractor_pool": [
+        "rabbit",
+        "crocodile",
+        "giraffe",
+        "elephant",
+        "hippo",
+        "zebra",
+        "monkey",
+        "tiger"
+      ],
+      "adjacent_types": [
+        "insect"
+      ],
+      "image_id": "img_lobster_v1",
+      "image": "assets/flashcards/movers/lobster.jpg",
+      "fallback_image": "assets/flashcards/movers/lobster.jpg",
+      "object_prompt": "one red lobster",
+      "color": "#e53935",
+      "emoji": "🦞",
+      "status": "approved"
+    },
+    {
+      "id": "movers_skate",
+      "lemma": "skate",
+      "slug": "skate",
+      "pos": "noun",
+      "level": "movers",
+      "theme": "toys",
+      "type": "play",
+      "age_min": 3,
+      "age_max": 6,
+      "prompt_en": "Which one is the skate?",
+      "speech": "Which one is the skate?",
+      "imageable": true,
+      "distractor_pool": [
+        "helicopter",
+        "motorbike",
+        "truck",
+        "camera",
+        "robot",
+        "skateboard",
+        "scooter",
+        "sledge"
+      ],
+      "adjacent_types": [
+        "vehicle"
+      ],
+      "image_id": "img_skate_v1",
+      "image": "assets/flashcards/movers/skate.jpg",
+      "fallback_image": "assets/flashcards/movers/skate.jpg",
+      "object_prompt": "one roller skate",
+      "color": "#ec407a",
+      "emoji": "🛼",
+      "status": "approved"
+    },
+    {
+      "id": "movers_skateboard",
+      "lemma": "skateboard",
+      "slug": "skateboard",
+      "pos": "noun",
+      "level": "movers",
+      "theme": "toys",
+      "type": "play",
+      "age_min": 3,
+      "age_max": 6,
+      "prompt_en": "Which one is the skateboard?",
+      "speech": "Which one is the skateboard?",
+      "imageable": true,
+      "distractor_pool": [
+        "helicopter",
+        "motorbike",
+        "truck",
+        "camera",
+        "robot",
+        "skate",
+        "scooter",
+        "sledge"
+      ],
+      "adjacent_types": [
+        "vehicle"
+      ],
+      "image_id": "img_skateboard_v1",
+      "image": "assets/flashcards/movers/skateboard.jpg",
+      "fallback_image": "assets/flashcards/movers/skateboard.jpg",
+      "object_prompt": "one skateboard",
+      "color": "#1e88e5",
+      "emoji": "🛹",
+      "status": "approved"
+    },
+    {
+      "id": "movers_scooter",
+      "lemma": "scooter",
+      "slug": "scooter",
+      "pos": "noun",
+      "level": "movers",
+      "theme": "toys",
+      "type": "play",
+      "age_min": 3,
+      "age_max": 6,
+      "prompt_en": "Which one is the scooter?",
+      "speech": "Which one is the scooter?",
+      "imageable": true,
+      "distractor_pool": [
+        "helicopter",
+        "motorbike",
+        "truck",
+        "camera",
+        "robot",
+        "skate",
+        "skateboard",
+        "sledge"
+      ],
+      "adjacent_types": [
+        "vehicle"
+      ],
+      "image_id": "img_scooter_v1",
+      "image": "assets/flashcards/movers/scooter.jpg",
+      "fallback_image": "assets/flashcards/movers/scooter.jpg",
+      "object_prompt": "one kick scooter",
+      "color": "#00897b",
+      "emoji": "🛴",
+      "status": "approved"
+    },
+    {
+      "id": "movers_sledge",
+      "lemma": "sledge",
+      "slug": "sledge",
+      "pos": "noun",
+      "level": "movers",
+      "theme": "toys",
+      "type": "play",
+      "age_min": 3,
+      "age_max": 6,
+      "prompt_en": "Which one is the sledge?",
+      "speech": "Which one is the sledge?",
+      "imageable": true,
+      "distractor_pool": [
+        "helicopter",
+        "motorbike",
+        "truck",
+        "camera",
+        "robot",
+        "skate",
+        "skateboard",
+        "scooter"
+      ],
+      "adjacent_types": [
+        "vehicle"
+      ],
+      "image_id": "img_sledge_v1",
+      "image": "assets/flashcards/movers/sledge.jpg",
+      "fallback_image": "assets/flashcards/movers/sledge.jpg",
+      "object_prompt": "one wooden sledge",
+      "color": "#8d6e63",
+      "emoji": "🛷",
       "status": "approved"
     }
   ],

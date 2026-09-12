@@ -382,7 +382,24 @@ test("feelings/actions/adjectives skill banks use natural prompts", () => {
 });
 
 test("expanded movers and flyers include new picture nouns", () => {
-  for (const slug of ["snake", "spider", "bat", "fox", "bridge", "island", "cave", "lighthouse"]) {
+  for (const slug of [
+    "snake",
+    "spider",
+    "bat",
+    "fox",
+    "bridge",
+    "island",
+    "cave",
+    "lighthouse",
+    "owl",
+    "squirrel",
+    "hedgehog",
+    "lobster",
+    "skate",
+    "skateboard",
+    "scooter",
+    "sledge",
+  ]) {
     assert.ok(movers.words.some((word) => word.slug === slug), slug);
   }
   for (const slug of [
@@ -394,8 +411,49 @@ test("expanded movers and flyers include new picture nouns", () => {
     "desert",
     "jungle",
     "snowman",
+    "astronaut",
+    "queen",
+    "chef",
+    "doctor",
+    "treasure",
+    "compass",
+    "map",
+    "tent",
   ]) {
     assert.ok(flyers.words.some((word) => word.slug === slug), slug);
   }
+});
+
+test("batch2 feelings/actions/adjectives expansions are present", () => {
+  for (const slug of [
+    "hungry",
+    "thirsty",
+    "bored",
+    "brave",
+    "shy",
+    "proud",
+    "worried",
+    "funny",
+  ]) {
+    assert.ok(feelings.words.some((word) => word.slug === slug), slug);
+  }
+  for (const slug of [
+    "catch",
+    "throw",
+    "climb",
+    "fall",
+    "open",
+    "look",
+    "carry",
+    "give",
+  ]) {
+    assert.ok(actions.words.some((word) => word.slug === slug), slug);
+  }
+  for (const slug of ["new", "old", "light", "dark"]) {
+    assert.ok(adjectives.words.some((word) => word.slug === slug), slug);
+  }
+  assert.ok(feelings.words.length >= 16);
+  assert.ok(actions.words.length >= 28);
+  assert.ok(adjectives.words.length >= 16);
 });
 
