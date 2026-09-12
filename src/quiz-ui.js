@@ -1,4 +1,4 @@
-/** Shared picture-choice quiz markup (A–D cards with optional PNG images). */
+/** Shared picture-choice quiz markup (A–D cards with optional JPEG images). */
 
 export function escapeHtml(value = "") {
   return String(value).replace(

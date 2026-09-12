@@ -1,14 +1,14 @@
 /** Listening-test helpers: choice PNG map + gentle level summary glue. */
 
 export const CHOICE_ASSET_FILES = {
-  apple: "apple.png",
-  banana: "banana.png",
-  cat: "cat.png",
-  dog: "dog.png",
-  ball: "ball.png",
-  cup: "cup.png",
-  star: "star.png",
-  fish: "fish.png",
+  apple: "apple.jpg",
+  banana: "banana.jpg",
+  cat: "cat.jpg",
+  dog: "dog.jpg",
+  ball: "ball.jpg",
+  cup: "cup.jpg",
+  star: "star.jpg",
+  fish: "fish.jpg",
 };
 
 export const LISTENING_FEATURE = {
@@ -82,7 +82,7 @@ export function enrichQuestionBank(bank, assetBase = "/") {
   return next;
 }
 
-/** Built-in listening/vocab items that use the shipped choice PNGs. */
+/** Built-in listening/vocab items that use the shipped choice JPEGs. */
 export function createListeningSeedQuestions(assetBase = "/") {
   const img = (key) => choiceImageSrc(key, assetBase);
   const card = (value, label, color, emoji) => ({

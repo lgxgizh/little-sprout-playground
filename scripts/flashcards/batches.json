@@ -1,0 +1,114 @@
+{
+  "schemaVersion": 1,
+  "format": "jpeg",
+  "batches": [
+    {
+      "id": "grid-01",
+      "slugs": ["apple", "banana", "orange", "pear"]
+    },
+    {
+      "id": "grid-02",
+      "slugs": ["grape", "lemon", "pineapple", "kiwi"]
+    },
+    {
+      "id": "grid-03",
+      "slugs": ["watermelon", "mango", "coconut", "lime"]
+    },
+    {
+      "id": "grid-04",
+      "slugs": ["carrot", "tomato", "potato", "onion"]
+    },
+    {
+      "id": "grid-05",
+      "slugs": ["bread", "cake", "egg", "burger"]
+    },
+    {
+      "id": "grid-06",
+      "slugs": ["ice-cream", "juice", "milk", "sausage"]
+    },
+    {
+      "id": "grid-07",
+      "slugs": ["cat", "dog", "bird", "fish"]
+    },
+    {
+      "id": "grid-08",
+      "slugs": ["cow", "horse", "sheep", "duck"]
+    },
+    {
+      "id": "grid-09",
+      "slugs": ["chicken", "goat", "donkey", "mouse"]
+    },
+    {
+      "id": "grid-10",
+      "slugs": ["bee", "frog", "bear", "elephant"]
+    },
+    {
+      "id": "grid-11",
+      "slugs": ["giraffe", "monkey", "hippo", "tiger"]
+    },
+    {
+      "id": "grid-12",
+      "slugs": ["zebra", "polar-bear", "ball", "balloon"]
+    },
+    {
+      "id": "grid-13",
+      "slugs": ["doll", "kite", "robot", "teddy"]
+    },
+    {
+      "id": "grid-14",
+      "slugs": ["train", "bike", "boat", "plane"]
+    },
+    {
+      "id": "grid-15",
+      "slugs": ["helicopter", "baseball", "basketball", "football"]
+    },
+    {
+      "id": "grid-16",
+      "slugs": ["hat", "dress", "shirt", "t-shirt"]
+    },
+    {
+      "id": "grid-17",
+      "slugs": ["shoe", "sock", "boot", "jacket"]
+    },
+    {
+      "id": "grid-18",
+      "slugs": ["jeans", "shorts", "skirt", "glasses"]
+    },
+    {
+      "id": "grid-19",
+      "slugs": ["bag", "baseball-cap", "watch", "handbag"]
+    },
+    {
+      "id": "grid-20",
+      "slugs": ["bed", "chair", "table", "sofa"]
+    },
+    {
+      "id": "grid-21",
+      "slugs": ["lamp", "clock", "door", "window"]
+    },
+    {
+      "id": "grid-22",
+      "slugs": ["house", "bath", "box", "phone"]
+    },
+    {
+      "id": "grid-23",
+      "slugs": ["computer", "television", "armchair", "desk"]
+    },
+    {
+      "id": "grid-24",
+      "slugs": ["car", "bus", "truck", "ship"]
+    },
+    {
+      "id": "grid-25",
+      "slugs": ["book", "pencil", "pen", "crayon"]
+    },
+    {
+      "id": "grid-26",
+      "slugs": ["ruler", "eraser", "cup", "star"]
+    },
+    {
+      "id": "grid-27",
+      "slugs": ["flower", "tree", "sun", "guitar"]
+    }
+  ]
+}

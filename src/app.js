@@ -25,6 +25,8 @@ import {
   pickSessionQuestion,
   withChoiceImages,
 } from "./listening.js";
+import { playStageMarkup } from "./play-ui.js";
+import { listeningPoolFromWordbank } from "./wordbank.js";
 import {
   chooseQuestionCandidates,
   stageDefinition,
@@ -267,6 +269,7 @@ const customModels = (() => {
 let profile = createDefaultProfile();
 let children = [];
 let activeChildId = null;
+let startersWordbank = null;
 
 const childLabels = {
   gender: {
@@ -402,6 +405,7 @@ function switchChild(childId) {
   activeChildId = next.id;
   profile = next.profile;
   resetActiveActivity();
+  applyWordbankPool();
 }
 
 function touchLearningDay() {
@@ -552,6 +556,7 @@ function beginSession(courseId, baselineTest = false, options = {}) {
     animationId: options.animationId || null,
     videoId: options.animationId || null,
   };
+  applyWordbankPool();
   const event = {
     type: "session_started",
     courseId,
@@ -985,6 +990,20 @@ function normalizeContentQuestion(question) {
   return normalized;
 }
 
+function applyWordbankPool() {
+  if (!startersWordbank) return;
+  const pool = listeningPoolFromWordbank(startersWordbank, {
+    childId: activeChild()?.id || "default",
+    assetBase,
+    salt: state.activeSession?.id || "home",
+  });
+  if (!pool.length) return;
+  const extras = questionBank.english.filter(
+    (question) => !pool.some((item) => item.id === question.id),
+  );
+  questionBank.english = [...pool, ...extras];
+}
+
 async function loadQuestionPack() {
   try {
     const response = await fetch(`${assetBase}content/questions.en.json`, {
@@ -1006,6 +1025,21 @@ async function loadQuestionPack() {
     ];
   } catch {
     // The built-in question bank keeps the app fully usable offline.
+  }
+}
+
+async function loadWordbank() {
+  try {
+    const response = await fetch(`${assetBase}content/wordbank.starters.json`, {
+      cache: "no-store",
+    });
+    if (!response.ok) return;
+    const payload = await response.json();
+    if (payload?.schemaVersion !== 1 || !Array.isArray(payload.words)) return;
+    startersWordbank = payload;
+    applyWordbankPool();
+  } catch {
+    // Seed listening questions remain available without the wordbank file.
   }
 }
 
@@ -1181,6 +1215,13 @@ function featureHubMarkup(next) {
   return `<section class="feature-hub" id="featureHub"><div class="section-heading"><div><span class="section-kicker">TWO KID FEATURES · 两大玩法</span><h2>What shall we play?</h2></div></div><div class="feature-hub-grid"><article class="feature-card feature-listening ${next.course.id === "english" ? "is-recommended" : ""}" data-feature="listening"><div class="feature-card-art"><span>🎧</span><b>听力测试</b></div><div class="feature-card-copy"><h3>Listening test</h3><p>Browser speech asks an English question. Tap a big picture card A / B / C / D.</p><button class="primary-btn feature-start" data-feature="listening"><span>Start listening</span><span class="arrow">→</span></button></div></article><article class="feature-card feature-animation ${next.course.id === "animation" ? "is-recommended" : ""}" data-feature="animation"><div class="feature-card-art"><span>🎞️</span><b>动画提问</b></div><div class="feature-card-copy"><h3>Animation Q&A</h3><p>Watch the fox GIF or the shapes clip, then answer with the same picture cards.</p><button class="primary-btn feature-start" data-feature="animation"><span>Watch & answer</span><span class="arrow">→</span></button></div></article></div>${state.showExtras ? `<div class="extras-grid">${secondaryCourses.map((course) => courseCard(course, false)).join("")}</div>` : `<p class="hub-aux-note">Parent helpers, storage, and voice prompts stay in settings. Extra color / animal / shape play is tucked away unless a grown-up turns it on.</p>`}</section>`;
 }
 
+function playResultHtml() {
+  if (!state.activityComplete) return "";
+  if (state.baselineTest) return baselineResultMarkup();
+  if (state.animationMode) return animationResultMarkup();
+  return offlineTaskMarkup(state.activityCourse);
+}
+
 function render() {
   const next = recommendation();
   const dailyProgress = todayProgress();
@@ -1188,6 +1229,26 @@ function render() {
     courses.find((course) => course.id === state.activityCourse) || courses[0];
   const question = currentQuestion();
   const childName = escapeHtml(activeChild()?.nickname || "Sunny");
+  if (state.activeSession) {
+    document.querySelector("#app").innerHTML = `
+    <div class="app-shell is-playing">
+      ${playStageMarkup({
+        question,
+        state,
+        total: sessionQuestionTotal(),
+        watchMediaHtml:
+          state.animationMode && state.animationPhase === "watch"
+            ? animationWatchMarkup()
+            : "",
+        resultHtml: playResultHtml(),
+      })}
+      ${state.modal ? modelSettingsModal() : ""}
+      <div class="toast" id="toast">Ready to play</div>
+    </div>`;
+    bindEvents();
+    scheduleAdvance();
+    return;
+  }
   document.querySelector("#app").innerHTML = `
     <div class="app-shell">
       <header class="topbar">
@@ -1942,6 +2003,7 @@ async function init() {
   }
   children = await loadChildren();
   await loadQuestionPack();
+  await loadWordbank();
   state.animationLibrary = mergeAnimationShelf(
     createDemoAnimations(assetBase),
     loadAnimationLibrary(assetBase),

@@ -2,6 +2,8 @@
 
 `questions.en.json` is an optional local content pack. The app loads it at startup and merges valid new questions into the built-in bank. If the file is missing or invalid, the built-in questions remain available.
 
+`wordbank.starters.json` is the Cambridge YLE Starters **imageable noun** bank for picture listening. The quiz engine reads this file, picks same-theme distractors, and shuffles choices with the child id. It is a curated subset for drawing cards, not official Cambridge exam content. Cards are JPEG files under `public/assets/flashcards/`.
+
 `questions.en.json` 是可选的本地内容包。网页启动时会自动加载，并把格式正确的新题合并到内置题库；文件缺失或格式错误时，仍然使用内置题库。
 
 ## Minimal format / 最小格式
@@ -52,7 +54,7 @@
 - `image` and `audio`: optional local asset paths / 可选本地资源路径。选项也可以带 `image` 或 `imageKey`。
 - `prompt` and `speech`: child-facing English only. Keep them short and concrete / 面向孩子的英文短句，尽量短、具体。
 - `answer`: must exactly match one choice `value` / 必须与某个选项的 `value` 完全一致。
-- `choices`: 2–4 choices with `label`, `value`, hex `color`, plus `emoji` and/or `imageKey`/`imageSrc` (prefer keys under `public/assets/choices/`: apple banana cat dog ball cup star fish) / 2–4 个选项；优先使用 choices 目录下的 PNG `imageKey`。
+- `choices`: 2–4 choices with `label`, `value`, hex `color`, plus `emoji` and/or `imageKey`/`imageSrc` (prefer JPEG keys under `public/assets/flashcards/` or `public/assets/choices/`) / 2–4 个选项；优先使用 JPEG 词卡。
 
 ## Curriculum guidance / 教材建议
 

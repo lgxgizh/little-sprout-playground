@@ -33,6 +33,7 @@
 - 独立的亲子任务区，鼓励把学习带到真实生活中 / A dedicated parent-child activity area that extends learning into daily life
 - 家长入口长按保护 / Long-press protection for parent settings
 - 可替换的本地图片、音频和题库资源 / Replaceable local media and question banks
+- 听力测试进入后是接近全屏的 2×2 大图，不再缩在首页卡片里 / Listening test is a near-fullscreen 2×2 picture board
 - 主页两大入口：听力测试（TTS + 图片选项）与动画提问（fox-apple.gif + 图片选项） / Home hub with Listening test and Animation Q&A (fox-apple.gif + picture cards)
 - Story shelf：本地 GIF/图片登记、观看后图片答题 / Story shelf for local GIF/image registration and watch-then-picture answers
 - GitHub Actions 自动构建和 Pages 部署 / Automated CI and GitHub Pages deployment
@@ -166,9 +167,12 @@ The recommendation rule prioritizes topics that are new or need gentle practice 
 .
 ├── .github/                 # CI、Pages、Issue 和 PR 模板 / workflows and templates
 ├── public/assets/           # 可替换媒体 / replaceable media
+├── scripts/flashcards/      # Grok 四宫格生图与 JPEG 切割 / 2x2 Imagine + split
 ├── src/
 │   ├── app.js               # 主页两大玩法、共享答题 UI、家长设置 / hub UI + parent settings
-│   ├── listening.js         # 听力测试题与 choice PNG 映射 / listening seeds + choice assets
+│   ├── listening.js         # 听力测试题与 JPEG 词卡映射 / listening seeds + JPEG cards
+│   ├── wordbank.js          # Starters 词库引擎：主题干扰项 / same-theme distractors
+│   ├── play-ui.js           # 全屏听力作答台 / fullscreen listening stage
 │   ├── animation-quiz.js    # GIF/图片动画理解书架 / GIF animation comprehension shelf
 │   ├── quiz-ui.js           # A–D 大图选项共享渲染 / shared picture-choice cards
 │   ├── model-config.js      # 语音、图片、选题、视频模型目录 / model catalog
@@ -188,7 +192,9 @@ The recommendation rule prioritizes topics that are new or need gentle practice 
 ## 接入自己的内容 / Bring your own content
 
 - 图片或封面放入 `public/assets/`。 / Put images in `public/assets/`.
-- 选项大图放在 `public/assets/choices/`（apple/banana/cat/dog/ball/cup/star/fish）。 / Choice PNGs live in `public/assets/choices/`.
+- 听力词卡用 JPEG（不要 PNG）：新卡 `public/assets/flashcards/{theme}/{slug}.jpg`，旧 8 个键仍可在 `public/assets/choices/`。Grok Imagine 出的是位图，做不成真 SVG；白底词卡也不需要 PNG 透明通道。 / Listening cards are JPEG, not PNG. New cards live in `public/assets/flashcards/`.
+- 剑桥 Starters 能画名词词库：`public/content/wordbank.starters.json`。题目引擎按主题抽干扰项，按孩子 ID 打乱选项；**不要在做题时现场生图**。 / Starters imageable-noun bank plus a same-theme question engine. Never generate images during a quiz.
+- 四宫格生图脚本：`scripts/flashcards/`（Grok Imagine 一次 4 词，再切成 JPEG）。 / Batch 2×2 Grok Imagine grids, then split to JPEG.
 - 演示动画为 `public/assets/stories/fox-apple.gif`；家长可在设置中登记其它本地 GIF/图片。 / Demo animation is `public/assets/stories/fox-apple.gif`; parents can register other local GIFs/images.
 - 本地音频放入 `public/assets/audio/{questionId}.mp3`。 / Put English MP3 files at `public/assets/audio/{questionId}.mp3`.
 - 旧版 `public/assets/media/shapes-hello.mp4` 已降级，不再作为主演示。 / Legacy `shapes-hello.mp4` is demoted and no longer the primary demo.
@@ -223,4 +229,8 @@ The code is released under the [MIT License](LICENSE). Media added by contributo
 
 Little Sprout Playground is an independent, picture-first learning web app for preschool children. The kid-facing home centers on two features: **Listening test** (browser speech prompts + A/B/C/D picture cards) and **Animation Q&A** (watch `fox-apple.gif`, then tap picture answers). Speak-back/microphone recognition is removed from demo kid flows. Parent helpers, storage, and model settings stay behind the long-press parent gate.
 
-It ships with generated choice PNGs under `public/assets/choices/` and the fox-apple GIF story—no third-party copyrighted cartoons. Learning data stays on the device by default. See [SECURITY.md](SECURITY.md) for privacy guidance.
+It ships with generated JPEG flashcards under `public/assets/flashcards/` (and eight compatibility JPEGs under `choices/`) plus the fox-apple GIF story—no third-party copyrighted cartoons. Learning data stays on the device by default. See [SECURITY.md](SECURITY.md) for privacy guidance.
+
+## GitHub space
+
+GitHub Pages wants the **published site under 1 GB**. Git warns at 50 MB per file and blocks 100 MB files. These listening JPEGs are about **25–50 KB each**. 32 cards now are ~1 MB; 128 cards would be about **4–6 MB**. That fits easily. Do not switch these cards to PNG, and do not use Git LFS: Pages cannot serve LFS files.

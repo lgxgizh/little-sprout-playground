@@ -80,7 +80,7 @@ test("normalizeAnimationEntry accepts stories GIF paths and imageSrc choices", (
   assert.equal(ok.title, "OK");
   assert.equal(ok.mediaType, "image");
   assert.equal(ok.questions.length, 1);
-  assert.match(ok.questions[0].choices[0].imageSrc, /apple\.png$/);
+  assert.match(ok.questions[0].choices[0].imageSrc, /apple\.jpg$/);
 });
 
 test("merge and parent summary stay gentle for animation attempts", () => {
@@ -145,16 +145,16 @@ test("merge and parent summary stay gentle for animation attempts", () => {
   assert.match(parentAnimationSummary(stats), /Replay|picture|watching|tries/i);
 });
 
-test("listening seed questions map to shipped choice PNGs", () => {
+test("listening seed questions map to shipped choice JPEGs", () => {
   const seeds = createListeningSeedQuestions("/");
   assert.ok(seeds.length >= 6);
   assert.ok(seeds.every((q) => q.choices.length === 4));
-  assert.equal(choiceImageSrc("apple", "/"), "/assets/choices/apple.png");
+  assert.equal(choiceImageSrc("apple", "/"), "/assets/choices/apple.jpg");
   const enriched = withChoiceImages(
     [{ label: "Dog", value: "dog", emoji: "🐶", color: "#d9a66f" }],
     "/",
   );
-  assert.match(enriched[0].imageSrc, /dog\.png$/);
+  assert.match(enriched[0].imageSrc, /dog\.jpg$/);
 });
 
 test("shared quiz UI builds A-D picture cards", () => {
@@ -166,19 +166,19 @@ test("shared quiz UI builds A-D picture cards", () => {
         label: "Apple",
         value: "apple",
         color: "#ff6b5e",
-        imageSrc: "/assets/choices/apple.png",
+        imageSrc: "/assets/choices/apple.jpg",
       },
       {
         label: "Ball",
         value: "ball",
         color: "#6db6e8",
-        imageSrc: "/assets/choices/ball.png",
+        imageSrc: "/assets/choices/ball.jpg",
       },
     ],
     { answer: "apple", prompt: "Find the apple" },
   );
   assert.match(html, /choice-grid-pictures/);
   assert.match(html, /choice-letter/);
-  assert.match(html, /apple\.png/);
+  assert.match(html, /apple\.jpg/);
   assert.match(html, /data-choice="apple"/);
 });
