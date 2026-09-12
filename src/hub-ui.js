@@ -85,21 +85,42 @@ export function videoHubMarkup({
   </section>`;
 }
 
+/**
+ * Listening setup: pick a concrete 单词库 (full pack or theme pack), then 题量.
+ * `banks` is preferred; legacy `themes` still works for older callers/tests.
+ */
 export function listeningHubMarkup({
+  banks = null,
+  selectedBankId = "",
   themes = [],
   selectedTheme = "all",
   counts = [5, 8, 10, 12],
   selectedCount = 8,
   available = 0,
   previews = [],
+  activeBankLabel = "",
 } = {}) {
-  const theme = themes.find((item) => item.id === selectedTheme) || themes[0];
-  const pool = theme?.count || available || 0;
+  const useBanks = Array.isArray(banks) && banks.length > 0;
+  const options = useBanks
+    ? banks
+    : themes.map((item) => ({
+        id: item.id,
+        label: item.label,
+        count: item.count,
+      }));
+  const selectedId = useBanks
+    ? selectedBankId || options[0]?.id || ""
+    : selectedTheme || options[0]?.id || "all";
+  const selected =
+    options.find((item) => item.id === selectedId) || options[0] || null;
+  const pool = selected?.count || available || 0;
   const nextCount = Math.max(1, Math.min(selectedCount, pool || selectedCount));
-  const themeButtons = themes
+  const bankLabel = activeBankLabel || selected?.label || "";
+  const optionButtons = options
     .map((item) => {
-      const active = item.id === selectedTheme ? "is-active" : "";
-      return `<button class="chip ${active}" type="button" data-listening-theme="${escapeHtml(item.id)}">${escapeHtml(item.label)} ${item.count}</button>`;
+      const active = item.id === selected?.id ? "is-active" : "";
+      const attr = useBanks ? "data-listening-bank" : "data-listening-theme";
+      return `<button class="chip ${active}" type="button" ${attr}="${escapeHtml(item.id)}">${escapeHtml(item.label)} <span class="chip-count">${item.count}</span></button>`;
     })
     .join("");
   const countButtons = counts
@@ -124,14 +145,15 @@ export function listeningHubMarkup({
     </header>
     <div class="listen-setup">
       <div class="listen-group">
-        <h2>词库</h2>
-        <div class="chip-row">${themeButtons}</div>
+        <h2>单词库</h2>
+        <p class="listen-active">当前：${escapeHtml(bankLabel || "未选择")}${pool ? ` · ${pool} 词` : ""}</p>
+        <div class="chip-row bank-row">${optionButtons}</div>
         ${preview}
       </div>
       <div class="listen-group">
         <h2>每次几题</h2>
         <div class="chip-row">${countButtons}</div>
-        <p class="listen-note">一次 ${nextCount} 题，从这组词库里随机抽，这一轮不重复。</p>
+        <p class="listen-note">一次 ${nextCount} 题，从「${escapeHtml(bankLabel || "单词库")}」里随机抽，这一轮不重复。</p>
       </div>
       <button class="primary-btn" id="startListening" type="button" ${pool ? "" : "disabled"}><span>开始 ${nextCount} 题</span><span class="arrow">→</span></button>
     </div>

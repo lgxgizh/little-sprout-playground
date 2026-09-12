@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "defaultBankId": "starters",
+  "banks": [
+    {
+      "id": "starters",
+      "label": "剑桥 Starters 全库",
+      "file": "wordbank.starters.json",
+      "description": "全部能画名词，适合综合听力"
+    },
+    {
+      "id": "starters-food",
+      "label": "食物",
+      "file": "wordbank.starters.json",
+      "theme": "food",
+      "description": "Starters 食物主题包"
+    },
+    {
+      "id": "starters-animals",
+      "label": "动物",
+      "file": "wordbank.starters.json",
+      "theme": "animals",
+      "description": "Starters 动物主题包"
+    },
+    {
+      "id": "starters-toys",
+      "label": "玩具",
+      "file": "wordbank.starters.json",
+      "theme": "toys",
+      "description": "Starters 玩具主题包"
+    },
+    {
+      "id": "starters-clothes",
+      "label": "衣服",
+      "file": "wordbank.starters.json",
+      "theme": "clothes",
+      "description": "Starters 衣服主题包"
+    },
+    {
+      "id": "starters-home",
+      "label": "家",
+      "file": "wordbank.starters.json",
+      "theme": "home",
+      "description": "Starters 家居主题包"
+    },
+    {
+      "id": "starters-transport",
+      "label": "交通",
+      "file": "wordbank.starters.json",
+      "theme": "transport",
+      "description": "Starters 交通主题包"
+    },
+    {
+      "id": "starters-school",
+      "label": "学习用品",
+      "file": "wordbank.starters.json",
+      "theme": "school",
+      "description": "Starters 学习用品主题包"
+    },
+    {
+      "id": "starters-world",
+      "label": "自然",
+      "file": "wordbank.starters.json",
+      "theme": "world",
+      "description": "Starters 自然主题包"
+    }
+  ]
+}

@@ -4,9 +4,13 @@ import { readFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 import {
+  bankIdFromTheme,
   buildListeningQuestion,
+  catalogBankFiles,
   clampListeningCount,
+  listListeningBanks,
   listWordbankThemes,
+  listeningPoolForBank,
   listeningPoolFromWordbank,
   mulberry32,
   pickDistractors,
@@ -19,6 +23,13 @@ import { choiceImageSrc } from "../src/listening.js";
 const wordbank = JSON.parse(
   await readFile("public/content/wordbank.starters.json", "utf8"),
 );
+const catalog = JSON.parse(
+  await readFile("public/content/wordbanks.json", "utf8"),
+);
+const loadedBanks = {
+  "wordbank.starters.json": wordbank,
+  starters: wordbank,
+};
 
 test("starters wordbank only keeps imageable nouns", () => {
   assert.equal(wordbank.schemaVersion, 1);
@@ -31,6 +42,20 @@ test("starters wordbank only keeps imageable nouns", () => {
     assert.match(word.image, /\.jpg$/);
     assert.doesNotMatch(word.lemma, /^(the|is|and|because|happy|morning)$/i);
   }
+});
+
+test("wordbank catalog lists full pack and theme packs", () => {
+  assert.equal(catalog.schemaVersion, 1);
+  assert.deepEqual(catalogBankFiles(catalog), ["wordbank.starters.json"]);
+  const banks = listListeningBanks(catalog, loadedBanks);
+  const full = banks.find((bank) => bank.id === "starters");
+  const food = banks.find((bank) => bank.id === "starters-food");
+  assert.ok(full.count >= 80);
+  assert.equal(full.theme, "all");
+  assert.ok(food.count >= 8);
+  assert.equal(food.theme, "food");
+  assert.equal(bankIdFromTheme(catalog, "animals"), "starters-animals");
+  assert.equal(bankIdFromTheme(catalog, "all"), "starters");
 });
 
 test("same-theme distractors beat distant objects", () => {
@@ -104,6 +129,15 @@ test("wordbank themes expose approved counts", () => {
   const foodPool = listeningPoolFromWordbank(wordbank, { theme: "food" });
   assert.ok(foodPool.every((question) => question.id.startsWith("english-")));
   assert.equal(foodPool.length, food.count);
+});
+
+test("selecting a theme pack bank filters the listening pool", () => {
+  const foodBank = listListeningBanks(catalog, loadedBanks).find(
+    (bank) => bank.id === "starters-food",
+  );
+  const pool = listeningPoolForBank(foodBank, loadedBanks, { assetBase: "/" });
+  assert.equal(pool.length, foodBank.count);
+  assert.ok(pool.every((question) => question.id.startsWith("english-")));
 });
 
 test("listening rounds shuffle and do not repeat", () => {

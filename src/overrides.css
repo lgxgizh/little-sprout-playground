@@ -1551,6 +1551,22 @@ body:has(.app-shell.is-hub) {
   color: #8a7a68;
 }
 
+.listen-active {
+  margin: -0.2rem 0 0.7rem;
+  color: #5c6d68;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.chip-count {
+  opacity: 0.85;
+  font-variant-numeric: tabular-nums;
+}
+
+.bank-row .chip {
+  max-width: 100%;
+}
+
 .chip-row {
   display: flex;
   flex-wrap: wrap;

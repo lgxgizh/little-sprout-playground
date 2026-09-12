@@ -136,11 +136,27 @@ export const THEME_LABELS = {
 
 export const LISTENING_COUNTS = [5, 8, 10, 12];
 
+export const LISTENING_PREFS_KEY = "little-sprout-listening";
+
+export function isUsableWord(word) {
+  if (!word || word.imageable === false) return false;
+  if (word.status && word.status !== "approved") return false;
+  return true;
+}
+
+export function usableWords(wordbank, theme = "all") {
+  const words = Array.isArray(wordbank?.words) ? wordbank.words : [];
+  return words.filter((word) => {
+    if (!isUsableWord(word)) return false;
+    if (theme && theme !== "all" && word.theme !== theme) return false;
+    return true;
+  });
+}
+
 export function listWordbankThemes(wordbank) {
   const counts = new Map();
   for (const word of wordbank?.words || []) {
-    if (word.imageable === false) continue;
-    if (word.status && word.status !== "approved") continue;
+    if (!isUsableWord(word)) continue;
     counts.set(word.theme, (counts.get(word.theme) || 0) + 1);
   }
   const total = [...counts.values()].reduce((sum, count) => sum + count, 0);
@@ -154,6 +170,76 @@ export function listWordbankThemes(wordbank) {
         count,
       })),
   ];
+}
+
+/** Unique JSON files referenced by a catalog (ready for Movers etc.). */
+export function catalogBankFiles(catalog) {
+  return [
+    ...new Set(
+      (catalog?.banks || [])
+        .map((bank) => bank?.file)
+        .filter((file) => typeof file === "string" && file.length),
+    ),
+  ];
+}
+
+export function findListeningBank(catalog, bankId) {
+  const banks = Array.isArray(catalog?.banks) ? catalog.banks : [];
+  if (!banks.length) return null;
+  return (
+    banks.find((bank) => bank.id === bankId) ||
+    banks.find((bank) => bank.id === catalog?.defaultBankId) ||
+    banks[0]
+  );
+}
+
+export function resolveLoadedBank(bankEntry, loadedBanks = {}) {
+  if (!bankEntry) return null;
+  if (loadedBanks[bankEntry.id]?.words) return loadedBanks[bankEntry.id];
+  if (bankEntry.file && loadedBanks[bankEntry.file]?.words) {
+    return loadedBanks[bankEntry.file];
+  }
+  return null;
+}
+
+/**
+ * Concrete listening banks parents can pick: full JSON packs and/or theme
+ * filters over a shared file (e.g. Starters food pack).
+ */
+export function listListeningBanks(catalog, loadedBanks = {}) {
+  const banks = Array.isArray(catalog?.banks) ? catalog.banks : [];
+  return banks
+    .map((bank) => {
+      const wordbank = resolveLoadedBank(bank, loadedBanks);
+      const theme = bank.theme || "all";
+      const words = usableWords(wordbank, theme);
+      return {
+        id: bank.id,
+        label: bank.label || bank.id,
+        description: bank.description || "",
+        file: bank.file || "",
+        theme,
+        count: words.length,
+        words,
+        source: wordbank,
+      };
+    })
+    .filter((bank) => bank.id);
+}
+
+export function bankPreviewWords(bank, limit = 8) {
+  const words = (bank?.words || []).filter((word) => word.image);
+  if (!words.length) return [];
+  if ((bank?.theme || "all") !== "all") return words.slice(0, limit);
+  const mixed = [];
+  const seen = new Set();
+  for (const word of words) {
+    if (seen.has(word.theme)) continue;
+    seen.add(word.theme);
+    mixed.push(word);
+  }
+  mixed.push(...words.filter((word) => !mixed.includes(word)));
+  return mixed.slice(0, limit);
 }
 
 export function clampListeningCount(requested, available) {
@@ -174,11 +260,7 @@ export function listeningPoolFromWordbank(
     shuffle = false,
   } = {},
 ) {
-  const words = Array.isArray(wordbank?.words) ? wordbank.words : [];
-  const usable = words.filter((word) => {
-    if (word.imageable === false) return false;
-    if (word.status && word.status !== "approved") return false;
-    if (theme && theme !== "all" && word.theme !== theme) return false;
+  const usable = usableWords(wordbank, theme).filter((word) => {
     if (availableSlugs && !availableSlugs.has(word.slug)) return false;
     return true;
   });
@@ -208,7 +290,60 @@ export function listeningPoolFromWordbank(
     .filter(Boolean);
 }
 
+export function listeningPoolForBank(
+  bankEntry,
+  loadedBanks = {},
+  options = {},
+) {
+  const wordbank = resolveLoadedBank(bankEntry, loadedBanks);
+  if (!wordbank) return [];
+  return listeningPoolFromWordbank(wordbank, {
+    ...options,
+    theme: bankEntry?.theme || options.theme || "all",
+  });
+}
+
 export function pickListeningRound(pool = [], count = 8, random = Math.random) {
   const shuffled = shuffleCopy(pool, random);
   return shuffled.slice(0, clampListeningCount(count, shuffled.length));
+}
+
+export function loadListeningPrefs(storage = globalThis.localStorage) {
+  try {
+    const raw = storage?.getItem?.(LISTENING_PREFS_KEY);
+    if (!raw) return {};
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === "object" ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+
+export function saveListeningPrefs(prefs, storage = globalThis.localStorage) {
+  try {
+    storage?.setItem?.(
+      LISTENING_PREFS_KEY,
+      JSON.stringify({
+        bankId: prefs?.bankId || prefs?.listeningBankId || "starters",
+        count: Number(prefs?.count || prefs?.listeningCount) || 8,
+        theme: prefs?.theme || "all",
+      }),
+    );
+  } catch {
+    /* ignore quota / private mode */
+  }
+}
+
+/** Map legacy theme id (all/food/…) onto a catalog bank id when possible. */
+export function bankIdFromTheme(catalog, themeId = "all") {
+  const theme = themeId || "all";
+  if (theme === "all") {
+    return (
+      catalog?.defaultBankId || findListeningBank(catalog)?.id || "starters"
+    );
+  }
+  const match = (catalog?.banks || []).find(
+    (bank) => (bank.theme || "all") === theme,
+  );
+  return match?.id || catalog?.defaultBankId || "starters";
 }

@@ -194,7 +194,7 @@ The recommendation rule prioritizes topics that are new or need gentle practice 
 
 - 图片或封面放入 `public/assets/`。 / Put images in `public/assets/`.
 - 听力词卡用 JPEG（不要 PNG）：新卡 `public/assets/flashcards/{theme}/{slug}.jpg`，旧 8 个键仍可在 `public/assets/choices/`。Grok Imagine 出的是位图，做不成真 SVG；白底词卡也不需要 PNG 透明通道。 / Listening cards are JPEG, not PNG. New cards live in `public/assets/flashcards/`.
-- 剑桥 Starters 能画名词词库：`public/content/wordbank.starters.json`。题目引擎按主题抽干扰项，按孩子 ID 打乱选项；**不要在做题时现场生图**。 / Starters imageable-noun bank plus a same-theme question engine. Never generate images during a quiz.
+- 听力可选手动 **单词库**：目录 `public/content/wordbanks.json` 列出可选词库（当前含「剑桥 Starters 全库」以及食物/动物等主题包）；词条仍来自 `public/content/wordbank.starters.json`，以后可再挂 Movers 等独立 JSON。家长在听力页先选单词库再选题量；每轮用 `pickListeningRound` 随机抽题且不重复。题目引擎按主题抽干扰项，按孩子 ID 打乱选项；**不要在做题时现场生图**。 / Listening picks a concrete word bank from `wordbanks.json` (full Starters plus theme packs; more JSON files later). Never generate images during a quiz.
 - 四宫格生图脚本：`scripts/flashcards/`（Grok Imagine 一次 4 词，再切成 JPEG）。 / Batch 2×2 Grok Imagine grids, then split to JPEG.
 - 演示动画为 `public/assets/stories/fox-apple.gif`；家长可在设置中登记其它本地 GIF/图片。 / Demo animation is `public/assets/stories/fox-apple.gif`; parents can register other local GIFs/images.
 - 本地音频放入 `public/assets/audio/{questionId}.mp3`。 / Put English MP3 files at `public/assets/audio/{questionId}.mp3`.

@@ -2,7 +2,11 @@
 
 `questions.en.json` is an optional local content pack. The app loads it at startup and merges valid new questions into the built-in bank. If the file is missing or invalid, the built-in questions remain available.
 
+`wordbanks.json` is the listening **word-bank catalog**. Each entry points at a word JSON file (today `wordbank.starters.json`) and may set an optional `theme` filter so parents pick a concrete pack (full Starters, food, animals, …). Add more files later (e.g. Movers) by listing them here.
+
 `wordbank.starters.json` is the Cambridge YLE Starters **imageable noun** bank for picture listening. The quiz engine reads this file, picks same-theme distractors, and shuffles choices with the child id. It is a curated subset for drawing cards, not official Cambridge exam content. Cards are JPEG files under `public/assets/flashcards/`.
+
+`wordbanks.json` 是听力「单词库」目录：每项指向一份词库 JSON，并可带 `theme` 过滤成主题包。以后加 Movers 等只需新增文件并在目录里登记。
 
 `questions.en.json` 是可选的本地内容包。网页启动时会自动加载，并把格式正确的新题合并到内置题库；文件缺失或格式错误时，仍然使用内置题库。
 

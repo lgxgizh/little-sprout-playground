@@ -28,10 +28,17 @@ import {
 import { homeHubMarkup, listeningHubMarkup, videoHubMarkup } from "./hub-ui.js";
 import { playStageMarkup } from "./play-ui.js";
 import {
+  bankIdFromTheme,
+  bankPreviewWords,
   clampListeningCount,
+  catalogBankFiles,
+  findListeningBank,
   LISTENING_COUNTS,
-  listWordbankThemes,
-  listeningPoolFromWordbank,
+  listListeningBanks,
+  listeningPoolForBank,
+  loadListeningPrefs,
+  pickListeningRound,
+  saveListeningPrefs,
 } from "./wordbank.js";
 import {
   chooseQuestionCandidates,
@@ -275,6 +282,8 @@ const customModels = (() => {
 let profile = createDefaultProfile();
 let children = [];
 let activeChildId = null;
+let wordbankCatalog = null;
+let loadedWordbanks = {};
 let startersWordbank = null;
 
 const childLabels = {
@@ -326,6 +335,7 @@ const state = {
   aiPlanToken: 0,
   showExtras: false,
   kidView: "home",
+  listeningBankId: "starters",
   listeningTheme: "all",
   listeningCount: 8,
   listeningGoal: 8,
@@ -987,41 +997,89 @@ function normalizeContentQuestion(question) {
   return normalized;
 }
 
-function listeningThemePreviews(themeId = "all", limit = 8) {
-  const words = (startersWordbank?.words || []).filter(
-    (word) =>
-      word.imageable !== false &&
-      (!word.status || word.status === "approved") &&
-      word.image &&
-      (themeId === "all" || word.theme === themeId),
-  );
-  const mixed = [];
-  if (themeId === "all") {
-    const seen = new Set();
-    for (const word of words) {
-      if (seen.has(word.theme)) continue;
-      seen.add(word.theme);
-      mixed.push(word);
-    }
-    mixed.push(...words.filter((word) => !mixed.includes(word)));
+function listeningBanks() {
+  if (wordbankCatalog) {
+    return listListeningBanks(wordbankCatalog, loadedWordbanks);
   }
-  const list = themeId === "all" ? mixed : words;
+  if (startersWordbank) {
+    return listListeningBanks(
+      {
+        schemaVersion: 1,
+        defaultBankId: "starters",
+        banks: [
+          {
+            id: "starters",
+            label: "剑桥 Starters 全库",
+            file: "wordbank.starters.json",
+          },
+        ],
+      },
+      {
+        "wordbank.starters.json": startersWordbank,
+        starters: startersWordbank,
+      },
+    );
+  }
+  return [
+    {
+      id: "starters",
+      label: "剑桥 Starters 全库",
+      count: questionBank.english.length,
+      theme: "all",
+      words: [],
+    },
+  ];
+}
+
+function selectedListeningBank() {
+  const banks = listeningBanks();
+  return (
+    banks.find((bank) => bank.id === state.listeningBankId) || banks[0] || null
+  );
+}
+
+function persistListeningPrefs() {
+  const bank = selectedListeningBank();
+  state.listeningTheme = bank?.theme || "all";
+  saveListeningPrefs({
+    bankId: state.listeningBankId,
+    count: state.listeningCount,
+    theme: state.listeningTheme,
+  });
+}
+
+function listeningBankPreviews(bank, limit = 8) {
   const base = assetBase.endsWith("/") ? assetBase : `${assetBase}/`;
-  return list.slice(0, limit).map((word) => ({
+  return bankPreviewWords(bank, limit).map((word) => ({
     src: `${base}${String(word.image).replace(/^\//, "")}`,
     lemma: word.lemma,
   }));
 }
 
 function applyWordbankPool() {
-  if (!startersWordbank) return;
-  const pool = listeningPoolFromWordbank(startersWordbank, {
-    childId: activeChild()?.id || "default",
-    assetBase,
-    salt: state.activeSession?.id || "home",
-    theme: state.listeningTheme || "all",
-    shuffle: Boolean(state.activeSession),
-  });
+  const bank =
+    selectedListeningBank() ||
+    findListeningBank(wordbankCatalog, state.listeningBankId);
+  if (!bank && !startersWordbank) return;
+  const pool = listeningPoolForBank(
+    bank || {
+      id: "starters",
+      file: "wordbank.starters.json",
+      theme: state.listeningTheme || "all",
+    },
+    {
+      ...loadedWordbanks,
+      "wordbank.starters.json":
+        loadedWordbanks["wordbank.starters.json"] || startersWordbank,
+      starters: startersWordbank,
+    },
+    {
+      childId: activeChild()?.id || "default",
+      assetBase,
+      salt: state.activeSession?.id || "home",
+      shuffle: false,
+    },
+  );
   if (!pool.length) return;
   questionBank.english = pool;
   const available = pool.length;
@@ -1031,9 +1089,8 @@ function applyWordbankPool() {
     !state.baselineTest &&
     state.activityCourse === "english"
   ) {
-    state.listeningQueue = pool
-      .slice(0, state.listeningGoal)
-      .map((question) => question.id);
+    const round = pickListeningRound(pool, state.listeningGoal);
+    state.listeningQueue = round.map((question) => question.id);
   }
 }
 
@@ -1061,19 +1118,78 @@ async function loadQuestionPack() {
   }
 }
 
+async function loadWordbankFile(fileName) {
+  const response = await fetch(`${assetBase}content/${fileName}`, {
+    cache: "no-store",
+  });
+  if (!response.ok) return null;
+  const payload = await response.json();
+  if (payload?.schemaVersion !== 1 || !Array.isArray(payload.words))
+    return null;
+  return payload;
+}
+
 async function loadWordbank() {
   try {
-    const response = await fetch(`${assetBase}content/wordbank.starters.json`, {
+    const catalogResponse = await fetch(`${assetBase}content/wordbanks.json`, {
       cache: "no-store",
     });
-    if (!response.ok) return;
-    const payload = await response.json();
-    if (payload?.schemaVersion !== 1 || !Array.isArray(payload.words)) return;
-    startersWordbank = payload;
-    applyWordbankPool();
+    if (catalogResponse.ok) {
+      const catalog = await catalogResponse.json();
+      if (catalog?.schemaVersion === 1 && Array.isArray(catalog.banks)) {
+        wordbankCatalog = catalog;
+      }
+    }
   } catch {
-    // Seed listening questions remain available without the wordbank file.
+    wordbankCatalog = null;
   }
+
+  const files = catalogBankFiles(wordbankCatalog);
+  if (!files.includes("wordbank.starters.json")) {
+    files.push("wordbank.starters.json");
+  }
+
+  const nextLoaded = { ...loadedWordbanks };
+  for (const fileName of files) {
+    try {
+      const payload = await loadWordbankFile(fileName);
+      if (!payload) continue;
+      nextLoaded[fileName] = payload;
+      if (fileName === "wordbank.starters.json") {
+        startersWordbank = payload;
+        nextLoaded.starters = payload;
+      }
+    } catch {
+      // Keep going so one missing pack does not block the rest.
+    }
+  }
+  loadedWordbanks = nextLoaded;
+
+  if (!wordbankCatalog && startersWordbank) {
+    wordbankCatalog = {
+      schemaVersion: 1,
+      defaultBankId: "starters",
+      banks: [
+        {
+          id: "starters",
+          label: "剑桥 Starters 全库",
+          file: "wordbank.starters.json",
+        },
+      ],
+    };
+  }
+
+  const banks = listListeningBanks(wordbankCatalog, loadedWordbanks);
+  if (!banks.some((bank) => bank.id === state.listeningBankId) && banks[0]) {
+    state.listeningBankId = banks[0].id;
+  }
+  const selected = selectedListeningBank();
+  state.listeningTheme = selected?.theme || "all";
+  state.listeningCount = clampListeningCount(
+    state.listeningCount,
+    selected?.count || state.listeningCount,
+  );
+  applyWordbankPool();
 }
 
 function childProfileSettings() {
@@ -1289,19 +1405,17 @@ function render() {
     return;
   }
   if (state.kidView === "listening") {
-    const themes = startersWordbank
-      ? listWordbankThemes(startersWordbank)
-      : [{ id: "all", label: "全部", count: questionBank.english.length }];
-    const selected =
-      themes.find((item) => item.id === state.listeningTheme) || themes[0];
+    const banks = listeningBanks();
+    const selected = selectedListeningBank() || banks[0];
     document.querySelector("#app").innerHTML = kidChrome(
       listeningHubMarkup({
-        themes,
-        selectedTheme: selected?.id || "all",
+        banks,
+        selectedBankId: selected?.id || state.listeningBankId,
         counts: LISTENING_COUNTS,
         selectedCount: state.listeningCount,
         available: selected?.count || 0,
-        previews: listeningThemePreviews(selected?.id || "all"),
+        activeBankLabel: selected?.label || "",
+        previews: listeningBankPreviews(selected),
       }),
     );
     bindEvents();
@@ -1424,24 +1538,37 @@ function bindEvents() {
     state.kidView = "home";
     render();
   });
+  document.querySelectorAll("[data-listening-bank]").forEach((btn) =>
+    btn.addEventListener("click", () => {
+      state.listeningBankId = btn.dataset.listeningBank || "starters";
+      const bank = selectedListeningBank();
+      state.listeningTheme = bank?.theme || "all";
+      state.listeningCount = clampListeningCount(
+        state.listeningCount,
+        bank?.count || 0,
+      );
+      persistListeningPrefs();
+      render();
+    }),
+  );
   document.querySelectorAll("[data-listening-theme]").forEach((btn) =>
     btn.addEventListener("click", () => {
-      state.listeningTheme = btn.dataset.listeningTheme || "all";
-      if (startersWordbank) {
-        const themes = listWordbankThemes(startersWordbank);
-        const theme =
-          themes.find((item) => item.id === state.listeningTheme) || themes[0];
-        state.listeningCount = clampListeningCount(
-          state.listeningCount,
-          theme?.count || 0,
-        );
-      }
+      const theme = btn.dataset.listeningTheme || "all";
+      state.listeningTheme = theme;
+      state.listeningBankId = bankIdFromTheme(wordbankCatalog, theme);
+      const bank = selectedListeningBank();
+      state.listeningCount = clampListeningCount(
+        state.listeningCount,
+        bank?.count || 0,
+      );
+      persistListeningPrefs();
       render();
     }),
   );
   document.querySelectorAll("[data-listening-count]").forEach((btn) =>
     btn.addEventListener("click", () => {
       state.listeningCount = Number(btn.dataset.listeningCount) || 8;
+      persistListeningPrefs();
       render();
     }),
   );
@@ -2002,9 +2129,28 @@ async function init() {
   } catch {
     state.showExtras = false;
   }
+  const listeningPrefs = loadListeningPrefs();
+  if (listeningPrefs.bankId) state.listeningBankId = listeningPrefs.bankId;
+  if (listeningPrefs.count)
+    state.listeningCount = Number(listeningPrefs.count) || 8;
+  if (listeningPrefs.theme) state.listeningTheme = listeningPrefs.theme;
+  if (!listeningPrefs.bankId && listeningPrefs.theme) {
+    // Prefs saved before bank ids existed: map theme → concrete bank later.
+    state.listeningBankId = bankIdFromTheme(
+      { defaultBankId: "starters", banks: [] },
+      listeningPrefs.theme,
+    );
+  }
   children = await loadChildren();
   await loadQuestionPack();
   await loadWordbank();
+  if (!listeningPrefs.bankId && listeningPrefs.theme && wordbankCatalog) {
+    state.listeningBankId = bankIdFromTheme(
+      wordbankCatalog,
+      listeningPrefs.theme,
+    );
+    persistListeningPrefs();
+  }
   state.animationLibrary = mergeAnimationShelf(
     createDemoAnimations(assetBase),
     loadAnimationLibrary(assetBase),
