@@ -39,6 +39,7 @@ import {
   recommendedListeningCount,
   catalogBankFiles,
   findListeningBank,
+  normalizeListeningBankId,
   LISTENING_COUNTS,
   listListeningBanks,
   listeningPoolForBank,
@@ -747,7 +748,7 @@ function listeningBanks() {
         banks: [
           {
             id: "starters",
-            label: "剑桥 Starters 全库",
+            label: "Pre A1 Starters · 可看图名词",
             file: "wordbank.starters.json",
           },
         ],
@@ -761,7 +762,7 @@ function listeningBanks() {
   return [
     {
       id: "starters",
-      label: "剑桥 Starters 全库",
+      label: "Pre A1 Starters · 可看图名词",
       count: questionBank.english.length,
       theme: "all",
       words: [],
@@ -895,7 +896,7 @@ async function loadWordbank() {
       banks: [
         {
           id: "starters",
-          label: "剑桥 Starters 全库",
+          label: "Pre A1 Starters · 可看图名词",
           file: "wordbank.starters.json",
         },
       ],
@@ -903,6 +904,7 @@ async function loadWordbank() {
   }
 
   const banks = listListeningBanks(wordbankCatalog, loadedWordbanks);
+  state.listeningBankId = normalizeListeningBankId(state.listeningBankId);
   if (!banks.some((bank) => bank.id === state.listeningBankId) && banks[0]) {
     state.listeningBankId = banks[0].id;
   }
@@ -1830,7 +1832,8 @@ async function init() {
   document.querySelector("#app").innerHTML =
     '<div class="loading-screen"><span>🦊</span><b>Little Sprout is getting ready…</b></div>';
   const listeningPrefs = loadListeningPrefs();
-  if (listeningPrefs.bankId) state.listeningBankId = listeningPrefs.bankId;
+  if (listeningPrefs.bankId)
+    state.listeningBankId = normalizeListeningBankId(listeningPrefs.bankId);
   if (listeningPrefs.count)
     state.listeningCount = Number(listeningPrefs.count) || 8;
   if (listeningPrefs.theme) state.listeningTheme = listeningPrefs.theme;

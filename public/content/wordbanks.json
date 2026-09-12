@@ -4,21 +4,27 @@
   "banks": [
     {
       "id": "starters",
-      "label": "剑桥 Starters 全库",
+      "label": "Pre A1 Starters · 可看图名词",
       "file": "wordbank.starters.json",
-      "description": "全部能画名词，适合综合听力"
+      "description": "剑桥 YLE Pre A1 Starters 可看图名词（精选，非官方考题）"
     },
     {
-      "id": "movers-lite",
-      "label": "进阶名词 · Movers Lite",
-      "file": "wordbank.movers-lite.json",
-      "description": "比 Starters 名词稍难一点，仍适合看图点选"
+      "id": "movers",
+      "label": "A1 Movers · 可看图名词",
+      "file": "wordbank.movers.json",
+      "description": "剑桥 YLE A1 Movers 可看图名词（精选，非官方考题）"
+    },
+    {
+      "id": "flyers",
+      "label": "A2 Flyers · 可看图名词",
+      "file": "wordbank.flyers.json",
+      "description": "剑桥 YLE A2 Flyers 可看图名词（精选，非官方考题）"
     },
     {
       "id": "concepts",
       "label": "对比概念 · 大小高低",
       "file": "wordbank.concepts.json",
-      "description": "听属性：大/小、高/矮、满/空，还有颜色对比"
+      "description": "听属性：大/小、高/矮、满/空，还有颜色对比（技能包，非考试级别）"
     },
     {
       "id": "starters-food",

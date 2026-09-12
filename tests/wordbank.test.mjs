@@ -20,6 +20,8 @@ import {
   pickDistractors,
   pickListeningRound,
   seedFrom,
+  normalizeListeningBankId,
+  findListeningBank,
 } from "../src/wordbank.js";
 import { playStageMarkup } from "../src/play-ui.js";
 import { choiceImageSrc } from "../src/listening.js";
@@ -31,7 +33,10 @@ const catalog = JSON.parse(
   await readFile("public/content/wordbanks.json", "utf8"),
 );
 const movers = JSON.parse(
-  await readFile("public/content/wordbank.movers-lite.json", "utf8"),
+  await readFile("public/content/wordbank.movers.json", "utf8"),
+);
+const flyers = JSON.parse(
+  await readFile("public/content/wordbank.flyers.json", "utf8"),
 );
 const concepts = JSON.parse(
   await readFile("public/content/wordbank.concepts.json", "utf8"),
@@ -39,8 +44,10 @@ const concepts = JSON.parse(
 const loadedBanks = {
   "wordbank.starters.json": wordbank,
   starters: wordbank,
-  "wordbank.movers-lite.json": movers,
-  "movers-lite": movers,
+  "wordbank.movers.json": movers,
+  movers: movers,
+  "wordbank.flyers.json": flyers,
+  flyers: flyers,
   "wordbank.concepts.json": concepts,
   concepts: concepts,
 };
@@ -62,7 +69,8 @@ test("wordbank catalog lists full pack and theme packs", () => {
   assert.equal(catalog.schemaVersion, 1);
   assert.deepEqual(catalogBankFiles(catalog), [
     "wordbank.starters.json",
-    "wordbank.movers-lite.json",
+    "wordbank.movers.json",
+    "wordbank.flyers.json",
     "wordbank.concepts.json",
   ]);
   const banks = listListeningBanks(catalog, loadedBanks);
@@ -192,22 +200,49 @@ test("recommended listening counts hide oversized chips", () => {
   assert.deepEqual(visibleListeningCounts(24), [5, 8, 10, 12]);
 });
 
-test("movers-lite bank is registered and image-backed", () => {
+test("movers bank is registered and image-backed", () => {
   assert.ok(movers.words.length >= 20);
-  assert.ok(movers.words.every((word) => word.level === "movers-lite"));
-  for (const slug of ["butterfly", "rabbit", "strawberry", "crocodile"]) {
+  assert.ok(movers.words.every((word) => word.level === "movers"));
+  for (const slug of ["rabbit", "crocodile", "dolphin", "panda"]) {
     assert.ok(
       movers.words.some((word) => word.slug === slug),
       slug,
     );
   }
+  assert.ok(!movers.words.some((word) => word.slug === "butterfly"));
+  assert.ok(!movers.words.some((word) => word.slug === "strawberry"));
   const banks = listListeningBanks(catalog, loadedBanks);
-  const entry = banks.find((bank) => bank.id === "movers-lite");
+  const entry = banks.find((bank) => bank.id === "movers");
   assert.ok(entry);
-  assert.match(entry.label, /Movers Lite|进阶/);
+  assert.match(entry.label, /A1 Movers|Movers/);
   const pool = listeningPoolForBank(entry, loadedBanks, { assetBase: "/" });
   assert.equal(pool.length, entry.count);
   assert.ok(pool[0].choices.length >= 2);
+});
+
+test("flyers bank is registered and image-backed", () => {
+  assert.ok(flyers.words.length >= 12);
+  assert.ok(flyers.words.every((word) => word.level === "flyers"));
+  for (const slug of ["camel", "butterfly", "strawberry", "castle"]) {
+    assert.ok(
+      flyers.words.some((word) => word.slug === slug),
+      slug,
+    );
+  }
+  const banks = listListeningBanks(catalog, loadedBanks);
+  const entry = banks.find((bank) => bank.id === "flyers");
+  assert.ok(entry);
+  assert.match(entry.label, /A2 Flyers|Flyers/);
+  const pool = listeningPoolForBank(entry, loadedBanks, { assetBase: "/" });
+  assert.equal(pool.length, entry.count);
+  assert.ok(pool[0].choices.length >= 2);
+});
+
+test("legacy movers-lite bank id maps to movers", () => {
+  assert.equal(normalizeListeningBankId("movers-lite"), "movers");
+  assert.equal(normalizeListeningBankId("movers"), "movers");
+  const entry = findListeningBank(catalog, "movers-lite");
+  assert.equal(entry?.id, "movers");
 });
 
 test("concepts bank builds contrast attribute prompts", () => {

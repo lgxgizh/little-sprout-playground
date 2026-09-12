@@ -1,40 +1,18 @@
 {
   "schemaVersion": 1,
-  "source": "curated-movers-lite",
+  "source": "Cambridge English A1 Movers wordlist nouns, curated for picture listening. Not official exam content; public wordlist from Cambridge English.",
+  "notes": "Curated imageable nouns for picture listening quizzes. Not official Cambridge exam materials.",
   "style": "children-flashcard-v1",
   "imageFormat": "jpeg",
-  "imageSize": "768x768",
-  "level": "movers-lite",
+  "imageSize": 768,
+  "level": "movers",
   "words": [
-    {
-      "id": "movers_butterfly",
-      "lemma": "butterfly",
-      "slug": "butterfly",
-      "pos": "noun",
-      "level": "movers-lite",
-      "theme": "animals",
-      "type": "insect",
-      "age_min": 3,
-      "age_max": 6,
-      "prompt_en": "Which one is the butterfly?",
-      "speech": "Which one is the butterfly?",
-      "imageable": true,
-      "distractor_pool": ["bee", "bird", "frog"],
-      "adjacent_types": ["animal"],
-      "image_id": "img_butterfly_v1",
-      "image": "assets/flashcards/movers/butterfly.jpg",
-      "fallback_image": "assets/flashcards/movers/butterfly.jpg",
-      "object_prompt": "one cute butterfly",
-      "color": "#c9b9d9",
-      "emoji": "🦋",
-      "status": "approved"
-    },
     {
       "id": "movers_rabbit",
       "lemma": "rabbit",
       "slug": "rabbit",
       "pos": "noun",
-      "level": "movers-lite",
+      "level": "movers",
       "theme": "animals",
       "type": "animal",
       "age_min": 3,
@@ -42,8 +20,14 @@
       "prompt_en": "Which one is the rabbit?",
       "speech": "Which one is the rabbit?",
       "imageable": true,
-      "distractor_pool": ["cat", "dog", "mouse"],
-      "adjacent_types": ["insect"],
+      "distractor_pool": [
+        "cat",
+        "dog",
+        "mouse"
+      ],
+      "adjacent_types": [
+        "insect"
+      ],
       "image_id": "img_rabbit_v1",
       "image": "assets/flashcards/movers/rabbit.jpg",
       "fallback_image": "assets/flashcards/movers/rabbit.jpg",
@@ -53,34 +37,11 @@
       "status": "approved"
     },
     {
-      "id": "movers_strawberry",
-      "lemma": "strawberry",
-      "slug": "strawberry",
-      "pos": "noun",
-      "level": "movers-lite",
-      "theme": "food",
-      "type": "fruit",
-      "age_min": 3,
-      "age_max": 6,
-      "prompt_en": "Which one is the strawberry?",
-      "speech": "Which one is the strawberry?",
-      "imageable": true,
-      "distractor_pool": ["apple", "grape", "banana"],
-      "adjacent_types": ["vegetable"],
-      "image_id": "img_strawberry_v1",
-      "image": "assets/flashcards/movers/strawberry.jpg",
-      "fallback_image": "assets/flashcards/movers/strawberry.jpg",
-      "object_prompt": "one cute strawberry",
-      "color": "#ff6b5e",
-      "emoji": "🍓",
-      "status": "approved"
-    },
-    {
       "id": "movers_crocodile",
       "lemma": "crocodile",
       "slug": "crocodile",
       "pos": "noun",
-      "level": "movers-lite",
+      "level": "movers",
       "theme": "animals",
       "type": "animal",
       "age_min": 3,
@@ -88,8 +49,14 @@
       "prompt_en": "Which one is the crocodile?",
       "speech": "Which one is the crocodile?",
       "imageable": true,
-      "distractor_pool": ["hippo", "frog", "fish"],
-      "adjacent_types": ["insect"],
+      "distractor_pool": [
+        "hippo",
+        "frog",
+        "fish"
+      ],
+      "adjacent_types": [
+        "insect"
+      ],
       "image_id": "img_crocodile_v1",
       "image": "assets/flashcards/movers/crocodile.jpg",
       "fallback_image": "assets/flashcards/movers/crocodile.jpg",
@@ -103,7 +70,7 @@
       "lemma": "giraffe",
       "slug": "giraffe",
       "pos": "noun",
-      "level": "movers-lite",
+      "level": "movers",
       "theme": "animals",
       "type": "zoo",
       "age_min": 3,
@@ -119,7 +86,10 @@
         "tiger",
         "zebra"
       ],
-      "adjacent_types": ["farm", "pet"],
+      "adjacent_types": [
+        "farm",
+        "pet"
+      ],
       "image_id": "img_giraffe_v1",
       "image": "assets/flashcards/movers/giraffe.jpg",
       "fallback_image": "assets/flashcards/movers/giraffe.jpg",
@@ -133,7 +103,7 @@
       "lemma": "elephant",
       "slug": "elephant",
       "pos": "noun",
-      "level": "movers-lite",
+      "level": "movers",
       "theme": "animals",
       "type": "zoo",
       "age_min": 3,
@@ -149,7 +119,10 @@
         "tiger",
         "zebra"
       ],
-      "adjacent_types": ["farm", "pet"],
+      "adjacent_types": [
+        "farm",
+        "pet"
+      ],
       "image_id": "img_elephant_v1",
       "image": "assets/flashcards/movers/elephant.jpg",
       "fallback_image": "assets/flashcards/movers/elephant.jpg",
@@ -163,7 +136,7 @@
       "lemma": "hippo",
       "slug": "hippo",
       "pos": "noun",
-      "level": "movers-lite",
+      "level": "movers",
       "theme": "animals",
       "type": "zoo",
       "age_min": 3,
@@ -179,7 +152,10 @@
         "tiger",
         "zebra"
       ],
-      "adjacent_types": ["farm", "pet"],
+      "adjacent_types": [
+        "farm",
+        "pet"
+      ],
       "image_id": "img_hippo_v1",
       "image": "assets/flashcards/movers/hippo.jpg",
       "fallback_image": "assets/flashcards/movers/hippo.jpg",
@@ -193,7 +169,7 @@
       "lemma": "zebra",
       "slug": "zebra",
       "pos": "noun",
-      "level": "movers-lite",
+      "level": "movers",
       "theme": "animals",
       "type": "zoo",
       "age_min": 3,
@@ -209,7 +185,10 @@
         "hippo",
         "tiger"
       ],
-      "adjacent_types": ["farm", "pet"],
+      "adjacent_types": [
+        "farm",
+        "pet"
+      ],
       "image_id": "img_zebra_v1",
       "image": "assets/flashcards/movers/zebra.jpg",
       "fallback_image": "assets/flashcards/movers/zebra.jpg",
@@ -223,7 +202,7 @@
       "lemma": "monkey",
       "slug": "monkey",
       "pos": "noun",
-      "level": "movers-lite",
+      "level": "movers",
       "theme": "animals",
       "type": "zoo",
       "age_min": 3,
@@ -239,7 +218,10 @@
         "tiger",
         "zebra"
       ],
-      "adjacent_types": ["farm", "pet"],
+      "adjacent_types": [
+        "farm",
+        "pet"
+      ],
       "image_id": "img_monkey_v1",
       "image": "assets/flashcards/movers/monkey.jpg",
       "fallback_image": "assets/flashcards/movers/monkey.jpg",
@@ -253,7 +235,7 @@
       "lemma": "tiger",
       "slug": "tiger",
       "pos": "noun",
-      "level": "movers-lite",
+      "level": "movers",
       "theme": "animals",
       "type": "zoo",
       "age_min": 3,
@@ -269,7 +251,10 @@
         "hippo",
         "zebra"
       ],
-      "adjacent_types": ["farm", "pet"],
+      "adjacent_types": [
+        "farm",
+        "pet"
+      ],
       "image_id": "img_tiger_v1",
       "image": "assets/flashcards/movers/tiger.jpg",
       "fallback_image": "assets/flashcards/movers/tiger.jpg",
@@ -283,7 +268,7 @@
       "lemma": "polar bear",
       "slug": "polar-bear",
       "pos": "noun",
-      "level": "movers-lite",
+      "level": "movers",
       "theme": "animals",
       "type": "zoo",
       "age_min": 3,
@@ -299,7 +284,10 @@
         "hippo",
         "tiger"
       ],
-      "adjacent_types": ["farm", "pet"],
+      "adjacent_types": [
+        "farm",
+        "pet"
+      ],
       "image_id": "img_polar-bear_v1",
       "image": "assets/flashcards/movers/polar-bear.jpg",
       "fallback_image": "assets/flashcards/movers/polar-bear.jpg",
@@ -313,7 +301,7 @@
       "lemma": "helicopter",
       "slug": "helicopter",
       "pos": "noun",
-      "level": "movers-lite",
+      "level": "movers",
       "theme": "toys",
       "type": "vehicle",
       "age_min": 3,
@@ -321,8 +309,17 @@
       "prompt_en": "Which one is the helicopter?",
       "speech": "Which one is the helicopter?",
       "imageable": true,
-      "distractor_pool": ["train", "bike", "boat", "plane", "car", "bus"],
-      "adjacent_types": ["play"],
+      "distractor_pool": [
+        "train",
+        "bike",
+        "boat",
+        "plane",
+        "car",
+        "bus"
+      ],
+      "adjacent_types": [
+        "play"
+      ],
       "image_id": "img_helicopter_v1",
       "image": "assets/flashcards/movers/helicopter.jpg",
       "fallback_image": "assets/flashcards/movers/helicopter.jpg",
@@ -336,7 +333,7 @@
       "lemma": "motorbike",
       "slug": "motorbike",
       "pos": "noun",
-      "level": "movers-lite",
+      "level": "movers",
       "theme": "transport",
       "type": "vehicle",
       "age_min": 3,
@@ -352,7 +349,9 @@
         "helicopter",
         "car"
       ],
-      "adjacent_types": ["play"],
+      "adjacent_types": [
+        "play"
+      ],
       "image_id": "img_motorbike_v1",
       "image": "assets/flashcards/movers/motorbike.jpg",
       "fallback_image": "assets/flashcards/movers/motorbike.jpg",
@@ -366,7 +365,7 @@
       "lemma": "truck",
       "slug": "truck",
       "pos": "noun",
-      "level": "movers-lite",
+      "level": "movers",
       "theme": "transport",
       "type": "vehicle",
       "age_min": 3,
@@ -382,7 +381,9 @@
         "helicopter",
         "car"
       ],
-      "adjacent_types": ["play"],
+      "adjacent_types": [
+        "play"
+      ],
       "image_id": "img_truck_v1",
       "image": "assets/flashcards/movers/truck.jpg",
       "fallback_image": "assets/flashcards/movers/truck.jpg",
@@ -396,7 +397,7 @@
       "lemma": "pineapple",
       "slug": "pineapple",
       "pos": "noun",
-      "level": "movers-lite",
+      "level": "movers",
       "theme": "food",
       "type": "fruit",
       "age_min": 3,
@@ -412,7 +413,11 @@
         "grape",
         "lemon"
       ],
-      "adjacent_types": ["vegetable", "meal", "drink"],
+      "adjacent_types": [
+        "vegetable",
+        "meal",
+        "drink"
+      ],
       "image_id": "img_pineapple_v1",
       "image": "assets/flashcards/movers/pineapple.jpg",
       "fallback_image": "assets/flashcards/movers/pineapple.jpg",
@@ -426,7 +431,7 @@
       "lemma": "watermelon",
       "slug": "watermelon",
       "pos": "noun",
-      "level": "movers-lite",
+      "level": "movers",
       "theme": "food",
       "type": "fruit",
       "age_min": 3,
@@ -442,7 +447,11 @@
         "grape",
         "lemon"
       ],
-      "adjacent_types": ["vegetable", "meal", "drink"],
+      "adjacent_types": [
+        "vegetable",
+        "meal",
+        "drink"
+      ],
       "image_id": "img_watermelon_v1",
       "image": "assets/flashcards/movers/watermelon.jpg",
       "fallback_image": "assets/flashcards/movers/watermelon.jpg",
@@ -456,7 +465,7 @@
       "lemma": "mango",
       "slug": "mango",
       "pos": "noun",
-      "level": "movers-lite",
+      "level": "movers",
       "theme": "food",
       "type": "fruit",
       "age_min": 3,
@@ -472,7 +481,11 @@
         "grape",
         "lemon"
       ],
-      "adjacent_types": ["vegetable", "meal", "drink"],
+      "adjacent_types": [
+        "vegetable",
+        "meal",
+        "drink"
+      ],
       "image_id": "img_mango_v1",
       "image": "assets/flashcards/movers/mango.jpg",
       "fallback_image": "assets/flashcards/movers/mango.jpg",
@@ -486,7 +499,7 @@
       "lemma": "coconut",
       "slug": "coconut",
       "pos": "noun",
-      "level": "movers-lite",
+      "level": "movers",
       "theme": "food",
       "type": "fruit",
       "age_min": 3,
@@ -502,7 +515,11 @@
         "grape",
         "lemon"
       ],
-      "adjacent_types": ["vegetable", "meal", "drink"],
+      "adjacent_types": [
+        "vegetable",
+        "meal",
+        "drink"
+      ],
       "image_id": "img_coconut_v1",
       "image": "assets/flashcards/movers/coconut.jpg",
       "fallback_image": "assets/flashcards/movers/coconut.jpg",
@@ -516,7 +533,7 @@
       "lemma": "kiwi",
       "slug": "kiwi",
       "pos": "noun",
-      "level": "movers-lite",
+      "level": "movers",
       "theme": "food",
       "type": "fruit",
       "age_min": 3,
@@ -532,7 +549,11 @@
         "grape",
         "lemon"
       ],
-      "adjacent_types": ["vegetable", "meal", "drink"],
+      "adjacent_types": [
+        "vegetable",
+        "meal",
+        "drink"
+      ],
       "image_id": "img_kiwi_v1",
       "image": "assets/flashcards/movers/kiwi.jpg",
       "fallback_image": "assets/flashcards/movers/kiwi.jpg",
@@ -546,7 +567,7 @@
       "lemma": "glasses",
       "slug": "glasses",
       "pos": "noun",
-      "level": "movers-lite",
+      "level": "movers",
       "theme": "clothes",
       "type": "wear",
       "age_min": 3,
@@ -554,7 +575,14 @@
       "prompt_en": "Which one is the glasses?",
       "speech": "Which one is the glasses?",
       "imageable": true,
-      "distractor_pool": ["hat", "dress", "shirt", "t-shirt", "shoe", "sock"],
+      "distractor_pool": [
+        "hat",
+        "dress",
+        "shirt",
+        "t-shirt",
+        "shoe",
+        "sock"
+      ],
       "adjacent_types": [],
       "image_id": "img_glasses_v1",
       "image": "assets/flashcards/movers/glasses.jpg",
@@ -569,7 +597,7 @@
       "lemma": "jeans",
       "slug": "jeans",
       "pos": "noun",
-      "level": "movers-lite",
+      "level": "movers",
       "theme": "clothes",
       "type": "wear",
       "age_min": 3,
@@ -577,7 +605,14 @@
       "prompt_en": "Which one is the jeans?",
       "speech": "Which one is the jeans?",
       "imageable": true,
-      "distractor_pool": ["hat", "dress", "shirt", "t-shirt", "shoe", "sock"],
+      "distractor_pool": [
+        "hat",
+        "dress",
+        "shirt",
+        "t-shirt",
+        "shoe",
+        "sock"
+      ],
       "adjacent_types": [],
       "image_id": "img_jeans_v1",
       "image": "assets/flashcards/movers/jeans.jpg",
@@ -592,7 +627,7 @@
       "lemma": "jacket",
       "slug": "jacket",
       "pos": "noun",
-      "level": "movers-lite",
+      "level": "movers",
       "theme": "clothes",
       "type": "wear",
       "age_min": 3,
@@ -600,7 +635,14 @@
       "prompt_en": "Which one is the jacket?",
       "speech": "Which one is the jacket?",
       "imageable": true,
-      "distractor_pool": ["hat", "dress", "shirt", "t-shirt", "shoe", "sock"],
+      "distractor_pool": [
+        "hat",
+        "dress",
+        "shirt",
+        "t-shirt",
+        "shoe",
+        "sock"
+      ],
       "adjacent_types": [],
       "image_id": "img_jacket_v1",
       "image": "assets/flashcards/movers/jacket.jpg",
@@ -615,7 +657,7 @@
       "lemma": "computer",
       "slug": "computer",
       "pos": "noun",
-      "level": "movers-lite",
+      "level": "movers",
       "theme": "home",
       "type": "object",
       "age_min": 3,
@@ -623,8 +665,17 @@
       "prompt_en": "Which one is the computer?",
       "speech": "Which one is the computer?",
       "imageable": true,
-      "distractor_pool": ["lamp", "clock", "door", "window", "bath", "box"],
-      "adjacent_types": ["furniture"],
+      "distractor_pool": [
+        "lamp",
+        "clock",
+        "door",
+        "window",
+        "bath",
+        "box"
+      ],
+      "adjacent_types": [
+        "furniture"
+      ],
       "image_id": "img_computer_v1",
       "image": "assets/flashcards/movers/computer.jpg",
       "fallback_image": "assets/flashcards/movers/computer.jpg",
@@ -638,7 +689,7 @@
       "lemma": "television",
       "slug": "television",
       "pos": "noun",
-      "level": "movers-lite",
+      "level": "movers",
       "theme": "home",
       "type": "object",
       "age_min": 3,
@@ -646,8 +697,17 @@
       "prompt_en": "Which one is the television?",
       "speech": "Which one is the television?",
       "imageable": true,
-      "distractor_pool": ["lamp", "clock", "door", "window", "bath", "box"],
-      "adjacent_types": ["furniture"],
+      "distractor_pool": [
+        "lamp",
+        "clock",
+        "door",
+        "window",
+        "bath",
+        "box"
+      ],
+      "adjacent_types": [
+        "furniture"
+      ],
       "image_id": "img_television_v1",
       "image": "assets/flashcards/movers/television.jpg",
       "fallback_image": "assets/flashcards/movers/television.jpg",
@@ -661,7 +721,7 @@
       "lemma": "guitar",
       "slug": "guitar",
       "pos": "noun",
-      "level": "movers-lite",
+      "level": "movers",
       "theme": "school",
       "type": "tool",
       "age_min": 3,
@@ -669,8 +729,17 @@
       "prompt_en": "Which one is the guitar?",
       "speech": "Which one is the guitar?",
       "imageable": true,
-      "distractor_pool": ["book", "pencil", "pen", "crayon", "ruler", "eraser"],
-      "adjacent_types": ["object"],
+      "distractor_pool": [
+        "book",
+        "pencil",
+        "pen",
+        "crayon",
+        "ruler",
+        "eraser"
+      ],
+      "adjacent_types": [
+        "object"
+      ],
       "image_id": "img_guitar_v1",
       "image": "assets/flashcards/movers/guitar.jpg",
       "fallback_image": "assets/flashcards/movers/guitar.jpg",
@@ -684,7 +753,7 @@
       "lemma": "camera",
       "slug": "camera",
       "pos": "noun",
-      "level": "movers-lite",
+      "level": "movers",
       "theme": "toys",
       "type": "play",
       "age_min": 3,
@@ -692,8 +761,18 @@
       "prompt_en": "Which one is the camera?",
       "speech": "Which one is the camera?",
       "imageable": true,
-      "distractor_pool": ["ball", "balloon", "doll", "kite", "robot", "teddy"],
-      "adjacent_types": ["sport", "vehicle"],
+      "distractor_pool": [
+        "ball",
+        "balloon",
+        "doll",
+        "kite",
+        "robot",
+        "teddy"
+      ],
+      "adjacent_types": [
+        "sport",
+        "vehicle"
+      ],
       "image_id": "img_camera_v1",
       "image": "assets/flashcards/movers/camera.jpg",
       "fallback_image": "assets/flashcards/movers/camera.jpg",
@@ -707,7 +786,7 @@
       "lemma": "robot",
       "slug": "robot",
       "pos": "noun",
-      "level": "movers-lite",
+      "level": "movers",
       "theme": "toys",
       "type": "play",
       "age_min": 3,
@@ -715,8 +794,18 @@
       "prompt_en": "Which one is the robot?",
       "speech": "Which one is the robot?",
       "imageable": true,
-      "distractor_pool": ["ball", "balloon", "doll", "kite", "teddy", "camera"],
-      "adjacent_types": ["sport", "vehicle"],
+      "distractor_pool": [
+        "ball",
+        "balloon",
+        "doll",
+        "kite",
+        "teddy",
+        "camera"
+      ],
+      "adjacent_types": [
+        "sport",
+        "vehicle"
+      ],
       "image_id": "img_robot_v1",
       "image": "assets/flashcards/movers/robot.jpg",
       "fallback_image": "assets/flashcards/movers/robot.jpg",
@@ -730,7 +819,7 @@
       "lemma": "armchair",
       "slug": "armchair",
       "pos": "noun",
-      "level": "movers-lite",
+      "level": "movers",
       "theme": "home",
       "type": "furniture",
       "age_min": 3,
@@ -738,8 +827,16 @@
       "prompt_en": "Which one is the armchair?",
       "speech": "Which one is the armchair?",
       "imageable": true,
-      "distractor_pool": ["bed", "chair", "table", "sofa", "desk"],
-      "adjacent_types": ["object"],
+      "distractor_pool": [
+        "bed",
+        "chair",
+        "table",
+        "sofa",
+        "desk"
+      ],
+      "adjacent_types": [
+        "object"
+      ],
       "image_id": "img_armchair_v1",
       "image": "assets/flashcards/movers/armchair.jpg",
       "fallback_image": "assets/flashcards/movers/armchair.jpg",
@@ -747,36 +844,581 @@
       "color": "#7dcc6b",
       "emoji": "🪑",
       "status": "approved"
+    },
+    {
+      "id": "movers_dolphin",
+      "lemma": "dolphin",
+      "slug": "dolphin",
+      "pos": "noun",
+      "level": "movers",
+      "theme": "animals",
+      "type": "animal",
+      "age_min": 3,
+      "age_max": 6,
+      "prompt_en": "Which one is the dolphin?",
+      "speech": "Which one is the dolphin?",
+      "imageable": true,
+      "distractor_pool": [
+        "whale",
+        "shark",
+        "penguin",
+        "panda"
+      ],
+      "adjacent_types": [
+        "zoo"
+      ],
+      "image_id": "img_dolphin_v1",
+      "image": "assets/flashcards/movers/dolphin.jpg",
+      "fallback_image": "assets/flashcards/movers/dolphin.jpg",
+      "object_prompt": "one cute dolphin jumping",
+      "color": "#6db6e8",
+      "emoji": "🐬",
+      "status": "approved"
+    },
+    {
+      "id": "movers_panda",
+      "lemma": "panda",
+      "slug": "panda",
+      "pos": "noun",
+      "level": "movers",
+      "theme": "animals",
+      "type": "zoo",
+      "age_min": 3,
+      "age_max": 6,
+      "prompt_en": "Which one is the panda?",
+      "speech": "Which one is the panda?",
+      "imageable": true,
+      "distractor_pool": [
+        "penguin",
+        "lion",
+        "kangaroo",
+        "rabbit"
+      ],
+      "adjacent_types": [
+        "animal",
+        "pet"
+      ],
+      "image_id": "img_panda_v1",
+      "image": "assets/flashcards/movers/panda.jpg",
+      "fallback_image": "assets/flashcards/movers/panda.jpg",
+      "object_prompt": "one cute black and white panda sitting",
+      "color": "#3d3d3d",
+      "emoji": "🐼",
+      "status": "approved"
+    },
+    {
+      "id": "movers_parrot",
+      "lemma": "parrot",
+      "slug": "parrot",
+      "pos": "noun",
+      "level": "movers",
+      "theme": "animals",
+      "type": "animal",
+      "age_min": 3,
+      "age_max": 6,
+      "prompt_en": "Which one is the parrot?",
+      "speech": "Which one is the parrot?",
+      "imageable": true,
+      "distractor_pool": [
+        "penguin",
+        "dolphin",
+        "panda",
+        "rabbit"
+      ],
+      "adjacent_types": [
+        "zoo"
+      ],
+      "image_id": "img_parrot_v1",
+      "image": "assets/flashcards/movers/parrot.jpg",
+      "fallback_image": "assets/flashcards/movers/parrot.jpg",
+      "object_prompt": "one colorful parrot on a perch",
+      "color": "#7dcc6b",
+      "emoji": "🦜",
+      "status": "approved"
+    },
+    {
+      "id": "movers_penguin",
+      "lemma": "penguin",
+      "slug": "penguin",
+      "pos": "noun",
+      "level": "movers",
+      "theme": "animals",
+      "type": "animal",
+      "age_min": 3,
+      "age_max": 6,
+      "prompt_en": "Which one is the penguin?",
+      "speech": "Which one is the penguin?",
+      "imageable": true,
+      "distractor_pool": [
+        "dolphin",
+        "panda",
+        "polar-bear",
+        "whale"
+      ],
+      "adjacent_types": [
+        "zoo"
+      ],
+      "image_id": "img_penguin_v1",
+      "image": "assets/flashcards/movers/penguin.jpg",
+      "fallback_image": "assets/flashcards/movers/penguin.jpg",
+      "object_prompt": "one cute penguin standing",
+      "color": "#3d3d3d",
+      "emoji": "🐧",
+      "status": "approved"
+    },
+    {
+      "id": "movers_shark",
+      "lemma": "shark",
+      "slug": "shark",
+      "pos": "noun",
+      "level": "movers",
+      "theme": "animals",
+      "type": "animal",
+      "age_min": 3,
+      "age_max": 6,
+      "prompt_en": "Which one is the shark?",
+      "speech": "Which one is the shark?",
+      "imageable": true,
+      "distractor_pool": [
+        "dolphin",
+        "whale",
+        "penguin",
+        "fish"
+      ],
+      "adjacent_types": [
+        "zoo"
+      ],
+      "image_id": "img_shark_v1",
+      "image": "assets/flashcards/movers/shark.jpg",
+      "fallback_image": "assets/flashcards/movers/shark.jpg",
+      "object_prompt": "one friendly cartoon shark, not scary",
+      "color": "#8fb7d6",
+      "emoji": "🦈",
+      "status": "approved"
+    },
+    {
+      "id": "movers_whale",
+      "lemma": "whale",
+      "slug": "whale",
+      "pos": "noun",
+      "level": "movers",
+      "theme": "animals",
+      "type": "animal",
+      "age_min": 3,
+      "age_max": 6,
+      "prompt_en": "Which one is the whale?",
+      "speech": "Which one is the whale?",
+      "imageable": true,
+      "distractor_pool": [
+        "dolphin",
+        "shark",
+        "penguin",
+        "panda"
+      ],
+      "adjacent_types": [
+        "zoo"
+      ],
+      "image_id": "img_whale_v1",
+      "image": "assets/flashcards/movers/whale.jpg",
+      "fallback_image": "assets/flashcards/movers/whale.jpg",
+      "object_prompt": "one big blue whale",
+      "color": "#6b8fc4",
+      "emoji": "🐋",
+      "status": "approved"
+    },
+    {
+      "id": "movers_kangaroo",
+      "lemma": "kangaroo",
+      "slug": "kangaroo",
+      "pos": "noun",
+      "level": "movers",
+      "theme": "animals",
+      "type": "zoo",
+      "age_min": 3,
+      "age_max": 6,
+      "prompt_en": "Which one is the kangaroo?",
+      "speech": "Which one is the kangaroo?",
+      "imageable": true,
+      "distractor_pool": [
+        "lion",
+        "panda",
+        "rabbit",
+        "zebra"
+      ],
+      "adjacent_types": [
+        "animal",
+        "pet"
+      ],
+      "image_id": "img_kangaroo_v1",
+      "image": "assets/flashcards/movers/kangaroo.jpg",
+      "fallback_image": "assets/flashcards/movers/kangaroo.jpg",
+      "object_prompt": "one cute kangaroo standing",
+      "color": "#c48a5a",
+      "emoji": "🦘",
+      "status": "approved"
+    },
+    {
+      "id": "movers_lion",
+      "lemma": "lion",
+      "slug": "lion",
+      "pos": "noun",
+      "level": "movers",
+      "theme": "animals",
+      "type": "zoo",
+      "age_min": 3,
+      "age_max": 6,
+      "prompt_en": "Which one is the lion?",
+      "speech": "Which one is the lion?",
+      "imageable": true,
+      "distractor_pool": [
+        "tiger",
+        "kangaroo",
+        "panda",
+        "zebra"
+      ],
+      "adjacent_types": [
+        "animal",
+        "pet"
+      ],
+      "image_id": "img_lion_v1",
+      "image": "assets/flashcards/movers/lion.jpg",
+      "fallback_image": "assets/flashcards/movers/lion.jpg",
+      "object_prompt": "one friendly cartoon lion, not scary",
+      "color": "#f0b04a",
+      "emoji": "🦁",
+      "status": "approved"
+    },
+    {
+      "id": "movers_kitten",
+      "lemma": "kitten",
+      "slug": "kitten",
+      "pos": "noun",
+      "level": "movers",
+      "theme": "animals",
+      "type": "pet",
+      "age_min": 3,
+      "age_max": 6,
+      "prompt_en": "Which one is the kitten?",
+      "speech": "Which one is the kitten?",
+      "imageable": true,
+      "distractor_pool": [
+        "puppy",
+        "rabbit",
+        "cat",
+        "panda"
+      ],
+      "adjacent_types": [
+        "animal"
+      ],
+      "image_id": "img_kitten_v1",
+      "image": "assets/flashcards/movers/kitten.jpg",
+      "fallback_image": "assets/flashcards/movers/kitten.jpg",
+      "object_prompt": "one cute little kitten sitting",
+      "color": "#f2d6c9",
+      "emoji": "🐱",
+      "status": "approved"
+    },
+    {
+      "id": "movers_puppy",
+      "lemma": "puppy",
+      "slug": "puppy",
+      "pos": "noun",
+      "level": "movers",
+      "theme": "animals",
+      "type": "pet",
+      "age_min": 3,
+      "age_max": 6,
+      "prompt_en": "Which one is the puppy?",
+      "speech": "Which one is the puppy?",
+      "imageable": true,
+      "distractor_pool": [
+        "kitten",
+        "rabbit",
+        "dog",
+        "panda"
+      ],
+      "adjacent_types": [
+        "animal"
+      ],
+      "image_id": "img_puppy_v1",
+      "image": "assets/flashcards/movers/puppy.jpg",
+      "fallback_image": "assets/flashcards/movers/puppy.jpg",
+      "object_prompt": "one cute little puppy sitting",
+      "color": "#d9a66f",
+      "emoji": "🐶",
+      "status": "approved"
+    },
+    {
+      "id": "movers_sandwich",
+      "lemma": "sandwich",
+      "slug": "sandwich",
+      "pos": "noun",
+      "level": "movers",
+      "theme": "food",
+      "type": "meal",
+      "age_min": 3,
+      "age_max": 6,
+      "prompt_en": "Which one is the sandwich?",
+      "speech": "Which one is the sandwich?",
+      "imageable": true,
+      "distractor_pool": [
+        "pineapple",
+        "watermelon",
+        "mango",
+        "coconut"
+      ],
+      "adjacent_types": [
+        "fruit",
+        "drink"
+      ],
+      "image_id": "img_sandwich_v1",
+      "image": "assets/flashcards/movers/sandwich.jpg",
+      "fallback_image": "assets/flashcards/movers/sandwich.jpg",
+      "object_prompt": "one sandwich cut in half",
+      "color": "#e2c15a",
+      "emoji": "🥪",
+      "status": "approved"
+    },
+    {
+      "id": "movers_scarf",
+      "lemma": "scarf",
+      "slug": "scarf",
+      "pos": "noun",
+      "level": "movers",
+      "theme": "clothes",
+      "type": "wear",
+      "age_min": 3,
+      "age_max": 6,
+      "prompt_en": "Which one is the scarf?",
+      "speech": "Which one is the scarf?",
+      "imageable": true,
+      "distractor_pool": [
+        "jacket",
+        "jeans",
+        "glasses",
+        "hat"
+      ],
+      "adjacent_types": [],
+      "image_id": "img_scarf_v1",
+      "image": "assets/flashcards/movers/scarf.jpg",
+      "fallback_image": "assets/flashcards/movers/scarf.jpg",
+      "object_prompt": "one cozy striped scarf",
+      "color": "#ff6b5e",
+      "emoji": "🧣",
+      "status": "approved"
+    },
+    {
+      "id": "movers_toothbrush",
+      "lemma": "toothbrush",
+      "slug": "toothbrush",
+      "pos": "noun",
+      "level": "movers",
+      "theme": "home",
+      "type": "object",
+      "age_min": 3,
+      "age_max": 6,
+      "prompt_en": "Which one is the toothbrush?",
+      "speech": "Which one is the toothbrush?",
+      "imageable": true,
+      "distractor_pool": [
+        "computer",
+        "television",
+        "armchair",
+        "lamp"
+      ],
+      "adjacent_types": [
+        "furniture"
+      ],
+      "image_id": "img_toothbrush_v1",
+      "image": "assets/flashcards/movers/toothbrush.jpg",
+      "fallback_image": "assets/flashcards/movers/toothbrush.jpg",
+      "object_prompt": "one toothbrush with toothpaste",
+      "color": "#9ed9c4",
+      "emoji": "🪥",
+      "status": "approved"
+    },
+    {
+      "id": "movers_rainbow",
+      "lemma": "rainbow",
+      "slug": "rainbow",
+      "pos": "noun",
+      "level": "movers",
+      "theme": "world",
+      "type": "nature",
+      "age_min": 3,
+      "age_max": 6,
+      "prompt_en": "Which one is the rainbow?",
+      "speech": "Which one is the rainbow?",
+      "imageable": true,
+      "distractor_pool": [
+        "moon",
+        "waterfall",
+        "star",
+        "cloud"
+      ],
+      "adjacent_types": [],
+      "image_id": "img_rainbow_v1",
+      "image": "assets/flashcards/movers/rainbow.jpg",
+      "fallback_image": "assets/flashcards/movers/rainbow.jpg",
+      "object_prompt": "one bright rainbow arc",
+      "color": "#c9b9d9",
+      "emoji": "🌈",
+      "status": "approved"
+    },
+    {
+      "id": "movers_moon",
+      "lemma": "moon",
+      "slug": "moon",
+      "pos": "noun",
+      "level": "movers",
+      "theme": "world",
+      "type": "nature",
+      "age_min": 3,
+      "age_max": 6,
+      "prompt_en": "Which one is the moon?",
+      "speech": "Which one is the moon?",
+      "imageable": true,
+      "distractor_pool": [
+        "rainbow",
+        "waterfall",
+        "star",
+        "sun"
+      ],
+      "adjacent_types": [],
+      "image_id": "img_moon_v1",
+      "image": "assets/flashcards/movers/moon.jpg",
+      "fallback_image": "assets/flashcards/movers/moon.jpg",
+      "object_prompt": "one crescent moon",
+      "color": "#f4f6f8",
+      "emoji": "🌙",
+      "status": "approved"
+    },
+    {
+      "id": "movers_waterfall",
+      "lemma": "waterfall",
+      "slug": "waterfall",
+      "pos": "noun",
+      "level": "movers",
+      "theme": "world",
+      "type": "nature",
+      "age_min": 3,
+      "age_max": 6,
+      "prompt_en": "Which one is the waterfall?",
+      "speech": "Which one is the waterfall?",
+      "imageable": true,
+      "distractor_pool": [
+        "rainbow",
+        "moon",
+        "river",
+        "tree"
+      ],
+      "adjacent_types": [],
+      "image_id": "img_waterfall_v1",
+      "image": "assets/flashcards/movers/waterfall.jpg",
+      "fallback_image": "assets/flashcards/movers/waterfall.jpg",
+      "object_prompt": "one waterfall cascading down rocks",
+      "color": "#6db6e8",
+      "emoji": "💦",
+      "status": "approved"
     }
   ],
   "batches": [
     {
-      "id": "movers-grid-01",
-      "slugs": ["butterfly", "rabbit", "strawberry", "crocodile"]
-    },
-    {
       "id": "movers-grid-02",
-      "slugs": ["giraffe", "elephant", "hippo", "zebra"]
+      "slugs": [
+        "giraffe",
+        "elephant",
+        "hippo",
+        "zebra"
+      ]
     },
     {
       "id": "movers-grid-03",
-      "slugs": ["monkey", "tiger", "polar-bear", "helicopter"]
+      "slugs": [
+        "monkey",
+        "tiger",
+        "polar-bear",
+        "helicopter"
+      ]
     },
     {
       "id": "movers-grid-04",
-      "slugs": ["motorbike", "truck", "pineapple", "watermelon"]
+      "slugs": [
+        "motorbike",
+        "truck",
+        "pineapple",
+        "watermelon"
+      ]
     },
     {
       "id": "movers-grid-05",
-      "slugs": ["mango", "coconut", "kiwi", "glasses"]
+      "slugs": [
+        "mango",
+        "coconut",
+        "kiwi",
+        "glasses"
+      ]
     },
     {
       "id": "movers-grid-06",
-      "slugs": ["jeans", "jacket", "computer", "television"]
+      "slugs": [
+        "jeans",
+        "jacket",
+        "computer",
+        "television"
+      ]
     },
     {
       "id": "movers-grid-07",
-      "slugs": ["guitar", "camera", "robot", "armchair"]
+      "slugs": [
+        "guitar",
+        "camera",
+        "robot",
+        "armchair"
+      ]
+    },
+    {
+      "id": "movers-grid-01-kept",
+      "slugs": [
+        "rabbit",
+        "crocodile"
+      ]
+    },
+    {
+      "id": "movers-extra-01",
+      "slugs": [
+        "dolphin",
+        "panda",
+        "parrot",
+        "penguin"
+      ]
+    },
+    {
+      "id": "movers-extra-02",
+      "slugs": [
+        "shark",
+        "whale",
+        "kangaroo",
+        "lion"
+      ]
+    },
+    {
+      "id": "movers-extra-03",
+      "slugs": [
+        "kitten",
+        "puppy",
+        "sandwich",
+        "scarf"
+      ]
+    },
+    {
+      "id": "movers-extra-04",
+      "slugs": [
+        "toothbrush",
+        "rainbow",
+        "moon",
+        "waterfall"
+      ]
     }
   ]
 }

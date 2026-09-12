@@ -9,12 +9,15 @@ test("word bank catalog and packs stay image-backed", async () => {
     await readFile("public/content/wordbanks.json", "utf8"),
   );
   assert.equal(catalog.schemaVersion, 1);
-  assert.ok(catalog.banks.some((bank) => bank.id === "movers-lite"));
+  assert.ok(catalog.banks.some((bank) => bank.id === "movers"));
+  assert.ok(catalog.banks.some((bank) => bank.id === "flyers"));
   assert.ok(catalog.banks.some((bank) => bank.id === "concepts"));
+  assert.ok(!catalog.banks.some((bank) => bank.id === "movers-lite"));
 
   for (const fileName of [
     "wordbank.starters.json",
-    "wordbank.movers-lite.json",
+    "wordbank.movers.json",
+    "wordbank.flyers.json",
     "wordbank.concepts.json",
   ]) {
     const pack = JSON.parse(
@@ -34,7 +37,8 @@ test("word bank catalog and packs stay image-backed", async () => {
       continue;
     }
     assert.ok(Array.isArray(pack.words));
-    assert.ok(pack.words.length >= 20);
+    const minWords = fileName === "wordbank.flyers.json" ? 12 : 20;
+    assert.ok(pack.words.length >= minWords, fileName);
     for (const word of pack.words) {
       assert.equal(typeof word.prompt_en, "string");
       assert.equal(typeof word.speech, "string");

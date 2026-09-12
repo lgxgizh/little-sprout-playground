@@ -1,16 +1,19 @@
 # English content packs / 英语内容包
 
-Kid listening comes from `wordbanks.json` plus the word JSON files it points at (`wordbank.starters.json`, `wordbank.movers-lite.json`, `wordbank.concepts.json`, …). The quiz engine builds picture questions from `speech` / `prompt_en` (or contrast pair prompts) and reads them with the browser (or optional TTS). It does **not** play mp3 files from word `audio` fields.
+Kid listening comes from `wordbanks.json` plus the word JSON files it points at (`wordbank.starters.json`, `wordbank.movers.json`, `wordbank.flyers.json`, `wordbank.concepts.json`, …). The quiz engine builds picture questions from `speech` / `prompt_en` (or contrast pair prompts) and reads them with the browser (or optional TTS). It does **not** play mp3 files from word `audio` fields.
 
-`wordbanks.json` is the listening **word-bank catalog**. Each entry points at a word JSON file and may set an optional `theme` filter so kids/parents pick a concrete pack (full Starters, Movers Lite, concepts, food, animals, …).
+`wordbanks.json` is the listening **word-bank catalog**. Each entry points at a word JSON file and may set an optional `theme` filter so kids/parents pick a concrete pack (Pre A1 Starters, A1 Movers, A2 Flyers, concepts, food, animals, …).
 
-- `wordbank.starters.json` — Cambridge YLE Starters–style **imageable nouns** for picture listening.
-- `wordbank.movers-lite.json` — a slightly harder curated noun pack (Movers-ish, still picture-friendly); cards under `public/assets/flashcards/movers/` plus reused Starters JPEGs.
-- `wordbank.concepts.json` — contrast / attribute listening (`question_type: "contrast"` + `pairs`) such as big/small, tall/short, full/empty, and simple color contrasts; cards under `public/assets/flashcards/concepts/`.
+Cambridge publishes public YLE wordlists (Pre A1 Starters / A1 Movers / A2 Flyers). Our banks are **curated imageable-noun subsets** for picture listening — **not** official exam content or past papers.
 
-Cards are JPEG files under `public/assets/flashcards/`. Packs are curated for drawing cards, not official Cambridge exam content.
+- `wordbank.starters.json` — Pre A1 Starters–style **imageable nouns**; cards under `public/assets/flashcards/{theme}/`.
+- `wordbank.movers.json` — A1 Movers curated nouns; cards under `public/assets/flashcards/movers/`.
+- `wordbank.flyers.json` — A2 Flyers curated nouns; cards under `public/assets/flashcards/flyers/`.
+- `wordbank.concepts.json` — contrast / attribute listening (`question_type: "contrast"` + `pairs`) such as big/small, tall/short, full/empty, and simple color contrasts (skill pack, not an exam level); cards under `public/assets/flashcards/concepts/`.
 
-`wordbanks.json` 是听力「单词库」目录。听力只用词库的 `speech` / `prompt_en`（或对比题 pair 提示）做浏览器朗读，不播放词条上的 mp3。
+Cards are JPEG files under `public/assets/flashcards/`. Packs are curated for drawing cards, not official Cambridge exam materials.
+
+`wordbanks.json` 是听力「单词库」目录，按剑桥 YLE 公开词表系列组织（Pre A1 Starters / A1 Movers / A2 Flyers），另加「对比概念」技能包。听力只用词库的 `speech` / `prompt_en`（或对比题 pair 提示）做浏览器朗读，不播放词条上的 mp3。词库是可看图名词精选，**不是**官方考题。
 
 ## Minimal format / 最小格式
 

@@ -351,11 +351,22 @@ export function catalogBankFiles(catalog) {
   ];
 }
 
+/** Legacy localStorage / prefs ids → current catalog ids. */
+const LEGACY_BANK_IDS = {
+  "movers-lite": "movers",
+};
+
+export function normalizeListeningBankId(bankId) {
+  if (!bankId) return bankId;
+  return LEGACY_BANK_IDS[bankId] || bankId;
+}
+
 export function findListeningBank(catalog, bankId) {
   const banks = Array.isArray(catalog?.banks) ? catalog.banks : [];
   if (!banks.length) return null;
+  const id = normalizeListeningBankId(bankId);
   return (
-    banks.find((bank) => bank.id === bankId) ||
+    banks.find((bank) => bank.id === id) ||
     banks.find((bank) => bank.id === catalog?.defaultBankId) ||
     banks[0]
   );
@@ -542,7 +553,13 @@ export function loadListeningPrefs(storage = globalThis.localStorage) {
     const raw = storage?.getItem?.(LISTENING_PREFS_KEY);
     if (!raw) return {};
     const parsed = JSON.parse(raw);
-    return parsed && typeof parsed === "object" ? parsed : {};
+    if (!parsed || typeof parsed !== "object") return {};
+    if (parsed.bankId || parsed.listeningBankId) {
+      parsed.bankId = normalizeListeningBankId(
+        parsed.bankId || parsed.listeningBankId,
+      );
+    }
+    return parsed;
   } catch {
     return {};
   }
