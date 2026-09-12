@@ -987,6 +987,32 @@ function normalizeContentQuestion(question) {
   return normalized;
 }
 
+function listeningThemePreviews(themeId = "all", limit = 8) {
+  const words = (startersWordbank?.words || []).filter(
+    (word) =>
+      word.imageable !== false &&
+      (!word.status || word.status === "approved") &&
+      word.image &&
+      (themeId === "all" || word.theme === themeId),
+  );
+  const mixed = [];
+  if (themeId === "all") {
+    const seen = new Set();
+    for (const word of words) {
+      if (seen.has(word.theme)) continue;
+      seen.add(word.theme);
+      mixed.push(word);
+    }
+    mixed.push(...words.filter((word) => !mixed.includes(word)));
+  }
+  const list = themeId === "all" ? mixed : words;
+  const base = assetBase.endsWith("/") ? assetBase : `${assetBase}/`;
+  return list.slice(0, limit).map((word) => ({
+    src: `${base}${String(word.image).replace(/^\//, "")}`,
+    lemma: word.lemma,
+  }));
+}
+
 function applyWordbankPool() {
   if (!startersWordbank) return;
   const pool = listeningPoolFromWordbank(startersWordbank, {
@@ -1216,7 +1242,7 @@ function animationWatchMarkup() {
   const media = isImage
     ? `<img id="comprehensionAnimation" class="comprehension-animation" src="${escapeHtml(item.src)}" alt="${escapeHtml(item.title)}" />`
     : `<video id="comprehensionAnimation" class="comprehension-animation" src="${escapeHtml(item.src)}" poster="${escapeHtml(item.poster || "")}" controls playsinline></video>`;
-  return `<div class="video-player-card animation-player-card">${media}</div>`;
+  return `<div class="video-player-card animation-player-card">${media}<div class="video-player-copy"><b>${escapeHtml(item.title)}</b><small>Look and listen. Grown-ups can pause anytime.</small></div></div>`;
 }
 
 function kidChrome(inner) {
@@ -1224,8 +1250,8 @@ function kidChrome(inner) {
   return `
     <div class="app-shell is-hub">
       <header class="topbar">
-        <div class="brand"><span>小栗子</span><small>${childName}</small></div>
-        <div class="top-actions"><button class="text-btn" id="soundToggle" aria-label="声音开关">${state.soundOn ? "声音开" : "声音关"}</button><button class="text-btn" id="openParent">家长</button></div>
+        <div class="brand"><span class="brand-mark">✦</span><span>Little Sprout</span><small>${childName}</small></div>
+        <div class="top-actions"><button class="icon-btn" id="soundToggle" aria-label="Sound on or off">${state.soundOn ? "🔊" : "🔇"}</button><button class="parent-btn" id="openParent">Parent <span>⌄</span></button></div>
       </header>
       <main class="hub-main">${inner}</main>
       ${state.modal ? modelSettingsModal() : ""}
@@ -1275,6 +1301,7 @@ function render() {
         counts: LISTENING_COUNTS,
         selectedCount: state.listeningCount,
         available: selected?.count || 0,
+        previews: listeningThemePreviews(selected?.id || "all"),
       }),
     );
     bindEvents();
@@ -1301,7 +1328,10 @@ function render() {
     return;
   }
   document.querySelector("#app").innerHTML = kidChrome(
-    homeHubMarkup({ childName: activeChild()?.nickname || "Sunny" }),
+    homeHubMarkup({
+      childName: activeChild()?.nickname || "Sunny",
+      assetBase,
+    }),
   );
   bindEvents();
 }

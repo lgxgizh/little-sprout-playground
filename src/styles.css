@@ -1,23 +1,23 @@
-@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700;800&family=Nunito:wght@400;500;600;700;800&display=swap");
 :root {
-  font-family: "Noto Sans SC", ui-sans-serif, system-ui, sans-serif;
-  color: #171717;
-  background: #fff;
+  font-family: "Nunito", "Noto Sans SC", ui-sans-serif, system-ui, sans-serif;
+  color: #30444b;
+  background: #fffaf1;
   font-synthesis: none;
-  --ink: #171717;
-  --muted: #737373;
-  --coral: #171717;
-  --yellow: #d4d4d4;
-  --mint: #e5e5e5;
-  --cream: #ffffff;
-  --line: #ececec;
+  --ink: #30444b;
+  --muted: #71838a;
+  --coral: #f26b5b;
+  --yellow: #f6c84c;
+  --mint: #9ed9c4;
+  --cream: #fffaf1;
+  --line: #eee5d9;
 }
 * {
   box-sizing: border-box;
 }
 body {
   margin: 0;
-  background: #fff;
+  background: var(--cream);
   color: var(--ink);
 }
 button {
@@ -31,34 +31,42 @@ button {
   overflow: hidden;
 }
 .topbar {
-  height: 56px;
-  padding: 0 clamp(16px, 4vw, 40px);
+  height: 78px;
+  padding: 0 clamp(20px, 5vw, 76px);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 1px solid var(--line);
-  background: #fff;
+  border-bottom: 1px solid #f1e9df;
+  background: rgba(255, 250, 241, 0.92);
   position: sticky;
   top: 0;
   z-index: 10;
+  backdrop-filter: blur(12px);
 }
 .brand {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 15px;
-  font-weight: 600;
-  letter-spacing: 0;
+  gap: 9px;
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
 }
 .brand-mark {
-  display: none;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  background: var(--coral);
+  border-radius: 10px;
+  color: white;
+  font-size: 16px;
 }
 .brand small {
-  font-size: 13px;
-  font-weight: 400;
-  color: var(--muted);
+  font-size: 11px;
+  font-weight: 500;
+  color: #a9a49a;
   letter-spacing: 0;
-  margin-left: 0;
+  margin-left: 3px;
 }
 .desktop-nav {
   display: flex;
@@ -93,24 +101,21 @@ button {
   align-items: center;
   gap: 14px;
 }
-.icon-btn,
-.text-btn {
-  background: none;
-  min-height: 40px;
-  padding: 0 8px;
-  border-radius: 0;
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--ink);
+.icon-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  background: #fff3df;
+  font-size: 17px;
 }
 .parent-btn {
   height: 40px;
-  padding: 0 8px;
-  border: 0;
-  background: none;
-  border-radius: 0;
-  font-size: 14px;
-  color: var(--ink);
+  padding: 0 15px;
+  border: 1px solid #e9dfd3;
+  background: #fffdf9;
+  border-radius: 12px;
+  font-size: 13px;
+  color: #66777c;
 }
 .parent-btn span {
   font-size: 16px;
@@ -177,23 +182,27 @@ button {
 .primary-btn {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  gap: 8px;
-  background: #171717;
-  color: #fff;
-  border-radius: 8px;
-  padding: 12px 18px;
-  font-weight: 600;
-  font-size: 15px;
-  box-shadow: none;
+  justify-content: space-between;
+  gap: 32px;
+  background: var(--coral);
+  color: white;
+  border-radius: 15px;
+  padding: 14px 17px 14px 20px;
+  font-weight: 700;
+  font-size: 14px;
+  box-shadow: 0 10px 22px rgba(242, 107, 91, 0.22);
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
 }
 .primary-btn:hover {
-  transform: none;
-  box-shadow: none;
-  opacity: 0.86;
+  transform: translateY(-2px);
+  box-shadow: 0 14px 28px rgba(242, 107, 91, 0.3);
 }
 .primary-btn .arrow {
-  display: none;
+  font-size: 22px;
+  line-height: 14px;
+  font-weight: 400;
 }
 .streak {
   display: flex;
@@ -471,25 +480,29 @@ button {
   gap: 10px;
 }
 .choice {
-  background: #fff;
-  border: 1px solid var(--line);
-  border-radius: 12px;
+  background: #fffdf9;
+  border: 2px solid #f2ebe0;
+  border-radius: 15px;
   padding: 10px 7px 11px;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 4px;
   font-size: 15px;
-  font-weight: 600;
+  font-weight: 700;
   position: relative;
+  transition:
+    transform 0.18s,
+    border-color 0.18s,
+    background 0.18s;
 }
 .choice:hover {
-  transform: none;
-  border-color: #171717;
+  transform: translateY(-2px);
+  border-color: var(--choice-color);
 }
 .choice.correct {
-  border-color: #171717;
-  background: #fafafa;
+  border-color: #83c69f;
+  background: #f2fbf5;
 }
 .choice-emoji {
   font-size: 32px;
@@ -502,38 +515,25 @@ button {
   font-size: 14px;
 }
 .feedback {
-  font-size: 14px;
+  font-size: 12px;
   text-align: center;
-  border-radius: 0;
-  margin-top: 8px;
-  padding: 8px;
-  background: none;
+  border-radius: 10px;
+  margin-top: 14px;
+  padding: 10px;
 }
 .feedback.good {
-  background: none;
-  color: #171717;
+  background: #eaf8ef;
+  color: #4b9b6a;
 }
 .feedback.try {
-  background: none;
-  color: var(--muted);
+  background: #fff6e5;
+  color: #b98742;
 }
-.hint,
-.play-hint {
-  font-size: 13px;
+.hint {
+  font-size: 10px;
   text-align: center;
-  color: var(--muted);
-  margin-top: 8px;
-  font-weight: 400;
-}
-.next-question {
-  display: block;
-  margin: 4px auto 0;
-  background: none;
-  color: var(--ink);
-  font-size: 15px;
-  font-weight: 600;
-  text-decoration: underline;
-  text-underline-offset: 4px;
+  color: #b1b9b2;
+  margin-top: 15px;
 }
 .parent-note {
   max-width: 1300px;
@@ -650,11 +650,11 @@ button {
   transform: translate(-50%, 20px);
   opacity: 0;
   pointer-events: none;
-  background: #171717;
+  background: #30444b;
   color: #fff;
-  padding: 8px 12px;
-  border-radius: 6px;
-  font-size: 13px;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-size: 12px;
   transition: 0.25s;
   z-index: 50;
 }

@@ -2,21 +2,40 @@
 
 import { escapeHtml } from "./quiz-ui.js";
 
-export function homeHubMarkup({ childName = "Sunny" } = {}) {
+export function homeHubMarkup({ childName = "Sunny", assetBase = "/" } = {}) {
+  const base = assetBase.endsWith("/") ? assetBase : `${assetBase}/`;
+  const listenPics = [
+    "assets/flashcards/food/apple.jpg",
+    "assets/flashcards/animals/cat.jpg",
+    "assets/flashcards/animals/dog.jpg",
+    "assets/flashcards/toys/ball.jpg",
+  ];
   return `<section class="home-hub" id="featureHub">
     <div class="home-hub-hello">
-      <p>${escapeHtml(childName)}</p>
-      <h1>选一个开始</h1>
+      <p>嗨，${escapeHtml(childName)}</p>
+      <h1>今天玩哪一个？</h1>
     </div>
     <div class="home-hub-grid">
-      <button class="home-feature" data-feature="listening" type="button">
-        <h2>英语听力测试</h2>
-        <p>听一句英文，点一张图</p>
-      </button>
-      <button class="home-feature" data-feature="video" type="button">
-        <h2>看视频提问</h2>
-        <p>先看短片，再点图片</p>
-      </button>
+      <article class="home-feature home-feature-listen" data-feature="listening">
+        <div class="home-feature-pics">${listenPics
+          .map((src) => `<img src="${escapeHtml(base + src)}" alt="" />`)
+          .join("")}</div>
+        <div>
+          <h2>英语听力测试</h2>
+          <p>听一句英文，点一张图。</p>
+        </div>
+        <button class="primary-btn feature-start" data-feature="listening" type="button"><span>开始</span><span class="arrow">→</span></button>
+      </article>
+      <article class="home-feature home-feature-video" data-feature="video">
+        <div class="home-feature-pics home-feature-pics-wide">
+          <img src="${escapeHtml(base)}assets/stories/fox-apple.gif" alt="" />
+        </div>
+        <div>
+          <h2>看视频提问</h2>
+          <p>先看短片，再听问题、点图片。</p>
+        </div>
+        <button class="primary-btn feature-start" data-feature="video" type="button"><span>开始</span><span class="arrow">→</span></button>
+      </article>
     </div>
   </section>`;
 }
@@ -29,7 +48,7 @@ export function videoHubMarkup({
   if (!demo) {
     return `<section class="video-hub" id="videoHub">
       <header class="hub-bar">
-        <button type="button" class="text-btn" id="backHome">返回</button>
+        <button type="button" class="play-leave" id="backHome">← 返回</button>
         <h1>看视频提问</h1>
       </header>
       <p class="hub-empty">还没有可以看的短片。</p>
@@ -44,23 +63,25 @@ export function videoHubMarkup({
   const extra = others
     .map(
       (item) =>
-        `<button class="video-more-item" data-animation="${escapeHtml(item.id)}" type="button">${escapeHtml(item.title)}</button>`,
+        `<article class="media-card"><div class="media-thumb">${item.poster ? `<img src="${escapeHtml(item.poster)}" alt=""/>` : `<span class="media-empty-icon">🎞️</span>`}<span class="media-duration">${escapeHtml(item.durationLabel || "")}</span></div><div class="media-card-copy"><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.description || "")}</p><button class="media-play" data-animation="${escapeHtml(item.id)}" type="button">▶ Watch &amp; answer</button></div></article>`,
     )
     .join("");
   return `<section class="video-hub" id="videoHub">
     <header class="hub-bar">
-      <button type="button" class="text-btn" id="backHome">返回</button>
+      <button type="button" class="play-leave" id="backHome">← 返回</button>
       <h1>看视频提问</h1>
     </header>
     <div class="video-demo" id="videoDemo">
       <div class="video-demo-frame">${media}</div>
       <div class="video-demo-copy">
-        <h2>${escapeHtml(demo.title || "短片")}</h2>
-        <p>看完短片，再点图片</p>
-        <button class="primary-btn" id="startVideoDemo" type="button" data-animation="${escapeHtml(demo.id)}">开始提问</button>
+        <span class="eyebrow">DEMO · 小演示</span>
+        <h2>${escapeHtml(demo.title || "Watch, then tap")}</h2>
+        <p>先看这一段短片，再听问题、点图片。</p>
+        <button class="primary-btn" id="startVideoDemo" type="button" data-animation="${escapeHtml(demo.id)}"><span>开始提问</span><span class="arrow">→</span></button>
+        <small class="media-status">${escapeHtml(parentSummary)}</small>
       </div>
     </div>
-    ${extra ? `<div class="video-hub-more">${extra}</div>` : ""}
+    ${extra ? `<div class="video-hub-more"><h3>More clips</h3><div class="media-grid">${extra}</div></div>` : ""}
   </section>`;
 }
 
@@ -70,6 +91,7 @@ export function listeningHubMarkup({
   counts = [5, 8, 10, 12],
   selectedCount = 8,
   available = 0,
+  previews = [],
 } = {}) {
   const theme = themes.find((item) => item.id === selectedTheme) || themes[0];
   const pool = theme?.count || available || 0;
@@ -87,22 +109,31 @@ export function listeningHubMarkup({
       return `<button class="chip ${active}" type="button" data-listening-count="${count}" ${disabled ? "disabled" : ""}>${count} 题</button>`;
     })
     .join("");
+  const preview = previews.length
+    ? `<div class="listen-preview">${previews
+        .map(
+          (item) =>
+            `<img src="${escapeHtml(item.src)}" alt="${escapeHtml(item.lemma || "")}" />`,
+        )
+        .join("")}</div>`
+    : "";
   return `<section class="listen-hub" id="listenHub">
     <header class="hub-bar">
-      <button type="button" class="text-btn" id="backHome">返回</button>
+      <button type="button" class="play-leave" id="backHome">← 返回</button>
       <h1>英语听力测试</h1>
     </header>
     <div class="listen-setup">
       <div class="listen-group">
         <h2>词库</h2>
         <div class="chip-row">${themeButtons}</div>
+        ${preview}
       </div>
       <div class="listen-group">
         <h2>每次几题</h2>
         <div class="chip-row">${countButtons}</div>
         <p class="listen-note">一次 ${nextCount} 题，从这组词库里随机抽，这一轮不重复。</p>
       </div>
-      <button class="primary-btn" id="startListening" type="button" ${pool ? "" : "disabled"}>开始 ${nextCount} 题</button>
+      <button class="primary-btn" id="startListening" type="button" ${pool ? "" : "disabled"}><span>开始 ${nextCount} 题</span><span class="arrow">→</span></button>
     </div>
   </section>`;
 }

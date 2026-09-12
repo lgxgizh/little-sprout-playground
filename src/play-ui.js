@@ -27,9 +27,9 @@ export function playStageMarkup({
       ? "听力图片测评"
       : "英语听力测试";
   const board = watching
-    ? `<div class="play-watch">${watchMediaHtml}<div class="play-watch-actions"><button class="primary-btn" id="animationReady" type="button">开始答题</button></div></div>`
+    ? `<div class="play-watch">${watchMediaHtml}<div class="play-watch-actions"><p>When the animation ends, tap Ready.</p><button class="primary-btn" id="animationReady" type="button"><span>Ready to answer</span><span class="arrow">→</span></button></div></div>`
     : `<h1 class="play-prompt vis-hidden">${escapeHtml(prompt)}</h1>
-       <button type="button" class="play-listen" id="voicePrompt" ${state.aiPlanning ? "disabled" : ""}>听一听</button>
+       <button type="button" class="play-listen" id="voicePrompt" ${state.aiPlanning ? "disabled" : ""}><span>🔊</span> Listen</button>
        ${choiceGridMarkup(question?.choices || [], {
          answer: question?.answer || "",
          selectedChoice: state.selectedChoice,
@@ -40,16 +40,16 @@ export function playStageMarkup({
        })}
        ${
          state.answered
-           ? `<div class="play-dock"><div class="feedback ${state.correct ? "good" : "try"}">${escapeHtml(state.encouragement || (state.correct ? "对了" : "再试一次"))}</div>${state.activityComplete ? resultHtml : `<button class="next-question" id="nextQuestion" type="button">${state.correct ? "下一题" : "再试一题"}</button>`}</div>`
-           : `<p class="play-hint">点一张图</p>`
+           ? `<div class="play-dock"><div class="feedback ${state.correct ? "good" : "try"}">${escapeHtml(state.encouragement || (state.correct ? "You found it! ✨" : "That's okay—let's look again"))}</div>${state.activityComplete ? resultHtml : `<button class="next-question" id="nextQuestion" type="button">${state.correct ? "Next one" : "Try another"} <span>→</span></button>`}</div>`
+           : `<p class="play-hint">Tap a picture</p>`
        }`;
 
   return `<section class="play-stage" id="quizPanel" aria-label="${escapeHtml(title)}">
     <header class="play-bar">
-      <button type="button" class="text-btn" id="finishSession">${state.activityComplete ? "完成" : "离开"}</button>
+      <button type="button" class="play-leave" id="finishSession">${state.activityComplete ? "Finish" : "Leave"}</button>
       <div class="play-progress" aria-hidden="true">${playProgressDots(state.questionIndex, total)}</div>
       <span class="play-count">${state.questionIndex + 1} / ${total}</span>
-      <button type="button" class="text-btn" id="soundToggle" aria-label="声音开关">${state.soundOn ? "声音开" : "声音关"}</button>
+      <button type="button" class="icon-btn" id="soundToggle" aria-label="Sound on or off">${state.soundOn ? "🔊" : "🔇"}</button>
     </header>
     <div class="play-board ${watching ? "is-watching" : ""}">${board}</div>
   </section>`;

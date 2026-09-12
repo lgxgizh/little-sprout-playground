@@ -8,11 +8,13 @@ import {
 
 test("kid home only offers listening and video Q&A", () => {
   const html = homeHubMarkup({ childName: "小米" });
-  assert.match(html, /小米/);
+  assert.match(html, /嗨，小米/);
   assert.match(html, /英语听力测试/);
   assert.match(html, /看视频提问/);
   assert.match(html, /data-feature="listening"/);
   assert.match(html, /data-feature="video"/);
+  assert.match(html, /flashcards\/food\/apple\.jpg/);
+  assert.match(html, /fox-apple\.gif/);
   assert.doesNotMatch(html, /Try one now/);
   assert.doesNotMatch(html, /Which one is the apple/);
   assert.doesNotMatch(html, /demo-quiz/);
@@ -37,6 +39,7 @@ test("video hub shows its own fox demo, not a listening quiz", () => {
     ],
   });
   assert.match(html, /看视频提问/);
+  assert.match(html, /DEMO/);
   assert.match(html, /开始提问/);
   assert.match(html, /fox-apple\.gif/);
   assert.match(html, /id="startVideoDemo"/);
@@ -55,6 +58,7 @@ test("listening hub lets you pick a word bank and question count", () => {
     counts: [5, 8, 10, 12],
     selectedCount: 8,
     available: 24,
+    previews: [{ src: "/assets/flashcards/food/apple.jpg", lemma: "apple" }],
   });
   assert.match(html, /英语听力测试/);
   assert.match(html, /词库/);
@@ -63,5 +67,6 @@ test("listening hub lets you pick a word bank and question count", () => {
   assert.match(html, /data-listening-count="8"/);
   assert.match(html, /开始 8 题/);
   assert.match(html, /随机抽/);
+  assert.match(html, /flashcards\/food\/apple\.jpg/);
   assert.doesNotMatch(html, /Try one now/);
 });
