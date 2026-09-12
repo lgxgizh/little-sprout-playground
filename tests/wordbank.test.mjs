@@ -84,7 +84,7 @@ test("play stage fills the viewport chrome instead of the home card", () => {
   assert.match(html, /play-stage/);
   assert.match(html, /id="quizPanel"/);
   assert.match(html, /id="finishSession"/);
-  assert.match(html, /Listen/);
+  assert.match(html, /听一听/);
   assert.doesNotMatch(html, /feature-hub/);
   assert.doesNotMatch(html, />Apple</);
 });

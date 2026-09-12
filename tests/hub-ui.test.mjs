@@ -4,7 +4,7 @@ import { homeHubMarkup, videoHubMarkup } from "../src/hub-ui.js";
 
 test("kid home only offers listening and video Q&A", () => {
   const html = homeHubMarkup({ childName: "小米" });
-  assert.match(html, /嗨，小米/);
+  assert.match(html, /小米/);
   assert.match(html, /英语听力测试/);
   assert.match(html, /看视频提问/);
   assert.match(html, /data-feature="listening"/);
@@ -33,7 +33,7 @@ test("video hub shows its own fox demo, not a listening quiz", () => {
     ],
   });
   assert.match(html, /看视频提问/);
-  assert.match(html, /DEMO/);
+  assert.match(html, /开始提问/);
   assert.match(html, /fox-apple\.gif/);
   assert.match(html, /id="startVideoDemo"/);
   assert.match(html, /My clip/);

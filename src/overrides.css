@@ -35,8 +35,9 @@
   opacity: 0.9;
 }
 .choice.wrong {
-  border-color: #f0be8f;
-  background: #fff8ef;
+  border-color: #d4d4d4;
+  background: #fafafa;
+  opacity: 0.7;
 }
 .speech-actions {
   display: flex;
@@ -1250,13 +1251,13 @@
 /* 2x2 picture choice cards */
 .choice-grid-pictures {
   grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-  gap: 0.85rem !important;
+  gap: 12px !important;
 }
 .choice-picture {
   min-height: 8.5rem;
   padding: 0.85rem 0.7rem 0.95rem !important;
   gap: 0.35rem !important;
-  border-radius: 1.15rem !important;
+  border-radius: 12px !important;
   touch-action: manipulation;
 }
 .choice-letter {
@@ -1290,8 +1291,8 @@
 .comprehension-animation {
   width: 100%;
   max-height: 280px;
-  border-radius: 1rem;
-  background: #1d2a32;
+  border-radius: 8px;
+  background: #f4f4f4;
   object-fit: contain;
 }
 .video-choice-row {
@@ -1365,7 +1366,7 @@ body:has(.app-shell.is-hub) {
   height: 100dvh;
   height: 100svh;
   overflow: hidden;
-  background: var(--cream);
+  background: #fff;
 }
 
 .hub-main {
@@ -1386,13 +1387,15 @@ body:has(.app-shell.is-hub) {
 
 .home-hub-hello p {
   margin: 0;
-  color: #7a8a82;
-  font-weight: 700;
+  color: var(--muted);
+  font-weight: 400;
+  font-size: 14px;
 }
 
 .home-hub-hello h1 {
-  margin: 0.2rem 0 0;
-  font-size: clamp(28px, 5vw, 44px);
+  margin: 0.35rem 0 0;
+  font-size: clamp(22px, 4vw, 32px);
+  font-weight: 600;
 }
 
 .home-hub-grid {
@@ -1400,44 +1403,39 @@ body:has(.app-shell.is-hub) {
   min-height: 0;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1rem;
+  gap: 12px;
 }
 
 .home-feature {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  gap: 1rem;
-  padding: 1.4rem;
-  border-radius: 1.6rem;
-  background: #fffdf8;
-  border: 2px solid rgba(90, 70, 50, 0.08);
-  box-shadow: 0 12px 28px rgba(90, 70, 50, 0.08);
+  justify-content: flex-end;
+  gap: 0.4rem;
+  padding: 1.5rem;
+  border-radius: 12px;
+  background: #fff;
+  border: 1px solid var(--line);
+  box-shadow: none;
   cursor: pointer;
   text-align: left;
+  min-height: 180px;
 }
 
-.home-feature-listen {
-  background: linear-gradient(180deg, #eef7ff, #fffdf8);
-}
-
-.home-feature-video {
-  background: linear-gradient(180deg, #fff3e8, #fffdf8);
-}
-
-.home-feature-icon {
-  font-size: 3rem;
+.home-feature:hover {
+  background: #fafafa;
 }
 
 .home-feature h2 {
-  margin: 0 0 0.35rem;
-  font-size: clamp(1.4rem, 3vw, 2rem);
+  margin: 0;
+  font-size: clamp(1.15rem, 2.4vw, 1.5rem);
+  font-weight: 600;
 }
 
 .home-feature p {
   margin: 0;
-  color: #6d645c;
-  font-size: 1.05rem;
+  color: var(--muted);
+  font-size: 0.95rem;
+  font-weight: 400;
 }
 
 .video-hub {
@@ -1456,18 +1454,19 @@ body:has(.app-shell.is-hub) {
 
 .hub-bar h1 {
   margin: 0;
-  font-size: 1.35rem;
+  font-size: 16px;
+  font-weight: 600;
 }
 
 .video-demo {
   display: grid;
   grid-template-columns: minmax(0, 1.2fr) minmax(16rem, 0.8fr);
-  gap: 1.25rem;
+  gap: 1.5rem;
   align-items: center;
-  padding: 1rem;
-  border-radius: 1.5rem;
-  background: #fffdf8;
-  border: 2px solid rgba(90, 70, 50, 0.08);
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  border: 0;
 }
 
 .video-demo-frame {
@@ -1479,8 +1478,8 @@ body:has(.app-shell.is-hub) {
   width: 100%;
   max-height: min(52vh, 420px);
   object-fit: contain;
-  border-radius: 1.1rem;
-  background: #1d2a32;
+  border-radius: 8px;
+  background: #f4f4f4;
 }
 
 .video-demo-copy {
@@ -1499,13 +1498,17 @@ body:has(.app-shell.is-hub) {
 }
 
 .video-hub-more {
-  display: grid;
-  gap: 0.6rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
-.video-hub-more h3 {
-  margin: 0;
-  font-size: 1rem;
+.video-more-item {
+  background: none;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 14px;
 }
 
 .hub-empty {
@@ -1530,7 +1533,7 @@ body:has(.app-shell.is-hub) {
   height: 100svh;
   min-height: 100dvh;
   overflow: hidden;
-  background: #e7f3ea;
+  background: #fff;
 }
 
 .play-stage {
@@ -1552,40 +1555,40 @@ body:has(.app-shell.is-hub) {
 }
 
 .play-leave {
-  min-height: 44px;
-  padding: 0 16px;
-  border-radius: 999px;
-  background: #fff;
-  border: 1px solid #d7e4da;
-  font-size: 15px;
-  font-weight: 800;
-  color: #4e6a5c;
+  min-height: 40px;
+  padding: 0 8px;
+  border-radius: 0;
+  background: none;
+  border: 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink);
 }
 
 .play-progress {
   display: flex;
   flex: 1;
-  gap: 6px;
+  gap: 4px;
   justify-content: center;
 }
 
 .play-progress i {
   display: block;
-  height: 8px;
+  height: 2px;
   flex: 1;
-  max-width: 36px;
-  border-radius: 99px;
-  background: #d5e5d9;
+  max-width: 40px;
+  border-radius: 0;
+  background: #ececec;
 }
 
 .play-progress i.filled {
-  background: #6bb585;
+  background: #171717;
 }
 
 .play-count {
   font-size: 13px;
-  font-weight: 800;
-  color: #6d7f76;
+  font-weight: 500;
+  color: var(--muted);
 }
 
 .play-board {
@@ -1598,13 +1601,13 @@ body:has(.app-shell.is-hub) {
 
 .play-listen {
   align-self: center;
-  min-height: 52px;
-  padding: 0 28px;
-  border-radius: 999px;
-  background: #30444b;
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: 8px;
+  background: #171717;
   color: #fff;
-  font-size: 1.2rem;
-  font-weight: 800;
+  font-size: 15px;
+  font-weight: 600;
 }
 
 .play-listen:disabled {
@@ -1614,8 +1617,8 @@ body:has(.app-shell.is-hub) {
 .play-hint {
   margin: 0;
   text-align: center;
-  color: #7a8a82;
-  font-size: 0.95rem;
+  color: var(--muted);
+  font-size: 13px;
 }
 
 .play-dock {
@@ -1637,7 +1640,9 @@ body:has(.app-shell.is-hub) {
   justify-content: center;
   padding: clamp(8px, 1.4vw, 18px) !important;
   background: #fff !important;
-  border-width: 3px !important;
+  border: 1px solid var(--line) !important;
+  border-radius: 12px !important;
+  box-shadow: none;
 }
 
 .play-stage .choice-image {
@@ -1649,9 +1654,13 @@ body:has(.app-shell.is-hub) {
 }
 
 .play-stage .choice-letter {
-  width: 1.7rem;
-  height: 1.7rem;
-  font-size: 0.85rem;
+  width: 1.4rem;
+  height: 1.4rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: none;
+  border: 0;
+  color: var(--muted);
 }
 
 .play-watch {

@@ -1185,7 +1185,7 @@ function animationWatchMarkup() {
   const media = isImage
     ? `<img id="comprehensionAnimation" class="comprehension-animation" src="${escapeHtml(item.src)}" alt="${escapeHtml(item.title)}" />`
     : `<video id="comprehensionAnimation" class="comprehension-animation" src="${escapeHtml(item.src)}" poster="${escapeHtml(item.poster || "")}" controls playsinline></video>`;
-  return `<div class="video-player-card animation-player-card">${media}<div class="video-player-copy"><b>${escapeHtml(item.title)}</b><small>Look and listen. Grown-ups can pause anytime.</small></div></div>`;
+  return `<div class="video-player-card animation-player-card">${media}</div>`;
 }
 
 function kidChrome(inner) {
@@ -1193,8 +1193,8 @@ function kidChrome(inner) {
   return `
     <div class="app-shell is-hub">
       <header class="topbar">
-        <div class="brand"><span class="brand-mark">✦</span><span>Little Sprout</span><small>${childName}</small></div>
-        <div class="top-actions"><button class="icon-btn" id="soundToggle" aria-label="Sound on or off">${state.soundOn ? "🔊" : "🔇"}</button><button class="parent-btn" id="openParent">Parent <span>⌄</span></button></div>
+        <div class="brand"><span>小栗子</span><small>${childName}</small></div>
+        <div class="top-actions"><button class="text-btn" id="soundToggle" aria-label="声音开关">${state.soundOn ? "声音开" : "声音关"}</button><button class="text-btn" id="openParent">家长</button></div>
       </header>
       <main class="hub-main">${inner}</main>
       ${state.modal ? modelSettingsModal() : ""}
@@ -1354,7 +1354,7 @@ function bindEvents() {
     state.animationPhase = "watch";
     state.kidView = "video";
     render();
-    showToast("Watch first, then tap a picture");
+    showToast("先看，再点图");
     const player = document.querySelector("#comprehensionAnimation");
     try {
       player?.play?.();
@@ -1458,19 +1458,7 @@ function bindEvents() {
           persistActiveChild();
         }
       }
-      const goodWords = [
-        "You found it! ✨",
-        "Great looking! Here is a star 🌟",
-        "Amazing teamwork! 🎈",
-      ];
-      const gentleWords = [
-        "That's okay. Let's look again.",
-        "Almost! Try one more time.",
-        "Take your time and listen again.",
-      ];
-      state.encouragement = state.correct
-        ? goodWords[profile.stars % goodWords.length]
-        : gentleWords[profile.totalAnswers % gentleWords.length];
+      state.encouragement = state.correct ? "对了" : "再试一次";
       if (state.correct) speak("You found it!");
       else speak("That's okay. Let's try another one.");
       render();
@@ -1500,7 +1488,7 @@ function bindEvents() {
       state.animationPhase = "watch";
       state.kidView = "video";
       render();
-      showToast("Watch first, then tap a picture");
+      showToast("先看，再点图");
       const player = document.querySelector("#comprehensionAnimation");
       try {
         player?.play?.();
@@ -1761,7 +1749,7 @@ function bindEvents() {
     state.answered = false;
     state.activeQuestionId = null;
     state.encouragement = "";
-    speak("Play time is complete!");
+    speak("All done.");
     render();
   });
   document.querySelector("#offlineDone")?.addEventListener("click", () => {
