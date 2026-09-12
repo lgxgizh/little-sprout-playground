@@ -64,8 +64,21 @@ export function playProgressDots(index = 0, total = 3) {
   ).join("");
 }
 
+/** Brief wrong-choice flash before choices unlock for another tap. */
+export const WRONG_CHOICE_FLASH_MS = 450;
+
+/** Soft dock after a wrong tap (flash or already unlocked). */
+function wrongRetryDock(feedback) {
+  return `<div class="play-dock"><div class="feedback try">${feedback}</div><button class="next-question retry-question" id="retryQuestion" type="button">再听一遍 · Listen again <span>🔊</span></button></div>`;
+}
+
 function playDockMarkup(state, resultHtml) {
+  // After auto-unlock, encouragement stays so the child still sees「再选一次」
+  // while picture choices are tappable again (no click required).
   if (!state.answered) {
+    if (state.encouragement && !state.correct) {
+      return wrongRetryDock(escapeHtml(state.encouragement));
+    }
     return `<p class="play-hint">Tap a picture</p>`;
   }
   const good = Boolean(state.correct);
@@ -78,7 +91,7 @@ function playDockMarkup(state, resultHtml) {
   if (good) {
     return `<div class="play-dock"><div class="feedback good">${feedback}</div><button class="next-question" id="nextQuestion" type="button">下一题 · Next one <span>→</span></button></div>`;
   }
-  return `<div class="play-dock"><div class="feedback try">${feedback}</div><button class="next-question retry-question" id="retryQuestion" type="button">再选一次 · Try again <span>↻</span></button></div>`;
+  return wrongRetryDock(feedback);
 }
 
 export function playStageMarkup({

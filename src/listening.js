@@ -26,6 +26,28 @@ export const LISTENING_FEATURE = {
  * Keep showing the same question after an answer is recorded.
  * Do not re-pick from the unseen list until lockedId is cleared.
  */
+
+/**
+ * Round accuracy counts only the first submit per question.
+ * Retries on the same locked question do not change roundAnswered / roundCorrect.
+ */
+export function applyFirstSubmitRoundScore(
+  state = {},
+  { questionId, correct = false, baselineTest = false } = {},
+) {
+  const roundAnswered = Number(state.roundAnswered) || 0;
+  const roundCorrect = Number(state.roundCorrect) || 0;
+  const seen = (state.sessionQuestionIds || []).includes(questionId);
+  if (baselineTest || seen) {
+    return { roundAnswered, roundCorrect, firstSubmit: false };
+  }
+  return {
+    roundAnswered: roundAnswered + 1,
+    roundCorrect: roundCorrect + (correct ? 1 : 0),
+    firstSubmit: true,
+  };
+}
+
 export function pickSessionQuestion(
   pool = [],
   { lockedId = null, sessionQuestionIds = [] } = {},

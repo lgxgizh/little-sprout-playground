@@ -20,6 +20,7 @@ import {
 } from "./animation-quiz.js";
 import {
   LISTENING_FEATURE,
+  applyFirstSubmitRoundScore,
   createListeningSeedQuestions,
   enrichQuestionImages,
   pickSessionQuestion,
@@ -31,7 +32,11 @@ import {
   videoHubMarkup,
 } from "./hub-ui.js";
 import { parentModelsMarkup } from "./parent-ui.js";
-import { listeningResultMarkup, playStageMarkup } from "./play-ui.js";
+import {
+  WRONG_CHOICE_FLASH_MS,
+  listeningResultMarkup,
+  playStageMarkup,
+} from "./play-ui.js";
 import {
   bankIdFromTheme,
   bankPreviewWords,
@@ -384,6 +389,7 @@ function beginSession(courseId, baselineTest = false, options = {}) {
     !options.animationId || state.activeAnimationId === options.animationId;
   if (sameCourse && sameVideo && !options.force) return;
   if (state.activeSession) completeSession("quit");
+  clearPlayTimers();
   state.activityCourse = courseId;
   state.questionIndex = 0;
   state.sessionQuestionIds = [];
@@ -392,6 +398,7 @@ function beginSession(courseId, baselineTest = false, options = {}) {
   state.answered = false;
   state.correct = false;
   state.selectedChoice = null;
+  state.encouragement = "";
   state.activityComplete = false;
   state.offlineTaskDone = false;
   state.roundCorrect = 0;
@@ -443,6 +450,7 @@ function beginSession(courseId, baselineTest = false, options = {}) {
 function completeSession(status = "completed") {
   const session = state.activeSession;
   if (!session) return;
+  clearPlayTimers();
   const completedAt = new Date().toISOString();
   const durationMs = Math.max(
     0,
@@ -968,6 +976,7 @@ function saveModels() {
 }
 
 let advanceTimer = 0;
+let wrongUnlockTimer = 0;
 
 function clearAdvanceTimer() {
   if (advanceTimer) {
@@ -976,12 +985,36 @@ function clearAdvanceTimer() {
   }
 }
 
+function clearWrongUnlockTimer() {
+  if (wrongUnlockTimer) {
+    clearTimeout(wrongUnlockTimer);
+    wrongUnlockTimer = 0;
+  }
+}
+
+function clearPlayTimers() {
+  clearAdvanceTimer();
+  clearWrongUnlockTimer();
+}
+
 function scheduleAdvance() {
   clearAdvanceTimer();
   if (!state.answered || !state.correct || state.activityComplete) return;
   advanceTimer = setTimeout(() => {
     document.querySelector("#nextQuestion")?.click();
   }, 1100);
+}
+
+/** After a short wrong flash, unlock choices so the child can tap again without the dock. */
+function scheduleWrongUnlock() {
+  clearWrongUnlockTimer();
+  wrongUnlockTimer = setTimeout(() => {
+    wrongUnlockTimer = 0;
+    if (!state.activeSession || state.correct || !state.answered) return;
+    state.answered = false;
+    state.selectedChoice = null;
+    render();
+  }, WRONG_CHOICE_FLASH_MS);
 }
 
 function speak(text, question = null) {
@@ -1304,16 +1337,19 @@ function bindEvents() {
   document.querySelectorAll("[data-choice]").forEach((btn) =>
     btn.addEventListener("click", () => {
       if (state.aiPlanning || state.answered) return;
+      clearWrongUnlockTimer();
       const question = currentQuestion();
-      const firstSubmit = !state.sessionQuestionIds.includes(question.id);
       state.answered = true;
       state.selectedChoice = btn.dataset.choice;
       state.correct = btn.dataset.choice === question.answer;
       // Round score counts only the first submit per question.
-      if (firstSubmit && !state.baselineTest) {
-        state.roundAnswered += 1;
-        if (state.correct) state.roundCorrect += 1;
-      }
+      const round = applyFirstSubmitRoundScore(state, {
+        questionId: question.id,
+        correct: state.correct,
+        baselineTest: state.baselineTest,
+      });
+      state.roundAnswered = round.roundAnswered;
+      state.roundCorrect = round.roundCorrect;
       const courseId = state.animationMode ? "animation" : state.activityCourse;
       recordAnswer(courseId, state.correct, question);
       if (state.baselineTest) {
@@ -1376,8 +1412,13 @@ function bindEvents() {
       state.encouragement = state.correct
         ? "对了 · You found it!"
         : "再试一次 · Try this one again";
-      if (state.correct) speak("You found it!", question);
-      else speak("That's okay. Try this one again.", question);
+      if (state.correct) {
+        clearWrongUnlockTimer();
+        speak("You found it!", question);
+      } else {
+        speak("That's okay. Try this one again.", question);
+        scheduleWrongUnlock();
+      }
       render();
     }),
   );
@@ -1614,7 +1655,7 @@ function bindEvents() {
     render();
   });
   document.querySelector("#restartListening")?.addEventListener("click", () => {
-    clearAdvanceTimer();
+    clearPlayTimers();
     completeSession(state.activityComplete ? "completed" : "quit");
     state.kidView = "listening";
     applyWordbankPool();
@@ -1623,7 +1664,7 @@ function bindEvents() {
     speak(currentQuestion()?.speech || "");
   });
   document.querySelector("#restartAnimation")?.addEventListener("click", () => {
-    clearAdvanceTimer();
+    clearPlayTimers();
     const animationId = state.activeAnimationId;
     completeSession(state.activityComplete ? "completed" : "quit");
     if (!animationId) {
@@ -1639,7 +1680,7 @@ function bindEvents() {
   document
     .querySelector("#backHomeFromResult")
     ?.addEventListener("click", () => {
-      clearAdvanceTimer();
+      clearPlayTimers();
       completeSession(state.activityComplete ? "completed" : "quit");
       state.kidView = "home";
       state.animationMode = false;
@@ -1651,7 +1692,7 @@ function bindEvents() {
       render();
     });
   document.querySelector("#finishSession")?.addEventListener("click", () => {
-    clearAdvanceTimer();
+    clearPlayTimers();
     state.aiPlanToken += 1;
     state.aiPlanning = false;
     state.aiQuestionId = null;
@@ -1701,17 +1742,19 @@ function bindEvents() {
     render();
   });
   document.querySelector("#retryQuestion")?.addEventListener("click", () => {
-    clearAdvanceTimer();
-    // Same question again — do not advance questionIndex or clear activeQuestionId.
+    clearPlayTimers();
+    // Optional re-listen: unlock if still in the wrong flash, stay on same question.
     state.answered = false;
     state.correct = false;
     state.selectedChoice = null;
-    state.encouragement = "";
+    if (!state.encouragement) {
+      state.encouragement = "再试一次 · Try this one again";
+    }
     render();
     if (state.activeSession) speak(currentQuestion().speech);
   });
   document.querySelector("#nextQuestion")?.addEventListener("click", () => {
-    clearAdvanceTimer();
+    clearPlayTimers();
     if (!state.correct) {
       // Safety: Next only advances after a correct answer.
       state.answered = false;

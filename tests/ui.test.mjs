@@ -87,17 +87,19 @@ test("listening end screen shows score bands and actions", () => {
   assert.match(anim, /Replay anytime/);
 });
 
-test("wrong answer dock offers retry same question, not next", () => {
-  const wrong = playStageMarkup({
-    question: {
-      id: "english-apple",
-      prompt: "Which one is an apple?",
-      answer: "apple",
-      choices: [
-        { label: "Apple", emoji: "🍎", value: "apple", color: "#ff6b5e" },
-        { label: "Banana", emoji: "🍌", value: "banana", color: "#f7c94b" },
-      ],
-    },
+test("wrong answer dock offers optional re-listen, not next", () => {
+  const appleQ = {
+    id: "english-apple",
+    prompt: "Which one is an apple?",
+    answer: "apple",
+    choices: [
+      { label: "Apple", emoji: "🍎", value: "apple", color: "#ff6b5e" },
+      { label: "Banana", emoji: "🍌", value: "banana", color: "#f7c94b" },
+    ],
+  };
+  // Brief flash: choices still locked, soft feedback + optional listen.
+  const flash = playStageMarkup({
+    question: appleQ,
     state: {
       animationMode: false,
       baselineTest: false,
@@ -112,20 +114,39 @@ test("wrong answer dock offers retry same question, not next", () => {
     },
     total: 8,
   });
-  assert.match(wrong, /id="retryQuestion"/);
-  assert.match(wrong, /再选一次/);
-  assert.doesNotMatch(wrong, /id="nextQuestion"/);
+  assert.match(flash, /id="retryQuestion"/);
+  assert.match(flash, /再听一遍/);
+  assert.match(flash, /再试一次/);
+  assert.match(flash, /disabled/);
+  assert.match(flash, /class="choice choice-picture  wrong"/);
+  assert.doesNotMatch(flash, /id="nextQuestion"/);
+
+  // After auto-unlock: encouragement stays, choices tappable again (no retry click).
+  const unlocked = playStageMarkup({
+    question: appleQ,
+    state: {
+      animationMode: false,
+      baselineTest: false,
+      questionIndex: 0,
+      answered: false,
+      correct: false,
+      selectedChoice: null,
+      activityComplete: false,
+      soundOn: true,
+      aiPlanning: false,
+      encouragement: "再试一次 · Try this one again",
+    },
+    total: 8,
+  });
+  assert.match(unlocked, /id="retryQuestion"/);
+  assert.match(unlocked, /再听一遍/);
+  assert.match(unlocked, /再试一次/);
+  assert.doesNotMatch(unlocked, /\sdisabled/);
+  assert.doesNotMatch(unlocked, /class="choice choice-picture  wrong"/);
+  assert.doesNotMatch(unlocked, /id="nextQuestion"/);
 
   const right = playStageMarkup({
-    question: {
-      id: "english-apple",
-      prompt: "Which one is an apple?",
-      answer: "apple",
-      choices: [
-        { label: "Apple", emoji: "🍎", value: "apple", color: "#ff6b5e" },
-        { label: "Banana", emoji: "🍌", value: "banana", color: "#f7c94b" },
-      ],
-    },
+    question: appleQ,
     state: {
       animationMode: false,
       baselineTest: false,
