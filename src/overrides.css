@@ -1516,6 +1516,50 @@ body:has(.app-shell.is-hub) {
   color: #7a8a82;
 }
 
+.listen-setup {
+  display: grid;
+  gap: 1.5rem;
+  max-width: 36rem;
+}
+
+.listen-group h2 {
+  margin: 0 0 0.6rem;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.chip.is-active {
+  background: #171717;
+  border-color: #171717;
+  color: #fff;
+}
+
+.chip:disabled {
+  opacity: 0.35;
+}
+
+.listen-note {
+  margin: 0.7rem 0 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
 @media (max-width: 720px) {
   .home-hub-grid,
   .video-demo {

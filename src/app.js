@@ -25,9 +25,14 @@ import {
   pickSessionQuestion,
   withChoiceImages,
 } from "./listening.js";
-import { homeHubMarkup, videoHubMarkup } from "./hub-ui.js";
+import { homeHubMarkup, listeningHubMarkup, videoHubMarkup } from "./hub-ui.js";
 import { playStageMarkup } from "./play-ui.js";
-import { listeningPoolFromWordbank } from "./wordbank.js";
+import {
+  clampListeningCount,
+  LISTENING_COUNTS,
+  listWordbankThemes,
+  listeningPoolFromWordbank,
+} from "./wordbank.js";
 import {
   chooseQuestionCandidates,
   stageDefinition,
@@ -321,6 +326,9 @@ const state = {
   aiPlanToken: 0,
   showExtras: false,
   kidView: "home",
+  listeningTheme: "all",
+  listeningCount: 8,
+  listeningGoal: 8,
   activeQuestionId: null,
 };
 
@@ -438,7 +446,7 @@ function sessionQuestionTotal() {
       state.questionIndex + 1,
     );
   }
-  return 3;
+  return state.listeningGoal || 8;
 }
 
 function lockQuestion(question) {
@@ -973,12 +981,13 @@ function applyWordbankPool() {
     childId: activeChild()?.id || "default",
     assetBase,
     salt: state.activeSession?.id || "home",
+    theme: state.listeningTheme || "all",
+    shuffle: Boolean(state.activeSession),
   });
   if (!pool.length) return;
-  const extras = questionBank.english.filter(
-    (question) => !pool.some((item) => item.id === question.id),
-  );
-  questionBank.english = [...pool, ...extras];
+  questionBank.english = pool;
+  const available = pool.length;
+  state.listeningGoal = clampListeningCount(state.listeningCount, available);
 }
 
 async function loadQuestionPack() {
@@ -1231,6 +1240,24 @@ function render() {
     scheduleAdvance();
     return;
   }
+  if (state.kidView === "listening") {
+    const themes = startersWordbank
+      ? listWordbankThemes(startersWordbank)
+      : [{ id: "all", label: "全部", count: questionBank.english.length }];
+    const selected =
+      themes.find((item) => item.id === state.listeningTheme) || themes[0];
+    document.querySelector("#app").innerHTML = kidChrome(
+      listeningHubMarkup({
+        themes,
+        selectedTheme: selected?.id || "all",
+        counts: LISTENING_COUNTS,
+        selectedCount: state.listeningCount,
+        available: selected?.count || 0,
+      }),
+    );
+    bindEvents();
+    return;
+  }
   if (state.kidView === "video") {
     const demo = featuredVideoDemo();
     const others = state.animationLibrary.filter(
@@ -1345,6 +1372,34 @@ function bindEvents() {
     state.kidView = "home";
     render();
   });
+  document.querySelectorAll("[data-listening-theme]").forEach((btn) =>
+    btn.addEventListener("click", () => {
+      state.listeningTheme = btn.dataset.listeningTheme || "all";
+      if (startersWordbank) {
+        const themes = listWordbankThemes(startersWordbank);
+        const theme =
+          themes.find((item) => item.id === state.listeningTheme) || themes[0];
+        state.listeningCount = clampListeningCount(
+          state.listeningCount,
+          theme?.count || 0,
+        );
+      }
+      render();
+    }),
+  );
+  document.querySelectorAll("[data-listening-count]").forEach((btn) =>
+    btn.addEventListener("click", () => {
+      state.listeningCount = Number(btn.dataset.listeningCount) || 8;
+      render();
+    }),
+  );
+  document.querySelector("#startListening")?.addEventListener("click", () => {
+    state.kidView = "listening";
+    applyWordbankPool();
+    beginSession("english", false, { force: true });
+    render();
+    speak(currentQuestion().speech);
+  });
   document.querySelector("#startVideoDemo")?.addEventListener("click", () => {
     const animationId =
       document.querySelector("#startVideoDemo")?.dataset.animation ||
@@ -1371,10 +1426,8 @@ function bindEvents() {
         render();
         return;
       }
-      state.kidView = "home";
-      beginSession("english", false, { force: true });
+      state.kidView = "listening";
       render();
-      speak(currentQuestion().speech);
     }),
   );
   document
@@ -1423,7 +1476,7 @@ function bindEvents() {
       } else if (state.animationMode) {
         const total = activeAnimation()?.questions?.length || 1;
         if (state.questionIndex >= total - 1) state.activityComplete = true;
-      } else if (state.questionIndex >= 2) {
+      } else if (state.questionIndex >= sessionQuestionTotal() - 1) {
         state.activityComplete = true;
       }
       if (state.baselineTest && state.activityComplete) {
@@ -1741,7 +1794,7 @@ function bindEvents() {
     state.baselinePool = [];
     const returnToVideo = state.animationMode;
     completeSession(state.activityComplete ? "completed" : "quit");
-    state.kidView = returnToVideo ? "video" : "home";
+    state.kidView = returnToVideo ? "video" : "listening";
     state.animationMode = false;
     state.activeAnimationId = null;
     state.animationPhase = "watch";

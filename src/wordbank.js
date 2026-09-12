@@ -122,6 +122,47 @@ export function buildListeningQuestion(
   };
 }
 
+export const THEME_LABELS = {
+  all: "全部",
+  food: "食物",
+  animals: "动物",
+  toys: "玩具",
+  clothes: "衣服",
+  home: "家",
+  transport: "交通",
+  school: "学习用品",
+  world: "自然",
+};
+
+export const LISTENING_COUNTS = [5, 8, 10, 12];
+
+export function listWordbankThemes(wordbank) {
+  const counts = new Map();
+  for (const word of wordbank?.words || []) {
+    if (word.imageable === false) continue;
+    if (word.status && word.status !== "approved") continue;
+    counts.set(word.theme, (counts.get(word.theme) || 0) + 1);
+  }
+  const total = [...counts.values()].reduce((sum, count) => sum + count, 0);
+  return [
+    { id: "all", label: THEME_LABELS.all, count: total },
+    ...[...counts.entries()]
+      .sort((left, right) => left[0].localeCompare(right[0]))
+      .map(([id, count]) => ({
+        id,
+        label: THEME_LABELS[id] || id,
+        count,
+      })),
+  ];
+}
+
+export function clampListeningCount(requested, available) {
+  const count = Number(requested) || 8;
+  const pool = Math.max(0, Number(available) || 0);
+  if (!pool) return 0;
+  return Math.max(1, Math.min(count, pool));
+}
+
 export function listeningPoolFromWordbank(
   wordbank,
   {
@@ -129,12 +170,15 @@ export function listeningPoolFromWordbank(
     assetBase = "/",
     availableSlugs = null,
     salt = "listen",
+    theme = "all",
+    shuffle = false,
   } = {},
 ) {
   const words = Array.isArray(wordbank?.words) ? wordbank.words : [];
   const usable = words.filter((word) => {
     if (word.imageable === false) return false;
     if (word.status && word.status !== "approved") return false;
+    if (theme && theme !== "all" && word.theme !== theme) return false;
     if (availableSlugs && !availableSlugs.has(word.slug)) return false;
     return true;
   });
@@ -148,12 +192,15 @@ export function listeningPoolFromWordbank(
     "star",
     "banana",
   ];
-  const ordered = [
+  let ordered = [
     ...preferred
       .map((slug) => usable.find((word) => word.slug === slug))
       .filter(Boolean),
     ...usable.filter((word) => !preferred.includes(word.slug)),
   ];
+  if (shuffle) {
+    ordered = shuffleCopy(usable, mulberry32(seedFrom(childId, theme, salt)));
+  }
   return ordered
     .map((word) =>
       buildListeningQuestion(word, usable, { childId, assetBase, salt }),

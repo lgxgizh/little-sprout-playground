@@ -34,7 +34,7 @@
 - 家长入口长按保护 / Long-press protection for parent settings
 - 可替换的本地图片、音频和题库资源 / Replaceable local media and question banks
 - 孩子主页只有两个入口：英语听力测试、看视频提问 / Kid home has only Listening test and Video Q&A
-- 听力测试直接进入题库全屏 2×2 大图，不再做首页试玩题 / Listening opens the word bank immediately—no home demo quiz
+- 听力测试先选词库主题和每次题量（默认 8 题），再用全屏 2×2 大图作答 / Listening starts by choosing a theme and round length (default 8), then a fullscreen 2×2 board
 - 看视频提问先播放狐狸短片小演示，再听题点图 / Video Q&A starts with the fox-apple demo, then picture questions
 - GitHub Actions 自动构建和 Pages 部署 / Automated CI and GitHub Pages deployment
 

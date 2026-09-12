@@ -63,3 +63,46 @@ export function videoHubMarkup({
     ${extra ? `<div class="video-hub-more">${extra}</div>` : ""}
   </section>`;
 }
+
+export function listeningHubMarkup({
+  themes = [],
+  selectedTheme = "all",
+  counts = [5, 8, 10, 12],
+  selectedCount = 8,
+  available = 0,
+} = {}) {
+  const theme = themes.find((item) => item.id === selectedTheme) || themes[0];
+  const pool = theme?.count || available || 0;
+  const nextCount = Math.max(1, Math.min(selectedCount, pool || selectedCount));
+  const themeButtons = themes
+    .map((item) => {
+      const active = item.id === selectedTheme ? "is-active" : "";
+      return `<button class="chip ${active}" type="button" data-listening-theme="${escapeHtml(item.id)}">${escapeHtml(item.label)} ${item.count}</button>`;
+    })
+    .join("");
+  const countButtons = counts
+    .map((count) => {
+      const disabled = pool > 0 && count > pool;
+      const active = count === selectedCount ? "is-active" : "";
+      return `<button class="chip ${active}" type="button" data-listening-count="${count}" ${disabled ? "disabled" : ""}>${count} 题</button>`;
+    })
+    .join("");
+  return `<section class="listen-hub" id="listenHub">
+    <header class="hub-bar">
+      <button type="button" class="text-btn" id="backHome">返回</button>
+      <h1>英语听力测试</h1>
+    </header>
+    <div class="listen-setup">
+      <div class="listen-group">
+        <h2>词库</h2>
+        <div class="chip-row">${themeButtons}</div>
+      </div>
+      <div class="listen-group">
+        <h2>每次几题</h2>
+        <div class="chip-row">${countButtons}</div>
+        <p class="listen-note">一次 ${nextCount} 题。词库里有 ${pool} 个词，不会在这一轮里重复。</p>
+      </div>
+      <button class="primary-btn" id="startListening" type="button" ${pool ? "" : "disabled"}>开始 ${nextCount} 题</button>
+    </div>
+  </section>`;
+}

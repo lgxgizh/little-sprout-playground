@@ -5,6 +5,8 @@ import { existsSync } from "node:fs";
 import { join } from "node:path";
 import {
   buildListeningQuestion,
+  clampListeningCount,
+  listWordbankThemes,
   listeningPoolFromWordbank,
   pickDistractors,
   seedFrom,
@@ -87,6 +89,19 @@ test("play stage fills the viewport chrome instead of the home card", () => {
   assert.match(html, /听一听/);
   assert.doesNotMatch(html, /feature-hub/);
   assert.doesNotMatch(html, />Apple</);
+});
+
+test("wordbank themes expose approved counts", () => {
+  const themes = listWordbankThemes(wordbank);
+  const all = themes.find((item) => item.id === "all");
+  const food = themes.find((item) => item.id === "food");
+  assert.ok(all.count >= 80);
+  assert.ok(food.count >= 8);
+  assert.equal(clampListeningCount(12, 8), 8);
+  assert.equal(clampListeningCount(8, 110), 8);
+  const foodPool = listeningPoolFromWordbank(wordbank, { theme: "food" });
+  assert.ok(foodPool.every((question) => question.id.startsWith("english-")));
+  assert.equal(foodPool.length, food.count);
 });
 
 test("choice images use jpeg, not png", () => {

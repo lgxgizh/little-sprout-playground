@@ -1,6 +1,10 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { homeHubMarkup, videoHubMarkup } from "../src/hub-ui.js";
+import {
+  homeHubMarkup,
+  listeningHubMarkup,
+  videoHubMarkup,
+} from "../src/hub-ui.js";
 
 test("kid home only offers listening and video Q&A", () => {
   const html = homeHubMarkup({ childName: "小米" });
@@ -39,4 +43,25 @@ test("video hub shows its own fox demo, not a listening quiz", () => {
   assert.match(html, /My clip/);
   assert.doesNotMatch(html, /英语听力测试/);
   assert.doesNotMatch(html, /Which one is the apple/);
+});
+
+test("listening hub lets you pick a word bank and question count", () => {
+  const html = listeningHubMarkup({
+    themes: [
+      { id: "all", label: "全部", count: 110 },
+      { id: "food", label: "食物", count: 24 },
+    ],
+    selectedTheme: "food",
+    counts: [5, 8, 10, 12],
+    selectedCount: 8,
+    available: 24,
+  });
+  assert.match(html, /英语听力测试/);
+  assert.match(html, /词库/);
+  assert.match(html, /每次几题/);
+  assert.match(html, /data-listening-theme="food"/);
+  assert.match(html, /data-listening-count="8"/);
+  assert.match(html, /开始 8 题/);
+  assert.match(html, /词库里有 24 个词/);
+  assert.doesNotMatch(html, /Try one now/);
 });
