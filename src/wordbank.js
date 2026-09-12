@@ -207,3 +207,8 @@ export function listeningPoolFromWordbank(
     )
     .filter(Boolean);
 }
+
+export function pickListeningRound(pool = [], count = 8, random = Math.random) {
+  const shuffled = shuffleCopy(pool, random);
+  return shuffled.slice(0, clampListeningCount(count, shuffled.length));
+}

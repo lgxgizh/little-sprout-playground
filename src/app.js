@@ -329,6 +329,7 @@ const state = {
   listeningTheme: "all",
   listeningCount: 8,
   listeningGoal: 8,
+  listeningQueue: [],
   activeQuestionId: null,
 };
 
@@ -484,6 +485,16 @@ function currentQuestion() {
     return enrichQuestionImages(aiQuestion, assetBase);
   }
   if (state.activityCourse === "english") {
+    if (!state.baselineTest && state.listeningQueue.length) {
+      const nextId =
+        state.activeQuestionId ||
+        state.listeningQueue.find(
+          (id) => !state.sessionQuestionIds.includes(id),
+        );
+      question = questions.find((item) => item.id === nextId) || questions[0];
+      lockQuestion(question);
+      return enrichQuestionImages(question, assetBase);
+    }
     const child = activeChild();
     const candidates = state.baselineTest
       ? state.baselinePool.length
@@ -536,6 +547,7 @@ function beginSession(courseId, baselineTest = false, options = {}) {
   state.questionIndex = 0;
   state.sessionQuestionIds = [];
   state.activeQuestionId = null;
+  if (courseId !== "english" || baselineTest) state.listeningQueue = [];
   state.answered = false;
   state.correct = false;
   state.selectedChoice = null;
@@ -988,6 +1000,15 @@ function applyWordbankPool() {
   questionBank.english = pool;
   const available = pool.length;
   state.listeningGoal = clampListeningCount(state.listeningCount, available);
+  if (
+    state.activeSession &&
+    !state.baselineTest &&
+    state.activityCourse === "english"
+  ) {
+    state.listeningQueue = pool
+      .slice(0, state.listeningGoal)
+      .map((question) => question.id);
+  }
 }
 
 async function loadQuestionPack() {
@@ -1116,7 +1137,8 @@ async function planQuestionWithAI() {
     !state.activeSession ||
     state.answered ||
     state.animationMode ||
-    state.baselineTest
+    state.baselineTest ||
+    state.listeningQueue.length
   ) {
     state.aiPlanning = false;
     state.aiQuestionId = null;

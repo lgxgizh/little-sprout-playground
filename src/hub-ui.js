@@ -100,7 +100,7 @@ export function listeningHubMarkup({
       <div class="listen-group">
         <h2>每次几题</h2>
         <div class="chip-row">${countButtons}</div>
-        <p class="listen-note">一次 ${nextCount} 题。词库里有 ${pool} 个词，不会在这一轮里重复。</p>
+        <p class="listen-note">一次 ${nextCount} 题，从这组词库里随机抽，这一轮不重复。</p>
       </div>
       <button class="primary-btn" id="startListening" type="button" ${pool ? "" : "disabled"}>开始 ${nextCount} 题</button>
     </div>

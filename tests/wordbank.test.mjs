@@ -8,7 +8,9 @@ import {
   clampListeningCount,
   listWordbankThemes,
   listeningPoolFromWordbank,
+  mulberry32,
   pickDistractors,
+  pickListeningRound,
   seedFrom,
 } from "../src/wordbank.js";
 import { playStageMarkup } from "../src/play-ui.js";
@@ -102,6 +104,18 @@ test("wordbank themes expose approved counts", () => {
   const foodPool = listeningPoolFromWordbank(wordbank, { theme: "food" });
   assert.ok(foodPool.every((question) => question.id.startsWith("english-")));
   assert.equal(foodPool.length, food.count);
+});
+
+test("listening rounds shuffle and do not repeat", () => {
+  const pool = listeningPoolFromWordbank(wordbank, { theme: "food" });
+  const left = pickListeningRound(pool, 8, mulberry32(1));
+  const right = pickListeningRound(pool, 8, mulberry32(2));
+  assert.equal(left.length, 8);
+  assert.equal(new Set(left.map((item) => item.id)).size, 8);
+  assert.notDeepEqual(
+    left.map((item) => item.id),
+    right.map((item) => item.id),
+  );
 });
 
 test("choice images use jpeg, not png", () => {

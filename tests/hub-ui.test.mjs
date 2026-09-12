@@ -62,6 +62,6 @@ test("listening hub lets you pick a word bank and question count", () => {
   assert.match(html, /data-listening-theme="food"/);
   assert.match(html, /data-listening-count="8"/);
   assert.match(html, /开始 8 题/);
-  assert.match(html, /词库里有 24 个词/);
+  assert.match(html, /随机抽/);
   assert.doesNotMatch(html, /Try one now/);
 });
