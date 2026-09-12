@@ -10,7 +10,7 @@ test("kid home only offers listening and video Q&A", () => {
   const html = homeHubMarkup({ childName: "小米" });
   assert.match(html, /嗨，小米/);
   assert.match(html, /英语听力测试/);
-  assert.match(html, /看视频提问/);
+  assert.match(html, /动画提问/);
   assert.match(html, /data-feature="listening"/);
   assert.match(html, /data-feature="video"/);
   assert.match(html, /flashcards\/food\/apple\.jpg/);
@@ -38,7 +38,7 @@ test("video hub shows its own fox demo, not a listening quiz", () => {
       },
     ],
   });
-  assert.match(html, /看视频提问/);
+  assert.match(html, /动画提问/);
   assert.match(html, /DEMO/);
   assert.match(html, /开始提问/);
   assert.match(html, /fox-apple\.gif/);
@@ -86,4 +86,20 @@ test("listening hub still accepts legacy theme chips", () => {
   });
   assert.match(html, /单词库/);
   assert.match(html, /data-listening-theme="food"/);
+});
+
+test("tiny word banks hide oversized count chips", () => {
+  const html = listeningHubMarkup({
+    banks: [{ id: "starters-world", label: "自然", count: 4 }],
+    selectedBankId: "starters-world",
+    counts: [5, 8, 10, 12],
+    selectedCount: 8,
+    available: 4,
+    activeBankLabel: "自然",
+  });
+  assert.match(html, /4 题/);
+  assert.match(html, /开始 4 题/);
+  assert.doesNotMatch(html, /data-listening-count="8"/);
+  assert.doesNotMatch(html, /data-listening-count="10"/);
+  assert.doesNotMatch(html, /data-listening-count="12"/);
 });

@@ -1,27 +1,16 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { existsSync } from "node:fs";
+import { readFile } from "node:fs/promises";
 import { join } from "node:path";
-import { questionBank } from "../src/content.js";
 
-test("demo questions use generated sticker files", () => {
-  for (const questions of Object.values(questionBank)) {
-    for (const question of questions) {
-      assert.ok(question.image, `${question.id} needs an image`);
-      assert.ok(
-        existsSync(join("public", question.image)),
-        `missing ${question.image}`,
-      );
-      for (const choice of question.choices) {
-        assert.ok(
-          choice.image,
-          `${question.id}:${choice.value} needs an image`,
-        );
-        assert.ok(
-          existsSync(join("public", choice.image)),
-          `missing ${choice.image}`,
-        );
-      }
-    }
+test("wordbank flashcard JPEGs exist on disk", async () => {
+  const wordbank = JSON.parse(
+    await readFile("public/content/wordbank.starters.json", "utf8"),
+  );
+  assert.ok(wordbank.words.length >= 80);
+  for (const word of wordbank.words) {
+    assert.ok(word.image, `${word.lemma} needs an image`);
+    assert.ok(existsSync(join("public", word.image)), `missing ${word.image}`);
   }
 });

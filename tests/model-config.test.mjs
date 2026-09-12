@@ -8,7 +8,11 @@ import {
   imagePromptFor,
   isAdapterModel,
   isCustomModel,
+  isOnDeviceOption,
+  localCatalogOptions,
+  modelCatalog,
   modelName,
+  remoteCatalogOptions,
   normalizeCustomConfig,
   resolveModels,
 } from "../src/model-config.js";
@@ -93,4 +97,23 @@ test("image prompts stay English and preschool-safe", () => {
   assert.match(prompt, /apple/i);
   assert.match(prompt, /no text/i);
   assert.doesNotMatch(prompt, /[\u3400-\u9fff]/);
+});
+
+test("local vs remote catalogs split on-device from adapters", () => {
+  assert.ok(
+    localCatalogOptions("image").every((item) => isOnDeviceOption(item)),
+  );
+  assert.ok(
+    remoteCatalogOptions("image").every((item) => !isOnDeviceOption(item)),
+  );
+  assert.ok(
+    localCatalogOptions("voice").some((item) => item.id === "browser-speech"),
+  );
+  assert.ok(
+    remoteCatalogOptions("image").some(
+      (item) => item.id === "grok-imagine-image",
+    ),
+  );
+  assert.equal(modelCatalog.video.label, "动画提问");
+  assert.match(modelCatalog.video.hint, /GIF|图片/);
 });

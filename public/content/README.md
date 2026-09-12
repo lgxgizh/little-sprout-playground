@@ -1,6 +1,6 @@
 # English content packs / 英语内容包
 
-`questions.en.json` is an optional local content pack. The app loads it at startup and merges valid new questions into the built-in bank. If the file is missing or invalid, the built-in questions remain available.
+Kid listening comes from `wordbanks.json` plus the word JSON it points at (today `wordbank.starters.json`). The quiz engine builds picture questions from `speech` / `prompt_en` and reads them with the browser (or optional TTS). It does **not** fetch `questions.en.json` into the kid pool, and it does **not** play mp3 files from word `audio` fields.
 
 `wordbanks.json` is the listening **word-bank catalog**. Each entry points at a word JSON file (today `wordbank.starters.json`) and may set an optional `theme` filter so parents pick a concrete pack (full Starters, food, animals, …). Add more files later (e.g. Movers) by listing them here.
 
@@ -8,7 +8,7 @@
 
 `wordbanks.json` 是听力「单词库」目录：每项指向一份词库 JSON，并可带 `theme` 过滤成主题包。以后加 Movers 等只需新增文件并在目录里登记。
 
-`questions.en.json` 是可选的本地内容包。网页启动时会自动加载，并把格式正确的新题合并到内置题库；文件缺失或格式错误时，仍然使用内置题库。
+`questions.en.json` 只是旧格式说明 / 文档样例，不会再并入孩子听力池。听力只用词库的 `speech` / `prompt_en` 做浏览器朗读，不播放词条上的 mp3。
 
 ## Minimal format / 最小格式
 
@@ -55,7 +55,7 @@
 - `concept`: optional stable English concept key such as `apple` or `greeting`; keep it short and reuse it for related questions / 可选的稳定概念标识，如 `apple` 或 `greeting`；请保持简短，相关题目复用同一个标识。
 - `baseline`: set `true` for English-check pool items (about 8–12 age-safe listening/picture questions; the app may stop early) / 英语测评题库条目设为 `true`（约 8–12 道适龄听力图片题，应用可自适应提前结束）。日常练习题一般填 `false`。
 - `visual`: optional emoji hero; picture cards are the main kid UI / 可选 emoji 主视觉；孩子主界面以图片卡片为主。
-- `image` and `audio`: optional local asset paths / 可选本地资源路径。选项也可以带 `image` 或 `imageKey`。
+- `image`: JPEG flashcard path for the word. Listening does not use an `audio` mp3 field; prompts are spoken from `speech` / `prompt_en`. / 词卡 JPEG 路径。听力不读 `audio` mp3 字段，只用 `speech` / `prompt_en` 朗读。
 - `prompt` and `speech`: child-facing English only. Keep them short and concrete / 面向孩子的英文短句，尽量短、具体。
 - `answer`: must exactly match one choice `value` / 必须与某个选项的 `value` 完全一致。
 - `choices`: 2–4 choices with `label`, `value`, hex `color`, plus `emoji` and/or `imageKey`/`imageSrc` (prefer JPEG keys under `public/assets/flashcards/` or `public/assets/choices/`) / 2–4 个选项；优先使用 JPEG 词卡。

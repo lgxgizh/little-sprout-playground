@@ -6,7 +6,7 @@
 
 **中文** · [English](#english)
 
-一个面向学龄前儿童的图片优先学习网页。孩子主页只保留两个入口：**英语听力测试**（直接做题库）和**看视频提问**（先进狐狸短片小演示，再答题）。语音只用于题目朗读，不含跟读麦克风。
+一个面向学龄前儿童的图片优先学习网页。孩子主页只保留两个入口：**英语听力测试**（直接做题库）和**动画提问**（先进狐狸动画小演示，再答题）。语音只用于题目朗读，不含跟读麦克风。
 
 **[在线体验](https://lgxgizh.github.io/little-sprout-playground/)** · [报告问题](https://github.com/lgxgizh/little-sprout-playground/issues)
 
@@ -20,7 +20,7 @@
 - 图片优先的大尺寸儿童交互界面 / Picture-first, touch-friendly UI
 - 英文题目朗读、答题反馈和语音开关 / English prompts, feedback, and voice toggle
 - 适配桌面端与移动端 / Responsive desktop and mobile layouts
-- 图片、语音、题目规划和视频理解分别配置，远程默认走 Grok 适配器 / Independent model settings for image, voice, planning, and video understanding
+- 图片、语音、题目规划和动画提问分别配置，远程默认走 Grok 适配器 / Independent model settings for image, voice, planning, and Animation Q&A
 - IndexedDB 本地成长档案 / Local IndexedDB learning profile
 - 记录到具体题目的练习轨迹，并避开同一学习单元内的重复题目 / Per-question practice history with in-session repetition avoidance
 - 支持多个孩子的昵称、年龄、英语基础和独立学习档案 / Multiple child profiles with nickname, age, English background, and separate progress
@@ -30,12 +30,11 @@
 - 学习档案 JSON 导出与导入，方便本地备份和换设备迁移 / Local JSON export and import for backup and device migration
 - 根据最近表现给出下一步推荐，不给孩子贴标签、不展示排名 / Gentle, transparent recommendations with no rankings or labels
 - 3 题自适应微任务、完成/休息出口和屏幕外亲子小游戏 / Three-question adaptive micro-lessons with finish/rest exits and offline parent-child play
-- 独立的亲子任务区，鼓励把学习带到真实生活中 / A dedicated parent-child activity area that extends learning into daily life
 - 家长入口长按保护 / Long-press protection for parent settings
 - 可替换的本地图片、音频和题库资源 / Replaceable local media and question banks
-- 孩子主页只有两个入口：英语听力测试、看视频提问 / Kid home has only Listening test and Video Q&A
+- 孩子主页只有两个入口：英语听力测试、动画提问 / Kid home has only Listening test and Animation Q&A
 - 听力测试先选词库主题和每次题量（默认 8 题），再用全屏 2×2 大图作答 / Listening starts by choosing a theme and round length (default 8), then a fullscreen 2×2 board
-- 看视频提问先播放狐狸短片小演示，再听题点图 / Video Q&A starts with the fox-apple demo, then picture questions
+- 动画提问先播放狐狸动画小演示，再听题点图 / Animation Q&A starts with the fox-apple demo, then picture questions
 - GitHub Actions 自动构建和 Pages 部署 / Automated CI and GitHub Pages deployment
 
 ## 快速开始 / Quick start
@@ -106,12 +105,12 @@ npm test
 
 Open **Parent settings → 设置** to configure four capabilities. Defaults are on-device. Remote options call your server adapter at `VITE_API_BASE_URL`; the recommended upstream is xAI Grok. Missing adapters time out or fail closed to local behaviour.
 
-| 能力 / Capability  | 本机默认   | 可选远程（xAI）              | 可选远程（OpenAI）    |
-| ------------------ | ---------- | ---------------------------- | --------------------- |
-| 图片 / Image       | 本地贴纸   | Imagine 2.0、Imagine Fast    | GPT Image 1、DALL·E 3 |
-| 语音 / Voice       | 浏览器     | Grok TTS Eve / Ara / Luna    | TTS、TTS HD           |
-| 题目规划 / Planner | 本地自适应 | Grok 4.6、4.5、4.3、4.1 Fast | GPT-4o mini、GPT-4o   |
-| 视频理解 / Video   | 本地播放   | Grok 4.6 / 4.5 / 4.3 看一看  | GPT-4o 看一看         |
+| 能力 / Capability    | 本机默认          | 可选远程（xAI）                     | 可选远程（OpenAI）    |
+| -------------------- | ----------------- | ----------------------------------- | --------------------- |
+| 图片 / Image         | 本地贴纸          | Imagine 2.0、Imagine Fast           | GPT Image 1、DALL·E 3 |
+| 语音 / Voice         | 浏览器            | Grok TTS Eve / Ara / Luna           | TTS、TTS HD           |
+| 题目规划 / Planner   | 本地自适应        | Grok 4.6、4.5、4.3、4.1 Fast        | GPT-4o mini、GPT-4o   |
+| 动画提问 / Animation | 本地 GIF/图片问答 | Grok 4.6 / 4.5 / 4.3 看一看（高级） | GPT-4o 看一看（高级） |
 
 模型目录在 `src/model-config.js`，全部可在家长设置里切换。xAI 选项用 `XAI_API_KEY`，OpenAI 选项用 `OPENAI_API_KEY`。没配对应密钥时自动退回本机。密钥只放服务端；前端不发送姓名、照片、录音或原始答案。
 
@@ -173,10 +172,11 @@ The recommendation rule prioritizes topics that are new or need gentle practice 
 │   ├── listening.js         # 听力测试题与 JPEG 词卡映射 / listening seeds + JPEG cards
 │   ├── wordbank.js          # Starters 词库引擎：主题干扰项 / same-theme distractors
 │   ├── hub-ui.js            # 孩子主页两大入口 / kid home hub
+│   ├── parent-ui.js         # 家长模型设置：本机优先、远程进高级 / local-first parent models
 │   ├── play-ui.js           # 全屏听力作答台 / fullscreen listening stage
 │   ├── animation-quiz.js    # GIF/图片动画理解书架 / GIF animation comprehension shelf
 │   ├── quiz-ui.js           # A–D 大图选项共享渲染 / shared picture-choice cards
-│   ├── model-config.js      # 语音、图片、选题、视频模型目录 / model catalog
+│   ├── model-config.js      # 语音、图片、选题、动画提问模型目录 / model catalog
 │   ├── ai.js                # 服务端适配器：选题、TTS、插画、视频理解 / adapters
 │   ├── learning-plan.js     # 英语阶段、复习规则和周统计 / English stages, review rules, weekly stats
 │   ├── assessment.js        # 约 3 岁英语测评与家长总结 / age-3 English check helpers
@@ -197,10 +197,10 @@ The recommendation rule prioritizes topics that are new or need gentle practice 
 - 听力可选手动 **单词库**：目录 `public/content/wordbanks.json` 列出可选词库（当前含「剑桥 Starters 全库」以及食物/动物等主题包）；词条仍来自 `public/content/wordbank.starters.json`，以后可再挂 Movers 等独立 JSON。家长在听力页先选单词库再选题量；每轮用 `pickListeningRound` 随机抽题且不重复。题目引擎按主题抽干扰项，按孩子 ID 打乱选项；**不要在做题时现场生图**。 / Listening picks a concrete word bank from `wordbanks.json` (full Starters plus theme packs; more JSON files later). Never generate images during a quiz.
 - 四宫格生图脚本：`scripts/flashcards/`（Grok Imagine 一次 4 词，再切成 JPEG）。 / Batch 2×2 Grok Imagine grids, then split to JPEG.
 - 演示动画为 `public/assets/stories/fox-apple.gif`；家长可在设置中登记其它本地 GIF/图片。 / Demo animation is `public/assets/stories/fox-apple.gif`; parents can register other local GIFs/images.
-- 本地音频放入 `public/assets/audio/{questionId}.mp3`。 / Put English MP3 files at `public/assets/audio/{questionId}.mp3`.
+- 可选本地音频模型才读取 `public/assets/audio/{questionId}.mp3`；词库本身不带 mp3 路径。 / Optional local-audio model may play `public/assets/audio/{questionId}.mp3`; word banks do not store mp3 paths.
 - 旧版 `public/assets/media/shapes-hello.mp4` 已降级，不再作为主演示。 / Legacy `shapes-hello.mp4` is demoted and no longer the primary demo.
 - 自定义题目可以抽取为 JSON，由本地题库适配器加载。 / Store custom questions as JSON and load them through a local question-bank adapter.
-- 直接编辑 `public/content/questions.en.json` 即可追加英语题目；字段和教材建议见 [`public/content/README.md`](public/content/README.md)。 / Add English questions by editing `public/content/questions.en.json`; see [`public/content/README.md`](public/content/README.md) for the schema and curriculum guidance.
+- 听力题来自 `public/content/wordbanks.json` 和词库 JSON（当前 `wordbank.starters.json`），用 `speech` / `prompt_en` 走浏览器朗读，不播词库里的 mp3。`questions.en.json` 只作旧格式说明，不再并入孩子听力池。 / Listening comes from the word-bank catalog and word JSON via browser TTS (`speech` / `prompt_en`). `questions.en.json` is legacy/docs only.
 - 每道题可用 `stage`、`ageMin`、`ageMax` 和 `concept` 控制阶段、适龄范围与复习归类；应用会在本地自动过滤不适合当前孩子的题目。 / Use `stage`, `ageMin`, `ageMax`, and `concept` to control level, age fit, and review grouping; the app filters unsuitable questions locally.
 - 远程模型应由后端保存密钥并提供受控 API。 / Keep provider secrets on a backend and expose a controlled API.
 

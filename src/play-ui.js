@@ -22,7 +22,7 @@ export function playStageMarkup({
   );
   const prompt = question?.prompt || "Listen, then tap a picture";
   const title = state.animationMode
-    ? "看视频提问"
+    ? "动画提问"
     : state.baselineTest
       ? "听力图片测评"
       : "英语听力测试";

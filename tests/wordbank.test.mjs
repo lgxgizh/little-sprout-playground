@@ -8,6 +8,8 @@ import {
   buildListeningQuestion,
   catalogBankFiles,
   clampListeningCount,
+  recommendedListeningCount,
+  visibleListeningCounts,
   listListeningBanks,
   listWordbankThemes,
   listeningPoolForBank,
@@ -155,4 +157,21 @@ test("listening rounds shuffle and do not repeat", () => {
 test("choice images use jpeg, not png", () => {
   assert.match(choiceImageSrc("apple", "/"), /apple\.jpg$/);
   assert.ok(existsSync(join("public", "assets", "choices", "apple.jpg")));
+});
+
+test("starter words have no leftover audio fields", () => {
+  for (const word of wordbank.words) {
+    assert.equal("audio" in word, false, word.lemma);
+  }
+});
+
+test("recommended listening counts hide oversized chips", () => {
+  assert.equal(recommendedListeningCount(4, 8), 4);
+  assert.equal(recommendedListeningCount(5, 8), 5);
+  assert.equal(recommendedListeningCount(8, 8), 8);
+  assert.equal(recommendedListeningCount(24, 8), 8);
+  assert.deepEqual(visibleListeningCounts(4), [4]);
+  assert.deepEqual(visibleListeningCounts(5), [5]);
+  assert.deepEqual(visibleListeningCounts(8), [5, 8]);
+  assert.deepEqual(visibleListeningCounts(24), [5, 8, 10, 12]);
 });

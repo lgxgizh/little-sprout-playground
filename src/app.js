@@ -23,14 +23,15 @@ import {
   createListeningSeedQuestions,
   enrichQuestionImages,
   pickSessionQuestion,
-  withChoiceImages,
 } from "./listening.js";
 import { homeHubMarkup, listeningHubMarkup, videoHubMarkup } from "./hub-ui.js";
+import { parentModelsMarkup } from "./parent-ui.js";
 import { playStageMarkup } from "./play-ui.js";
 import {
   bankIdFromTheme,
   bankPreviewWords,
   clampListeningCount,
+  recommendedListeningCount,
   catalogBankFiles,
   findListeningBank,
   LISTENING_COUNTS,
@@ -49,7 +50,6 @@ import {
 } from "./learning-plan.js";
 import {
   CUSTOM_STORAGE_KEY,
-  catalogOptions,
   defaultModels,
   emptyCustomConfig,
   isAdapterModel,
@@ -74,36 +74,6 @@ import {
   serializeLearningData,
 } from "./storage.js";
 
-const secondaryCourses = [
-  {
-    id: "colors",
-    label: "Color Hunt",
-    subtitle: "Find colors with pictures",
-    emoji: "🌈",
-    tone: "peach",
-    duration: "5 min",
-    tag: "Extra",
-  },
-  {
-    id: "animals",
-    label: "Animal Sounds",
-    subtitle: "Listen and find the animal",
-    emoji: "🐼",
-    tone: "mint",
-    duration: "5 min",
-    tag: "Extra",
-  },
-  {
-    id: "shapes",
-    label: "Shape Search",
-    subtitle: "Find circles and squares",
-    emoji: "🔵",
-    tone: "lavender",
-    duration: "5 min",
-    tag: "Extra",
-  },
-];
-
 const courses = [
   {
     id: "english",
@@ -123,128 +93,15 @@ const courses = [
     duration: "~12 sec + Q",
     tag: "Kid feature",
   },
-  ...secondaryCourses,
 ];
 
 const assetBase = import.meta.env.BASE_URL;
 
 let questionBank = {
-  colors: [
-    {
-      id: "color-blue-fruit",
-      difficulty: 1,
-      visual: "🦊",
-      prompt: "Find the blue fruit",
-      speech: "Can you find the blue fruit?",
-      answer: "blue",
-      choices: [
-        { label: "Red", emoji: "🍎", value: "red", color: "#ff6b5e" },
-        { label: "Yellow", emoji: "🍌", value: "yellow", color: "#f7c94b" },
-        { label: "Blue", emoji: "🫐", value: "blue", color: "#6db6e8" },
-      ],
-    },
-    {
-      id: "color-red-flower",
-      difficulty: 1,
-      visual: "🌼",
-      prompt: "Which flower is red?",
-      speech: "Can you find the red flower?",
-      answer: "red",
-      choices: [
-        { label: "Red", emoji: "🌹", value: "red", color: "#ff6b5e" },
-        { label: "Yellow", emoji: "🌻", value: "yellow", color: "#f7c94b" },
-        { label: "Blue", emoji: "🪻", value: "blue", color: "#6db6e8" },
-      ],
-    },
-    {
-      id: "color-yellow-sun",
-      difficulty: 2,
-      visual: "☀️",
-      prompt: "Give the yellow one to the bear",
-      speech: "Find the yellow one and give it to the bear.",
-      answer: "yellow",
-      choices: [
-        { label: "Blue", emoji: "🧢", value: "blue", color: "#6db6e8" },
-        { label: "Yellow", emoji: "⭐", value: "yellow", color: "#f7c94b" },
-        { label: "Red", emoji: "🧣", value: "red", color: "#ff6b5e" },
-      ],
-    },
-  ],
-  animals: [
-    {
-      id: "animal-cat",
-      difficulty: 1,
-      visual: "🐼",
-      prompt: "Who says meow?",
-      speech: "Find the animal that says meow.",
-      answer: "cat",
-      choices: [
-        { label: "Cat", emoji: "🐱", value: "cat", color: "#f3b56d" },
-        { label: "Duck", emoji: "🦆", value: "duck", color: "#f7c94b" },
-        { label: "Cow", emoji: "🐮", value: "cow", color: "#9ed9c4" },
-      ],
-    },
-    {
-      id: "animal-duck",
-      difficulty: 2,
-      visual: "🎵",
-      prompt: "Find the animal that says quack",
-      speech: "Can you find the animal that says quack?",
-      answer: "duck",
-      choices: [
-        { label: "Dog", emoji: "🐶", value: "dog", color: "#d9a66f" },
-        { label: "Duck", emoji: "🦆", value: "duck", color: "#f7c94b" },
-        { label: "Sheep", emoji: "🐑", value: "sheep", color: "#e8e8dc" },
-      ],
-    },
-  ],
-  shapes: [
-    {
-      id: "shape-circle",
-      difficulty: 1,
-      visual: "🔵",
-      prompt: "Find a round shape",
-      speech: "Can you find the round shape?",
-      answer: "circle",
-      choices: [
-        { label: "Circle", emoji: "⚪", value: "circle", color: "#6db6e8" },
-        { label: "Square", emoji: "🟨", value: "square", color: "#f7c94b" },
-        { label: "Triangle", emoji: "🔺", value: "triangle", color: "#ff8b76" },
-      ],
-    },
-    {
-      id: "shape-square",
-      difficulty: 2,
-      visual: "🧩",
-      prompt: "Which shape looks like a block?",
-      speech: "Which shape looks like a block?",
-      answer: "square",
-      choices: [
-        { label: "Triangle", emoji: "🔺", value: "triangle", color: "#ff8b76" },
-        { label: "Circle", emoji: "⚪", value: "circle", color: "#6db6e8" },
-        { label: "Square", emoji: "🟨", value: "square", color: "#f7c94b" },
-      ],
-    },
-  ],
   english: createListeningSeedQuestions(assetBase),
 };
 
 const offlineTasks = {
-  colors: {
-    title: "Color Hunt at Home",
-    prompt: "Find three blue things with a grown-up",
-    emoji: "🔎",
-  },
-  animals: {
-    title: "Animal Sound Play",
-    prompt: "Make the sound of your favorite animal",
-    emoji: "🐾",
-  },
-  shapes: {
-    title: "Shape Treasure Hunt",
-    prompt: "Find something round at home",
-    emoji: "🧺",
-  },
   english: {
     title: "English Listening Play",
     prompt: "Say apple, cat, or ball with a grown-up",
@@ -333,7 +190,6 @@ const state = {
   aiPlanSource: "local",
   aiPlanMessage: "",
   aiPlanToken: 0,
-  showExtras: false,
   kidView: "home",
   listeningBankId: "starters",
   listeningTheme: "all",
@@ -351,22 +207,6 @@ function todayKey(date = new Date()) {
       day: "2-digit",
     })
     .replaceAll("/", "-");
-}
-
-function todayProgress() {
-  const today = todayKey();
-  const answers = profile.events.filter((event) => {
-    const at = new Date(event.at);
-    return (
-      event.type === "answer" &&
-      Number.isFinite(at.getTime()) &&
-      todayKey(at) === today
-    );
-  }).length;
-  return {
-    answers: Math.min(3, answers),
-    target: 3,
-  };
 }
 
 function activeChild() {
@@ -488,54 +328,34 @@ function currentQuestion() {
     lockQuestion(question);
     return enrichQuestionImages(question, assetBase);
   }
-  const questions = questionBank[state.activityCourse] || questionBank.colors;
+  const questions = questionBank.english;
   const aiQuestion = questions.find((item) => item.id === state.aiQuestionId);
   if (aiQuestion) {
     lockQuestion(aiQuestion);
     return enrichQuestionImages(aiQuestion, assetBase);
   }
-  if (state.activityCourse === "english") {
-    if (!state.baselineTest && state.listeningQueue.length) {
-      const nextId =
-        state.activeQuestionId ||
-        state.listeningQueue.find(
-          (id) => !state.sessionQuestionIds.includes(id),
-        );
-      question = questions.find((item) => item.id === nextId) || questions[0];
-      lockQuestion(question);
-      return enrichQuestionImages(question, assetBase);
-    }
-    const child = activeChild();
-    const candidates = state.baselineTest
-      ? state.baselinePool.length
-        ? state.baselinePool
-        : selectBaselineQuestions(questions, child?.age || 3)
-      : chooseQuestionCandidates({
-          questions,
-          plan: child?.englishPlan,
-          questionStats: profile.questionStats,
-          sessionQuestionIds: state.sessionQuestionIds,
-          age: child?.age,
-        });
-    question =
-      pickSessionQuestion(candidates, {
-        lockedId: state.activeQuestionId,
-        sessionQuestionIds: state.sessionQuestionIds,
-      }) || questions[0];
+  if (!state.baselineTest && state.listeningQueue.length) {
+    const nextId =
+      state.activeQuestionId ||
+      state.listeningQueue.find((id) => !state.sessionQuestionIds.includes(id));
+    question = questions.find((item) => item.id === nextId) || questions[0];
     lockQuestion(question);
     return enrichQuestionImages(question, assetBase);
   }
-  const skill = profile.skills[state.activityCourse] || {
-    attempts: 0,
-    correct: 0,
-  };
-  const accuracy = skill.attempts ? skill.correct / skill.attempts : 0;
-  const targetDifficulty = skill.attempts >= 3 && accuracy >= 0.7 ? 2 : 1;
-  const available = questions.filter(
-    (item) => item.difficulty <= targetDifficulty,
-  );
+  const child = activeChild();
+  const candidates = state.baselineTest
+    ? state.baselinePool.length
+      ? state.baselinePool
+      : selectBaselineQuestions(questions, child?.age || 3)
+    : chooseQuestionCandidates({
+        questions,
+        plan: child?.englishPlan,
+        questionStats: profile.questionStats,
+        sessionQuestionIds: state.sessionQuestionIds,
+        age: child?.age,
+      });
   question =
-    pickSessionQuestion(available, {
+    pickSessionQuestion(candidates, {
       lockedId: state.activeQuestionId,
       sessionQuestionIds: state.sessionQuestionIds,
     }) || questions[0];
@@ -717,13 +537,7 @@ function recordAnswer(courseId, correct, question) {
 }
 
 function recommendation() {
-  const preferenceOrder = [
-    "english",
-    "animation",
-    "colors",
-    "animals",
-    "shapes",
-  ];
+  const preferenceOrder = ["english", "animation"];
   const child = activeChild();
   const dueReviews = (child?.englishPlan?.reviewQueue || []).filter(
     (item) => !item.dueAt || new Date(item.dueAt).getTime() <= Date.now(),
@@ -742,8 +556,9 @@ function recommendation() {
       stage,
     };
   }
-  const ranked = Object.entries(profile.skills).sort(
-    ([a, left], [b, right]) => {
+  const ranked = Object.entries(profile.skills)
+    .filter(([id]) => preferenceOrder.includes(id))
+    .sort(([a, left], [b, right]) => {
       const leftScore = left.attempts ? left.correct / left.attempts : -1;
       const rightScore = right.attempts ? right.correct / right.attempts : -1;
       if (leftScore !== rightScore) return leftScore - rightScore;
@@ -753,9 +568,11 @@ function recommendation() {
       return (
         recentOrder || preferenceOrder.indexOf(a) - preferenceOrder.indexOf(b)
       );
-    },
-  );
-  const [courseId, skill] = ranked[0];
+    });
+  const [courseId, skill] = ranked[0] || [
+    "english",
+    { attempts: 0, correct: 0 },
+  ];
   const course = courses.find((item) => item.id === courseId) || courses[0];
   const accuracy = skill.attempts
     ? Math.round((skill.correct / skill.attempts) * 100)
@@ -766,26 +583,6 @@ function recommendation() {
       ? "A few more tries will build confidence"
       : "Great work—let's keep it fresh";
   return { course, reason, accuracy };
-}
-
-function englishPlanCard() {
-  const child = activeChild();
-  const plan = child?.englishPlan;
-  const stage = stageDefinition(plan?.stage);
-  const dueReviews = (plan?.reviewQueue || []).filter(
-    (item) => !item.dueAt || new Date(item.dueAt).getTime() <= Date.now(),
-  ).length;
-  const detail = dueReviews
-    ? `${dueReviews} review ${dueReviews === 1 ? "word" : "words"} ready`
-    : "A fresh little step is ready";
-  return `<div class="english-plan-card"><div class="english-plan-icon">🔤</div><div><span>ENGLISH PATH · STAGE ${stage.id}</span><b>${stage.labelEn}</b><small>${detail}</small></div><i aria-hidden="true">→</i></div>`;
-}
-
-function learnerSetupCard() {
-  const child = activeChild();
-  if (!child || child.baseline?.status === "complete") return "";
-  const hasPlayed = profile.totalAnswers > 0;
-  return `<div class="learner-setup-card"><span class="learner-setup-icon">🧸</span><div><span>GROWN-UP START</span><b>${hasPlayed ? "Make this path yours" : "Meet your little learner"}</b><small>Set a nickname, age, and English starting point in one minute.</small></div><button class="small-action" id="openSetup">Set up <span>→</span></button></div>`;
 }
 
 function relativeTime(iso) {
@@ -862,7 +659,7 @@ function weeklyGrowthCard() {
 }
 
 function offlineTaskMarkup(courseId) {
-  const task = offlineTasks[courseId] || offlineTasks.colors;
+  const task = offlineTasks[courseId] || offlineTasks.english;
   return `<div class="offline-task ${state.offlineTaskDone ? "done" : ""}"><span class="offline-task-emoji">${task.emoji}</span><span><b>${task.title}</b><small>${state.offlineTaskDone ? "All done—high five!" : task.prompt}</small></span><button id="offlineDone" ${state.offlineTaskDone ? "disabled" : ""}>${state.offlineTaskDone ? "✓" : "Done"}</button></div>`;
 }
 
@@ -886,34 +683,6 @@ function animationResultMarkup() {
   );
   return `<div class="baseline-result"><span class="baseline-result-icon">🎬</span><span><b>Nice watching!</b><small>${escapeHtml(parentAnimationSummary(stats))}</small></span></div>`;
 }
-function familyTaskPanel() {
-  const recommendedId = recommendation().course.id;
-  return `<section class="family-tasks" id="familyTasks"><div class="section-heading"><div><span class="section-kicker">TOGETHER · PLAY TIME</span><h2>Play beyond the screen</h2></div><span class="active-model">Pick just one today</span></div><div class="family-task-grid">${courses
-    .map((course) => {
-      const task = offlineTasks[course.id];
-      return `<article class="family-task-card ${course.tone} ${course.id === recommendedId ? "is-recommended" : ""}"><span class="family-task-icon">${task.emoji}</span><div><b>${task.title}</b><p>${task.prompt}</p></div>${course.id === recommendedId ? '<span class="family-task-tag">Today\'s pick</span>' : ""}</article>`;
-    })
-    .join(
-      "",
-    )}</div><p class="family-task-note">You do not need to finish every task. Looking, listening, and playing with a grown-up is wonderful learning.</p></section>`;
-}
-
-function animationShelf() {
-  const items = state.animationLibrary.length
-    ? state.animationLibrary
-    : createDemoAnimations(assetBase);
-  const cards = items
-    .map((item) => {
-      const stats = summarizeAnimationAttempts(profile.events, item.id);
-      const thumb = item.poster
-        ? `<img src="${escapeHtml(item.poster)}" alt=""/>`
-        : `<span class="media-empty-icon">🎞️</span>`;
-      return `<article class="media-card ${item.demo ? "media-card-featured" : ""}"><div class="media-thumb">${thumb}<span class="media-duration">${escapeHtml(item.durationLabel)}</span></div><div class="media-card-copy"><span class="media-type">${item.demo ? "Demo GIF" : "Your local animation"}</span><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.description)}</p><button class="media-play" data-animation="${escapeHtml(item.id)}">▶ Watch & answer</button><small class="media-status">${stats.answers ? parentAnimationSummary(stats) : "Picture answers after watching"}</small></div></article>`;
-    })
-    .join("");
-  return `<section class="media-shelf" id="mediaShelf"><div class="section-heading"><div><span class="section-kicker">ANIMATION Q&A · 动画提问</span><h2>Story shelf</h2><span class="active-model">GIF · listen · tap</span></div><span class="shelf-note">Local only</span></div><div class="media-grid">${cards}</div><p class="family-task-note">Demo uses <code>fox-apple.gif</code>. Parents can register another local GIF/image in Parent settings. The old shapes MP4 is no longer the primary demo.</p></section>`;
-}
-
 function modelName(type) {
   return catalogModelName(type, models);
 }
@@ -924,77 +693,6 @@ function featuredVideoDemo() {
     state.animationLibrary.find((item) => item.demo) ||
     createDemoAnimations(assetBase)[0]
   );
-}
-
-function normalizeContentQuestion(question) {
-  if (!question || typeof question !== "object") return null;
-  const containsCjk = (value) => /[\u3400-\u9fff]/u.test(String(value || ""));
-  const clean = (value, max = 160) =>
-    String(value || "")
-      .replace(/[<>]/g, "")
-      .trim()
-      .slice(0, max);
-  const choices = Array.isArray(question.choices)
-    ? withChoiceImages(
-        question.choices
-          .map((choice) => ({
-            label: clean(choice?.label, 40),
-            emoji: clean(choice?.emoji, 8),
-            value: clean(choice?.value, 40),
-            color: /^#[0-9a-f]{6}$/i.test(choice?.color)
-              ? choice.color
-              : "#9ed9c4",
-            imageKey: clean(choice?.imageKey || choice?.value, 40),
-            imageSrc: clean(choice?.imageSrc, 400),
-          }))
-          .filter(
-            (choice) =>
-              choice.label &&
-              choice.value &&
-              (choice.emoji || choice.imageSrc || choice.imageKey),
-          )
-          .slice(0, 4),
-        assetBase,
-      )
-    : [];
-  const ageMin = Math.min(6, Math.max(2, Number(question.ageMin) || 2));
-  const ageMax = Math.min(6, Math.max(2, Number(question.ageMax) || 6));
-  if (ageMin > ageMax) return null;
-  const normalized = {
-    id: clean(question.id, 80),
-    difficulty: Math.min(3, Math.max(1, Number(question.difficulty) || 1)),
-    stage: Math.min(
-      4,
-      Math.max(1, Number(question.stage) || Number(question.difficulty) || 1),
-    ),
-    ageMin,
-    ageMax,
-    concept: clean(question.concept, 60),
-    baseline: Boolean(question.baseline),
-    visual: clean(question.visual, 8) || "🎧",
-    prompt: clean(question.prompt),
-    speech: clean(question.speech),
-    answer: clean(question.answer, 40),
-    choices,
-  };
-  const visibleText = [
-    normalized.visual,
-    normalized.prompt,
-    normalized.speech,
-    ...choices.flatMap((choice) => [choice.label, choice.value]),
-  ];
-  if (
-    !normalized.id ||
-    !normalized.prompt ||
-    !normalized.speech ||
-    !normalized.answer ||
-    choices.length < 2 ||
-    !choices.some((choice) => choice.value === normalized.answer) ||
-    new Set(choices.map((choice) => choice.value)).size !== choices.length ||
-    visibleText.some(containsCjk)
-  )
-    return null;
-  return normalized;
 }
 
 function listeningBanks() {
@@ -1091,30 +789,6 @@ function applyWordbankPool() {
   ) {
     const round = pickListeningRound(pool, state.listeningGoal);
     state.listeningQueue = round.map((question) => question.id);
-  }
-}
-
-async function loadQuestionPack() {
-  try {
-    const response = await fetch(`${assetBase}content/questions.en.json`, {
-      cache: "no-store",
-    });
-    if (!response.ok) return;
-    const payload = await response.json();
-    if (payload?.schemaVersion !== 1 || !Array.isArray(payload.questions))
-      return;
-    const additions = payload.questions
-      .map(normalizeContentQuestion)
-      .filter(Boolean);
-    const existing = new Set(
-      questionBank.english.map((question) => question.id),
-    );
-    questionBank.english = [
-      ...questionBank.english,
-      ...additions.filter((question) => !existing.has(question.id)),
-    ];
-  } catch {
-    // The built-in question bank keeps the app fully usable offline.
   }
 }
 
@@ -1292,23 +966,17 @@ async function planQuestionWithAI() {
   const courseId = state.activityCourse;
   const sessionId = state.activeSession.id;
   const token = ++state.aiPlanToken;
-  const allCandidates =
-    courseId === "english"
-      ? state.baselineTest
-        ? state.baselinePool.length
-          ? state.baselinePool
-          : selectBaselineQuestions(
-              questionBank.english,
-              activeChild()?.age || 3,
-            )
-        : chooseQuestionCandidates({
-            questions: questionBank.english,
-            plan: activeChild()?.englishPlan,
-            questionStats: profile.questionStats,
-            sessionQuestionIds: state.sessionQuestionIds,
-            age: activeChild()?.age,
-          })
-      : questionBank[courseId] || questionBank.colors;
+  const allCandidates = state.baselineTest
+    ? state.baselinePool.length
+      ? state.baselinePool
+      : selectBaselineQuestions(questionBank.english, activeChild()?.age || 3)
+    : chooseQuestionCandidates({
+        questions: questionBank.english,
+        plan: activeChild()?.englishPlan,
+        questionStats: profile.questionStats,
+        sessionQuestionIds: state.sessionQuestionIds,
+        age: activeChild()?.age,
+      });
   const unseenCandidates = allCandidates.filter(
     (question) => !state.sessionQuestionIds.includes(question.id),
   );
@@ -1412,7 +1080,10 @@ function render() {
         banks,
         selectedBankId: selected?.id || state.listeningBankId,
         counts: LISTENING_COUNTS,
-        selectedCount: state.listeningCount,
+        selectedCount: recommendedListeningCount(
+          selected?.count || 0,
+          state.listeningCount,
+        ),
         available: selected?.count || 0,
         activeBankLabel: selected?.label || "",
         previews: listeningBankPreviews(selected),
@@ -1424,7 +1095,7 @@ function render() {
   if (state.kidView === "video") {
     const demo = featuredVideoDemo();
     const others = state.animationLibrary.filter(
-      (item) => item.id !== demo?.id,
+      (item) => item.id !== demo?.id && !item.demo,
     );
     const stats = demo
       ? summarizeAnimationAttempts(profile.events, demo.id)
@@ -1450,46 +1121,16 @@ function render() {
   bindEvents();
 }
 
-function courseCard(course, recommended = false) {
-  return `<article class="course-card ${course.tone} ${recommended ? "is-recommended" : ""}" data-course="${course.id}"><div class="course-art"><span>${course.emoji}</span><b>${recommended ? "For you" : course.tag}</b><button class="play-fab" data-play="${course.id}" aria-label="Start ${course.label}">▶</button></div><div class="course-meta"><div><h3>${course.label}</h3><p>${course.subtitle}</p></div><span class="duration">◷ ${course.duration}</span></div></article>`;
-}
-
 function modelSettingsModal() {
   if (state.parentGate && !state.parentUnlocked) {
     return `<div class="modal-backdrop" id="modalBackdrop"><div class="modal parent-gate"><div class="modal-icon">🔒</div><h3>家长入口</h3><p>为了不让小朋友误触，请家长长按下面按钮 1 秒钟。</p><button class="hold-btn" id="parentHold"><span>长按进入设置</span><i></i></button><button class="reset-btn" id="parentCancel">先不设置</button></div></div>`;
   }
   const tab = state.parentTab || "child";
-  const customFields = (type) => {
-    const option = catalogOptions(type).find(
-      (item) => item.id === models[type],
-    );
-    if (option?.provider !== "custom") return "";
-    const cfg = customModels[type] || {};
-    const modelValue = cfg.model || option.remoteModel || "";
-    return `<div class="custom-model-fields">
-      <label><span>模型 ID</span><input data-custom-type="${type}" data-custom-field="model" value="${escapeHtml(modelValue)}" placeholder="例如 gpt-4o-mini 或 flux-schnell" /></label>
-      <label><span>OpenAI 兼容接口</span><input data-custom-type="${type}" data-custom-field="baseUrl" value="${escapeHtml(cfg.baseUrl || "")}" placeholder="https://openrouter.ai/api/v1 ，可留空用 .env CUSTOM_API_BASE" /></label>
-      ${
-        type === "voice"
-          ? `<label><span>音色 ID</span><input data-custom-type="${type}" data-custom-field="voiceId" value="${escapeHtml(cfg.voiceId || "")}" placeholder="alloy / nova / eve" /></label>`
-          : ""
-      }
-    </div>`;
-  };
-  const select = (type, label, icon, hint) =>
-    `<label class="model-setting"><span class="model-setting-label"><span class="model-setting-icon">${icon}</span><span><b>${label}</b><small>${hint}</small></span></span><select data-model="${type}">${catalogOptions(
-      type,
-    )
-      .map(
-        (item) =>
-          `<option value="${item.id}" ${models[type] === item.id ? "selected" : ""} title="${item.name} · ${item.note}">${item.name} · ${item.note}</option>`,
-      )
-      .join("")}</select>${customFields(type)}</label>`;
   const panel =
     tab === "growth"
-      ? `<div class="parent-panel-grid">${profileSummary()}${weeklyGrowthCard()}</div>`
+      ? `<div class="parent-panel-grid">${profileSummary()}<details class="growth-fold"><summary>本周成长卡</summary>${weeklyGrowthCard()}</details></div>`
       : tab === "models"
-        ? `<p class="parent-lead">默认用本机。xAI / OpenAI / Gemini 用对应密钥；FLUX、Qwen、DeepSeek 等走 OpenAI 兼容网关。也可以选「自定义」填任意模型 ID，不被绑定在一家。</p><div class="model-settings">${select("image", "图片", "🖼️", "学习插画与封面")}${select("voice", "语音", "🔊", "朗读题目和鼓励语")}${select("vocab", "选题", "🧩", "题目难度与题库")}${select("video", "视频理解", "🎬", "读本地短片，不是生成视频")}</div><div class="config-tip">当前语音：<b>${modelName("voice")}</b> · 当前题目：<b>${modelName("vocab")}</b> · 当前图片：<b>${modelName("image")}</b></div><div class="data-tools"><button class="small-action" id="exportData">导出学习档案</button><button class="small-action" id="importData">导入学习档案</button><input id="importFile" type="file" accept="application/json,.json" hidden /></div>`
+        ? parentModelsMarkup({ models, customModels })
         : childProfileSettings();
   return `<div class="modal-backdrop" id="modalBackdrop">
     <div class="modal model-modal parent-sheet">
@@ -1512,24 +1153,6 @@ function modelSettingsModal() {
 }
 
 function bindEvents() {
-  document.querySelectorAll("[data-tab]").forEach((btn) =>
-    btn.addEventListener("click", () => {
-      state.activeTab = btn.dataset.tab;
-      showToast(btn.textContent);
-      render();
-      const targetId =
-        state.activeTab === "library"
-          ? "#mediaShelf"
-          : state.activeTab === "tasks"
-            ? "#familyTasks"
-            : "#featureHub";
-      requestAnimationFrame(() =>
-        document
-          .querySelector(targetId)
-          ?.scrollIntoView({ behavior: "smooth", block: "start" }),
-      );
-    }),
-  );
   document.querySelector("#soundToggle")?.addEventListener("click", () => {
     state.soundOn = !state.soundOn;
     render();
@@ -1609,19 +1232,6 @@ function bindEvents() {
       render();
     }),
   );
-  document
-    .querySelector("#showExtrasToggle")
-    ?.addEventListener("change", (event) => {
-      state.showExtras = Boolean(event.target.checked);
-      try {
-        localStorage.setItem(
-          "little-sprout-show-extras",
-          state.showExtras ? "1" : "0",
-        );
-      } catch {
-        /* ignore */
-      }
-    });
   document.querySelector("#voicePrompt")?.addEventListener("click", () => {
     if (models.voice === "local-audio")
       showToast("Add the English audio file to public/assets/audio");
@@ -1694,23 +1304,6 @@ function bindEvents() {
       if (state.correct) speak("You found it!");
       else speak("That's okay. Let's try another one.");
       render();
-    }),
-  );
-  document.querySelectorAll("[data-play]").forEach((btn) =>
-    btn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      state.playing = btn.dataset.play;
-      beginSession(state.playing);
-      render();
-      showToast(
-        state.playing === "animals"
-          ? "Animal sounds are ready"
-          : "Play preview ready",
-      );
-      void planQuestionWithAI().then(() => {
-        if (state.activeSession)
-          speak(`Let's play. ${currentQuestion().speech}`);
-      });
     }),
   );
   document.querySelectorAll("[data-animation]").forEach((btn) =>
@@ -1827,7 +1420,7 @@ function bindEvents() {
       [...custom, ...(entry.sourceType === "blob" ? [entry] : [])],
     );
     render();
-    showToast("本地短片已加入看视频提问");
+    showToast("本地短片已加入动画提问");
   });
   document.querySelectorAll("[data-remove-animation]").forEach((btn) =>
     btn.addEventListener("click", () => {
@@ -1844,23 +1437,6 @@ function bindEvents() {
       showToast("已移除自定义动画");
     }),
   );
-  document
-    .querySelector("#viewAll")
-    ?.addEventListener("click", () =>
-      showToast("More play ideas are coming soon"),
-    );
-  document.querySelector("[data-recommend]")?.addEventListener("click", () => {
-    const courseId =
-      document.querySelector("[data-recommend]").dataset.recommend;
-    if (courseId === "animation") {
-      state.kidView = "video";
-      render();
-      return;
-    }
-    beginSession("english", false, { force: true });
-    render();
-    if (state.activeSession) speak(currentQuestion().speech);
-  });
   document.querySelectorAll("[data-model]").forEach((select) =>
     select.addEventListener("change", () => {
       models[select.dataset.model] = select.value;
@@ -2123,12 +1699,6 @@ function showToast(message) {
 async function init() {
   document.querySelector("#app").innerHTML =
     '<div class="loading-screen"><span>🦊</span><b>Little Sprout is getting ready…</b></div>';
-  try {
-    state.showExtras =
-      localStorage.getItem("little-sprout-show-extras") === "1";
-  } catch {
-    state.showExtras = false;
-  }
   const listeningPrefs = loadListeningPrefs();
   if (listeningPrefs.bankId) state.listeningBankId = listeningPrefs.bankId;
   if (listeningPrefs.count)
@@ -2142,7 +1712,6 @@ async function init() {
     );
   }
   children = await loadChildren();
-  await loadQuestionPack();
   await loadWordbank();
   if (!listeningPrefs.bankId && listeningPrefs.theme && wordbankCatalog) {
     state.listeningBankId = bankIdFromTheme(

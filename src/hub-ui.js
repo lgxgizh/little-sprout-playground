@@ -1,6 +1,10 @@
-/** Kid-facing home: only listening test and video Q&A. */
+/** Kid-facing home: only listening test and Animation Q&A. */
 
 import { escapeHtml } from "./quiz-ui.js";
+import {
+  recommendedListeningCount,
+  visibleListeningCounts,
+} from "./wordbank.js";
 
 export function homeHubMarkup({ childName = "Sunny", assetBase = "/" } = {}) {
   const base = assetBase.endsWith("/") ? assetBase : `${assetBase}/`;
@@ -31,8 +35,8 @@ export function homeHubMarkup({ childName = "Sunny", assetBase = "/" } = {}) {
           <img src="${escapeHtml(base)}assets/stories/fox-apple.gif" alt="" />
         </div>
         <div>
-          <h2>看视频提问</h2>
-          <p>先看短片，再听问题、点图片。</p>
+          <h2>动画提问</h2>
+          <p>先看动画，再听问题、点图片。</p>
         </div>
         <button class="primary-btn feature-start" data-feature="video" type="button"><span>开始</span><span class="arrow">→</span></button>
       </article>
@@ -49,9 +53,9 @@ export function videoHubMarkup({
     return `<section class="video-hub" id="videoHub">
       <header class="hub-bar">
         <button type="button" class="play-leave" id="backHome">← 返回</button>
-        <h1>看视频提问</h1>
+        <h1>动画提问</h1>
       </header>
-      <p class="hub-empty">还没有可以看的短片。</p>
+      <p class="hub-empty">还没有可以看的动画。</p>
     </section>`;
   }
   const isImage =
@@ -69,19 +73,19 @@ export function videoHubMarkup({
   return `<section class="video-hub" id="videoHub">
     <header class="hub-bar">
       <button type="button" class="play-leave" id="backHome">← 返回</button>
-      <h1>看视频提问</h1>
+      <h1>动画提问</h1>
     </header>
     <div class="video-demo" id="videoDemo">
       <div class="video-demo-frame">${media}</div>
       <div class="video-demo-copy">
         <span class="eyebrow">DEMO · 小演示</span>
         <h2>${escapeHtml(demo.title || "Watch, then tap")}</h2>
-        <p>先看这一段短片，再听问题、点图片。</p>
+        <p>先看这一段动画，再听问题、点图片。</p>
         <button class="primary-btn" id="startVideoDemo" type="button" data-animation="${escapeHtml(demo.id)}"><span>开始提问</span><span class="arrow">→</span></button>
         <small class="media-status">${escapeHtml(parentSummary)}</small>
       </div>
     </div>
-    ${extra ? `<div class="video-hub-more"><h3>More clips</h3><div class="media-grid">${extra}</div></div>` : ""}
+    ${extra ? `<div class="video-hub-more"><h3>更多动画</h3><div class="media-grid">${extra}</div></div>` : ""}
   </section>`;
 }
 
@@ -114,7 +118,8 @@ export function listeningHubMarkup({
   const selected =
     options.find((item) => item.id === selectedId) || options[0] || null;
   const pool = selected?.count || available || 0;
-  const nextCount = Math.max(1, Math.min(selectedCount, pool || selectedCount));
+  const visibleCounts = visibleListeningCounts(pool, counts);
+  const nextCount = recommendedListeningCount(pool, selectedCount);
   const bankLabel = activeBankLabel || selected?.label || "";
   const optionButtons = options
     .map((item) => {
@@ -123,11 +128,10 @@ export function listeningHubMarkup({
       return `<button class="chip ${active}" type="button" ${attr}="${escapeHtml(item.id)}">${escapeHtml(item.label)} <span class="chip-count">${item.count}</span></button>`;
     })
     .join("");
-  const countButtons = counts
+  const countButtons = visibleCounts
     .map((count) => {
-      const disabled = pool > 0 && count > pool;
-      const active = count === selectedCount ? "is-active" : "";
-      return `<button class="chip ${active}" type="button" data-listening-count="${count}" ${disabled ? "disabled" : ""}>${count} 题</button>`;
+      const active = count === nextCount ? "is-active" : "";
+      return `<button class="chip ${active}" type="button" data-listening-count="${count}">${count} 题</button>`;
     })
     .join("");
   const preview = previews.length

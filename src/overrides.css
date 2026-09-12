@@ -1959,3 +1959,23 @@ body:has(.app-shell.is-hub) {
     padding-right: 16px;
   }
 }
+
+.model-advanced,
+.growth-fold {
+  margin-top: 16px;
+  border: 1px solid rgba(60, 40, 20, 0.12);
+  border-radius: 16px;
+  padding: 8px 14px 12px;
+  background: #fffdf6;
+}
+.model-advanced > summary,
+.growth-fold > summary {
+  cursor: pointer;
+  font-weight: 700;
+  padding: 8px 0;
+}
+.model-local-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}

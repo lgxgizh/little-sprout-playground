@@ -249,6 +249,26 @@ export function clampListeningCount(requested, available) {
   return Math.max(1, Math.min(count, pool));
 }
 
+export function recommendedListeningCount(available, preferred = 8) {
+  const pool = Math.max(0, Number(available) || 0);
+  if (!pool) return preferred;
+  const allowed = LISTENING_COUNTS.filter((c) => c <= pool);
+  if (allowed.includes(preferred)) return preferred;
+  if (allowed.length) {
+    const under = allowed.filter((c) => c <= preferred);
+    return under.length ? under[under.length - 1] : allowed[allowed.length - 1];
+  }
+  return Math.min(preferred, pool);
+}
+
+export function visibleListeningCounts(available, counts = LISTENING_COUNTS) {
+  const pool = Math.max(0, Number(available) || 0);
+  if (!pool) return [...counts];
+  const visible = counts.filter((c) => c <= pool);
+  if (visible.length) return visible;
+  return [pool];
+}
+
 export function listeningPoolFromWordbank(
   wordbank,
   {

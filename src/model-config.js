@@ -267,9 +267,9 @@ export const modelCatalog = {
     ],
   },
   video: {
-    label: "视频理解",
+    label: "动画提问",
     icon: "🎬",
-    hint: "只分析故事架上的本地短片，不开启摄像头。SuperGrok 会员不能把 grok.com 的额度接到这里。",
+    hint: "本地默认只做 GIF/图片问答。远程读片是可选的高级能力，不开启摄像头。",
     defaultId: "local-video",
     options: [
       localOption("local-video", "本地播放", "只播放，不做分析 · 默认"),
@@ -332,6 +332,18 @@ export const modelCatalog = {
     ],
   },
 };
+
+export function isOnDeviceOption(option) {
+  return option?.mode === "local" || option?.mode === "browser";
+}
+
+export function localCatalogOptions(type) {
+  return catalogOptions(type).filter((item) => isOnDeviceOption(item));
+}
+
+export function remoteCatalogOptions(type) {
+  return catalogOptions(type).filter((item) => !isOnDeviceOption(item));
+}
 
 export function catalogOptions(type) {
   return modelCatalog[type]?.options || [];
