@@ -25,6 +25,7 @@ import {
   pickSessionQuestion,
   withChoiceImages,
 } from "./listening.js";
+import { homeHubMarkup, videoHubMarkup } from "./hub-ui.js";
 import { playStageMarkup } from "./play-ui.js";
 import { listeningPoolFromWordbank } from "./wordbank.js";
 import {
@@ -44,7 +45,7 @@ import {
   normalizeCustomConfig,
   resolveModels,
 } from "./model-config.js";
-import { choiceGridMarkup, escapeHtml, listenButtonMarkup } from "./quiz-ui.js";
+import { escapeHtml } from "./quiz-ui.js";
 import {
   addLearningEvent,
   clearLearningData,
@@ -319,9 +320,7 @@ const state = {
   aiPlanMessage: "",
   aiPlanToken: 0,
   showExtras: false,
-  demoChoice: null,
-  demoAnswered: false,
-  demoCorrect: false,
+  kidView: "home",
   activeQuestionId: null,
 };
 
@@ -889,34 +888,12 @@ function modelName(type) {
   return catalogModelName(type, models);
 }
 
-function homeTryQuestion() {
-  return createListeningSeedQuestions(assetBase)[0];
-}
-
-function homeTryMarkup() {
-  const question = homeTryQuestion();
-  if (!question) return "";
-  return `<div class="demo-quiz" aria-label="Try one question">
-    <div class="eyebrow">Try one now · 打开就能玩</div>
-    <h2>${escapeHtml(question.prompt)}</h2>
-    <p>Listen, then tap a picture. No sign-in.</p>
-    <button class="voice-btn" id="demoListen" type="button"><span>🔊</span> Listen</button>
-    ${choiceGridMarkup(question.choices, {
-      answer: question.answer,
-      selectedChoice: state.demoChoice,
-      answered: state.demoAnswered,
-      prompt: question.prompt,
-      dataAttr: "demo-choice",
-      showLabels: false,
-    })}
-    ${
-      state.demoAnswered
-        ? `<div class="feedback ${state.demoCorrect ? "good" : "try"}">${state.demoCorrect ? "You found it! That's Little Sprout." : "That's okay — look for the apple."}</div>
-           <button class="primary-btn" id="startAfterDemo" type="button"><span>${state.demoCorrect ? "Play the listening test" : "Start listening test"}</span><span class="arrow">→</span></button>
-           ${state.demoCorrect ? "" : `<button class="text-btn" id="retryDemo" type="button">Try again</button>`}`
-        : `<p class="hint">Tap a picture to try</p>`
-    }
-  </div>`;
+function featuredVideoDemo() {
+  return (
+    state.animationLibrary.find((item) => item.id === "demo-fox-apple") ||
+    state.animationLibrary.find((item) => item.demo) ||
+    createDemoAnimations(assetBase)[0]
+  );
 }
 
 function normalizeContentQuestion(question) {
@@ -1068,7 +1045,7 @@ function childProfileSettings() {
     )
     .join(
       "",
-    )}</select></label></div><div class="baseline-row"><span>当前英语路径：<b>第 ${stage.id} 阶段 · ${stage.label}</b><small>${baseline}</small></span><button class="small-action" id="startBaseline">开始听力图片测评</button></div><div class="video-register"><div class="config-divider"><span>本地动画理解（GIF/图片）</span></div><p class="video-register-note">添加本地 GIF 或图片（本机文件或 <code>public/assets/stories</code> 路径）。孩子流程：观看 → 听题 → 点大图。旧版 MP4 已降级，不再作为主演示。</p><label><span>标题</span><input id="animationTitle" maxlength="40" placeholder="例如：Fox finds an apple" /></label><label><span>资源路径或选择文件</span><input id="animationAssetPath" maxlength="160" placeholder="assets/stories/fox-apple.gif" /><input id="animationFile" type="file" accept="image/gif,image/png,image/webp,image/jpeg,video/mp4,video/webm" /></label><label><span>题目英文提示</span><input id="animationPrompt" maxlength="80" placeholder="What fruit did you see?" value="What fruit did you see?" /></label><label><span>正确答案</span><input id="animationAnswer" maxlength="40" placeholder="apple" value="apple" /></label><div class="video-choice-row"><label><span>选项 A</span><input id="animationChoiceA" maxlength="20" value="apple" /></label><label><span>选项 B</span><input id="animationChoiceB" maxlength="20" value="banana" /></label><label><span>选项 C</span><input id="animationChoiceC" maxlength="20" value="ball" /></label><label><span>选项 D</span><input id="animationChoiceD" maxlength="20" value="cup" /></label></div><button class="small-action" id="addAnimationClip">＋ 登记本地动画</button><div class="video-library-list">${(state.animationLibrary.filter((v) => !v.demo) || []).map((item) => `<div class="video-library-item"><b>${escapeHtml(item.title)}</b><small>${escapeHtml(item.src)}</small><button class="text-btn" data-remove-animation="${escapeHtml(item.id)}">移除</button></div>`).join("") || "<small>还没有自定义动画</small>"}</div></div><div class="config-divider"><span>次要玩法（可选）</span></div><p class="video-register-note">颜色 / 动物 / 形状已从孩子主页收起，需要时再打开。</p><label class="extras-toggle"><input type="checkbox" id="showExtrasToggle" ${state.showExtras ? "checked" : ""} /> 在主页显示次要玩法卡片</label><button class="save-child-btn" id="saveChildProfile">保存孩子信息</button></div>`;
+    )}</select></label></div><div class="baseline-row"><span>当前英语路径：<b>第 ${stage.id} 阶段 · ${stage.label}</b><small>${baseline}</small></span><button class="small-action" id="startBaseline">开始听力图片测评</button></div><div class="video-register"><div class="config-divider"><span>本地动画理解（GIF/图片）</span></div><p class="video-register-note">添加本地 GIF 或图片（本机文件或 <code>public/assets/stories</code> 路径）。孩子流程：观看 → 听题 → 点大图。旧版 MP4 已降级，不再作为主演示。</p><label><span>标题</span><input id="animationTitle" maxlength="40" placeholder="例如：Fox finds an apple" /></label><label><span>资源路径或选择文件</span><input id="animationAssetPath" maxlength="160" placeholder="assets/stories/fox-apple.gif" /><input id="animationFile" type="file" accept="image/gif,image/png,image/webp,image/jpeg,video/mp4,video/webm" /></label><label><span>题目英文提示</span><input id="animationPrompt" maxlength="80" placeholder="What fruit did you see?" value="What fruit did you see?" /></label><label><span>正确答案</span><input id="animationAnswer" maxlength="40" placeholder="apple" value="apple" /></label><div class="video-choice-row"><label><span>选项 A</span><input id="animationChoiceA" maxlength="20" value="apple" /></label><label><span>选项 B</span><input id="animationChoiceB" maxlength="20" value="banana" /></label><label><span>选项 C</span><input id="animationChoiceC" maxlength="20" value="ball" /></label><label><span>选项 D</span><input id="animationChoiceD" maxlength="20" value="cup" /></label></div><button class="small-action" id="addAnimationClip">＋ 登记本地动画</button><div class="video-library-list">${(state.animationLibrary.filter((v) => !v.demo) || []).map((item) => `<div class="video-library-item"><b>${escapeHtml(item.title)}</b><small>${escapeHtml(item.src)}</small><button class="text-btn" data-remove-animation="${escapeHtml(item.id)}">移除</button></div>`).join("") || "<small>还没有自定义动画</small>"}</div></div><button class="save-child-btn" id="saveChildProfile">保存孩子信息</button></div>`;
 }
 
 function saveChildForm() {
@@ -1211,8 +1188,18 @@ function animationWatchMarkup() {
   return `<div class="video-player-card animation-player-card">${media}<div class="video-player-copy"><b>${escapeHtml(item.title)}</b><small>Look and listen. Grown-ups can pause anytime.</small></div></div>`;
 }
 
-function featureHubMarkup(next) {
-  return `<section class="feature-hub" id="featureHub"><div class="section-heading"><div><span class="section-kicker">TWO KID FEATURES · 两大玩法</span><h2>What shall we play?</h2></div></div><div class="feature-hub-grid"><article class="feature-card feature-listening ${next.course.id === "english" ? "is-recommended" : ""}" data-feature="listening"><div class="feature-card-art"><span>🎧</span><b>听力测试</b></div><div class="feature-card-copy"><h3>Listening test</h3><p>Browser speech asks an English question. Tap a big picture card A / B / C / D.</p><button class="primary-btn feature-start" data-feature="listening"><span>Start listening</span><span class="arrow">→</span></button></div></article><article class="feature-card feature-animation ${next.course.id === "animation" ? "is-recommended" : ""}" data-feature="animation"><div class="feature-card-art"><span>🎞️</span><b>动画提问</b></div><div class="feature-card-copy"><h3>Animation Q&A</h3><p>Watch the fox GIF or the shapes clip, then answer with the same picture cards.</p><button class="primary-btn feature-start" data-feature="animation"><span>Watch & answer</span><span class="arrow">→</span></button></div></article></div>${state.showExtras ? `<div class="extras-grid">${secondaryCourses.map((course) => courseCard(course, false)).join("")}</div>` : `<p class="hub-aux-note">Parent helpers, storage, and voice prompts stay in settings. Extra color / animal / shape play is tucked away unless a grown-up turns it on.</p>`}</section>`;
+function kidChrome(inner) {
+  const childName = escapeHtml(activeChild()?.nickname || "Sunny");
+  return `
+    <div class="app-shell is-hub">
+      <header class="topbar">
+        <div class="brand"><span class="brand-mark">✦</span><span>Little Sprout</span><small>${childName}</small></div>
+        <div class="top-actions"><button class="icon-btn" id="soundToggle" aria-label="Sound on or off">${state.soundOn ? "🔊" : "🔇"}</button><button class="parent-btn" id="openParent">Parent <span>⌄</span></button></div>
+      </header>
+      <main class="hub-main">${inner}</main>
+      ${state.modal ? modelSettingsModal() : ""}
+      <div class="toast" id="toast">Ready to play</div>
+    </div>`;
 }
 
 function playResultHtml() {
@@ -1223,12 +1210,7 @@ function playResultHtml() {
 }
 
 function render() {
-  const next = recommendation();
-  const dailyProgress = todayProgress();
-  const activeCourse =
-    courses.find((course) => course.id === state.activityCourse) || courses[0];
   const question = currentQuestion();
-  const childName = escapeHtml(activeChild()?.nickname || "Sunny");
   if (state.activeSession) {
     document.querySelector("#app").innerHTML = `
     <div class="app-shell is-playing">
@@ -1249,72 +1231,30 @@ function render() {
     scheduleAdvance();
     return;
   }
-  document.querySelector("#app").innerHTML = `
-    <div class="app-shell">
-      <header class="topbar">
-        <div class="brand"><span class="brand-mark">✦</span><span>Little Sprout</span><small>Play · Learn · Grow</small></div>
-        <nav class="desktop-nav" aria-label="Main navigation">
-          <button class="nav-item ${state.activeTab === "home" ? "active" : ""}" data-tab="home">Today</button>
-          <button class="nav-item ${state.activeTab === "library" ? "active" : ""}" data-tab="library">Play shelf</button>
-          <button class="nav-item ${state.activeTab === "tasks" ? "active" : ""}" data-tab="tasks">Together</button>
-        </nav>
-        <div class="top-actions"><button class="icon-btn" id="soundToggle" aria-label="Sound on or off">${state.soundOn ? "🔊" : "🔇"}</button><button class="parent-btn" id="openParent">Parent <span>⌄</span></button></div>
-      </header>
-
-      <main>
-        <section class="hero">
-          <div class="hero-copy">
-            <div class="eyebrow"><span class="spark">✦</span> 5-MINUTE PLAY TIME</div>
-            <h1>${childName} + Little Sprout<br/><em>Listening & Animation</em></h1>
-            <p>Tap a picture to try right now — no sign-in.<br/>Then play Listening test or Animation Q&amp;A.</p>
-            <button class="primary-btn" id="startLesson"><span>${state.activeSession ? "Keep playing" : "Start listening test"}</span><span class="arrow">→</span></button>
-            <div class="streak"><span class="streak-icon">🔥</span><span><b>${profile.streak} days in a row</b><small>${profile.streak ? "A little play every day helps" : "Finish today to light your first star"}</small></span></div>
-            <div class="star-badge">⭐ ${profile.stars} stars collected</div>
-            <div class="daily-goal"><div class="daily-goal-top"><span>Today's picture answers</span><b>${dailyProgress.answers}/${dailyProgress.target}</b></div><div class="daily-goal-track"><i style="width:${Math.round((dailyProgress.answers / dailyProgress.target) * 100)}%"></i></div><small>${dailyProgress.answers >= dailyProgress.target ? "Today is complete—come back tomorrow!" : `${dailyProgress.target - dailyProgress.answers} more to go`}</small></div>
-            ${englishPlanCard()}
-            ${learnerSetupCard()}
-          </div>
-          <div class="hero-art">${homeTryMarkup()}</div>
-        </section>
-
-        ${featureHubMarkup(next)}
-
-        <section class="learning-panel" id="quizPanel">
-          ${state.animationMode && state.animationPhase === "watch" ? animationWatchMarkup() : ""}
-          <div class="panel-intro"><span class="section-kicker">${state.animationMode ? "ANIMATION Q&A" : state.baselineTest ? "LISTENING CHECK" : "MINI QUEST"} · ${String(state.questionIndex + 1).padStart(2, "0")}</span><h2>${state.animationMode ? escapeHtml(activeAnimation()?.title || "Animation play") : activeCourse.label}</h2><p>${state.animationMode && state.animationPhase === "watch" ? "Watch first, then answer with pictures." : `${question.prompt}<br/>Let's try it together!`}</p><div class="speech-actions">${listenButtonMarkup({ disabled: state.animationMode && state.animationPhase === "watch" })}</div><div class="model-chip"><span>Question model</span><b>${state.animationMode ? "Local animation cards" : modelName("vocab")}</b></div>${state.aiPlanning ? '<div class="ai-plan-note is-loading">🪄 Choosing a question for you…</div>' : state.aiPlanMessage ? `<div class="ai-plan-note ${state.aiPlanSource === "ai" ? "is-ai" : "is-local"}">${state.aiPlanSource === "ai" ? "✨" : "🌱"} ${state.aiPlanMessage}</div>` : ""}</div>
-          <div class="quiz-card ${state.animationMode && state.animationPhase === "watch" ? "is-watching" : ""}">
-            <div class="quiz-top"><span>${state.animationMode && state.animationPhase === "watch" ? "Watch time" : `Question ${state.questionIndex + 1} / ${sessionQuestionTotal()}`}</span><span class="session-live">${state.activeSession ? "● Playing now" : ""}</span><div class="progress-dots">${Array.from({ length: Math.min(sessionQuestionTotal(), 12) }, (_, i) => `<i class="${i <= state.questionIndex ? "filled" : ""}"></i>`).join("")}</div></div>
-            ${
-              state.animationMode && state.animationPhase === "watch"
-                ? `<div class="video-watch-hint"><p>When the animation ends, tap <b>Ready to answer</b>.</p><button class="primary-btn" id="animationReady"><span>Ready to answer</span><span class="arrow">→</span></button></div>`
-                : `<div class="question-visual"><span class="question-emoji" aria-hidden="true">${state.animationMode ? "🎞️" : "🎧"}</span><span class="question-bubble">${escapeHtml(question.prompt)}<br/><b>Listen, then tap a picture</b></span></div>
-            ${choiceGridMarkup(question.choices, {
-              answer: question.answer,
-              selectedChoice: state.selectedChoice,
-              answered: state.answered,
-              disabled: state.aiPlanning,
-              prompt: question.prompt,
-              showLabels: false,
-            })}
-            ${state.answered ? `<div class="feedback ${state.correct ? "good" : "try"}">${state.encouragement || (state.correct ? "You found it! ✨" : "That's okay—let's look again")}</div>${state.activityComplete ? (state.baselineTest ? baselineResultMarkup() : state.animationMode ? animationResultMarkup() : offlineTaskMarkup(state.activityCourse)) : `<button class="next-question" id="nextQuestion">${state.correct ? "Next one" : "Try another"} <span>→</span></button>`}` : '<div class="hint">Tap a picture to answer · Find a star!</div>'}`
-            }
-            ${state.activeSession ? `<button class="finish-btn" id="finishSession">${state.activityComplete ? "Finish today" : "Take a break"}</button>` : ""}
-          </div>
-        </section>
-
-        ${animationShelf()}
-
-        ${familyTaskPanel()}
-
-        <section class="parent-note"><div class="note-icon">💛</div><div><b>Grown-up note</b><p>Five to eight minutes is plenty. Voice is for prompts only.</p></div><button class="round-arrow" id="openParent2" aria-label="Open parent settings">→</button></section>
-      </main>
-
-      <nav class="mobile-nav"><button class="mobile-nav-item ${state.activeTab === "home" ? "active" : ""}" data-tab="home">⌂<span>Today</span></button><button class="mobile-nav-item ${state.activeTab === "library" ? "active" : ""}" data-tab="library">▶<span>Play</span></button><button class="mobile-nav-item ${state.activeTab === "tasks" ? "active" : ""}" data-tab="tasks">♡<span>Together</span></button><button class="mobile-nav-item" id="openParent3">☼<span>Parent</span></button></nav>
-      ${state.modal ? modelSettingsModal() : ""}
-      <div class="toast" id="toast">Ready to play</div>
-    </div>`;
+  if (state.kidView === "video") {
+    const demo = featuredVideoDemo();
+    const others = state.animationLibrary.filter(
+      (item) => item.id !== demo?.id,
+    );
+    const stats = demo
+      ? summarizeAnimationAttempts(profile.events, demo.id)
+      : { answers: 0 };
+    document.querySelector("#app").innerHTML = kidChrome(
+      videoHubMarkup({
+        demo,
+        others,
+        parentSummary: stats.answers
+          ? parentAnimationSummary(stats)
+          : "Look first, then tap a picture",
+      }),
+    );
+    bindEvents();
+    return;
+  }
+  document.querySelector("#app").innerHTML = kidChrome(
+    homeHubMarkup({ childName: activeChild()?.nickname || "Sunny" }),
+  );
   bindEvents();
-  scheduleAdvance();
 }
 
 function courseCard(course, recommended = false) {
@@ -1401,67 +1341,39 @@ function bindEvents() {
     state.soundOn = !state.soundOn;
     render();
   });
-  document.querySelector("#demoListen")?.addEventListener("click", () => {
-    speak(homeTryQuestion()?.speech || "Which one is an apple?");
-  });
-  document.querySelector("#retryDemo")?.addEventListener("click", () => {
-    state.demoChoice = null;
-    state.demoAnswered = false;
-    state.demoCorrect = false;
+  document.querySelector("#backHome")?.addEventListener("click", () => {
+    state.kidView = "home";
     render();
   });
-  document.querySelectorAll("[data-demo-choice]").forEach((btn) =>
-    btn.addEventListener("click", () => {
-      if (state.demoAnswered) return;
-      const question = homeTryQuestion();
-      state.demoChoice = btn.dataset.demoChoice;
-      state.demoAnswered = true;
-      state.demoCorrect = btn.dataset.demoChoice === question?.answer;
-      speak(
-        state.demoCorrect ? "You found it!" : "That's okay. Let's look again.",
-      );
-      render();
-    }),
-  );
-  document.querySelector("#startAfterDemo")?.addEventListener("click", () => {
-    document.querySelector("#startLesson")?.click();
-  });
-  document.querySelector("#startLesson")?.addEventListener("click", () => {
-    const child = activeChild();
-    beginSession("english", child?.baseline?.status !== "complete", {
-      force: true,
-    });
+  document.querySelector("#startVideoDemo")?.addEventListener("click", () => {
+    const animationId =
+      document.querySelector("#startVideoDemo")?.dataset.animation ||
+      featuredVideoDemo()?.id;
+    if (!animationId) return;
+    beginSession("animation", false, { animationId, force: true });
+    state.animationPhase = "watch";
+    state.kidView = "video";
     render();
-    document
-      .querySelector("#quizPanel")
-      .scrollIntoView({ behavior: "smooth", block: "center" });
-    speak(currentQuestion().speech);
+    showToast("Watch first, then tap a picture");
+    const player = document.querySelector("#comprehensionAnimation");
+    try {
+      player?.play?.();
+    } catch {
+      /* autoplay may be blocked */
+    }
   });
   document.querySelectorAll("[data-feature]").forEach((btn) =>
-    btn.addEventListener("click", () => {
+    btn.addEventListener("click", (event) => {
+      event.stopPropagation();
       const feature = btn.dataset.feature;
-      if (feature === "animation") {
-        const animationId =
-          state.animationLibrary.find((item) => item.demo)?.id ||
-          createDemoAnimations(assetBase)[0]?.id;
-        beginSession("animation", false, { animationId, force: true });
-        state.animationPhase = "watch";
-        state.activeTab = "library";
+      if (feature === "video" || feature === "animation") {
+        state.kidView = "video";
         render();
-        document
-          .querySelector("#quizPanel")
-          ?.scrollIntoView({ behavior: "smooth", block: "center" });
-        showToast("Watch the animation, then answer");
         return;
       }
-      const child = activeChild();
-      beginSession("english", child?.baseline?.status !== "complete", {
-        force: true,
-      });
+      state.kidView = "home";
+      beginSession("english", false, { force: true });
       render();
-      document
-        .querySelector("#quizPanel")
-        ?.scrollIntoView({ behavior: "smooth", block: "center" });
       speak(currentQuestion().speech);
     }),
   );
@@ -1586,12 +1498,9 @@ function bindEvents() {
       const animationId = btn.dataset.animation;
       beginSession("animation", false, { animationId, force: true });
       state.animationPhase = "watch";
-      state.activeTab = "library";
+      state.kidView = "video";
       render();
-      document
-        .querySelector("#quizPanel")
-        ?.scrollIntoView({ behavior: "smooth", block: "center" });
-      showToast("Watch the animation, then answer");
+      showToast("Watch first, then tap a picture");
       const player = document.querySelector("#comprehensionAnimation");
       try {
         player?.play?.();
@@ -1698,7 +1607,7 @@ function bindEvents() {
       [...custom, ...(entry.sourceType === "blob" ? [entry] : [])],
     );
     render();
-    showToast("本地动画已加入 Story shelf");
+    showToast("本地短片已加入看视频提问");
   });
   document.querySelectorAll("[data-remove-animation]").forEach((btn) =>
     btn.addEventListener("click", () => {
@@ -1723,15 +1632,14 @@ function bindEvents() {
   document.querySelector("[data-recommend]")?.addEventListener("click", () => {
     const courseId =
       document.querySelector("[data-recommend]").dataset.recommend;
-    beginSession(courseId);
+    if (courseId === "animation") {
+      state.kidView = "video";
+      render();
+      return;
+    }
+    beginSession("english", false, { force: true });
     render();
-    showToast("Your play idea is ready");
-    document
-      .querySelector("#quizPanel")
-      ?.scrollIntoView({ behavior: "smooth", block: "center" });
-    void planQuestionWithAI().then(() => {
-      if (state.activeSession) speak(currentQuestion().speech);
-    });
+    if (state.activeSession) speak(currentQuestion().speech);
   });
   document.querySelectorAll("[data-model]").forEach((select) =>
     select.addEventListener("change", () => {
@@ -1778,10 +1686,8 @@ function bindEvents() {
     state.modal = false;
     state.parentGate = false;
     beginSession("english", true);
+    state.kidView = "home";
     render();
-    document
-      .querySelector("#quizPanel")
-      ?.scrollIntoView({ behavior: "smooth", block: "center" });
     speak(currentQuestion().speech);
   });
   document.querySelector("#exportData")?.addEventListener("click", () => {
@@ -1845,7 +1751,9 @@ function bindEvents() {
     state.baselineCorrect = 0;
     state.baselineAnswers = [];
     state.baselinePool = [];
+    const returnToVideo = state.animationMode;
     completeSession(state.activityComplete ? "completed" : "quit");
+    state.kidView = returnToVideo ? "video" : "home";
     state.animationMode = false;
     state.activeAnimationId = null;
     state.animationPhase = "watch";

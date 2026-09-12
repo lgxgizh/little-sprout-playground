@@ -6,7 +6,7 @@
 
 **中文** · [English](#english)
 
-一个面向学龄前儿童的图片优先学习网页，主打两大孩子玩法：**听力测试**与**动画提问**。孩子听英文提问、看 GIF 小故事，再点选 A/B/C/D 大图卡片；语音只用于题目朗读，演示流程不含跟读麦克风。
+一个面向学龄前儿童的图片优先学习网页。孩子主页只保留两个入口：**英语听力测试**（直接做题库）和**看视频提问**（先进狐狸短片小演示，再答题）。语音只用于题目朗读，不含跟读麦克风。
 
 **[在线体验](https://lgxgizh.github.io/little-sprout-playground/)** · [报告问题](https://github.com/lgxgizh/little-sprout-playground/issues)
 
@@ -33,9 +33,9 @@
 - 独立的亲子任务区，鼓励把学习带到真实生活中 / A dedicated parent-child activity area that extends learning into daily life
 - 家长入口长按保护 / Long-press protection for parent settings
 - 可替换的本地图片、音频和题库资源 / Replaceable local media and question banks
-- 听力测试进入后是接近全屏的 2×2 大图，不再缩在首页卡片里 / Listening test is a near-fullscreen 2×2 picture board
-- 主页两大入口：听力测试（TTS + 图片选项）与动画提问（fox-apple.gif + 图片选项） / Home hub with Listening test and Animation Q&A (fox-apple.gif + picture cards)
-- Story shelf：本地 GIF/图片登记、观看后图片答题 / Story shelf for local GIF/image registration and watch-then-picture answers
+- 孩子主页只有两个入口：英语听力测试、看视频提问 / Kid home has only Listening test and Video Q&A
+- 听力测试直接进入题库全屏 2×2 大图，不再做首页试玩题 / Listening opens the word bank immediately—no home demo quiz
+- 看视频提问先播放狐狸短片小演示，再听题点图 / Video Q&A starts with the fox-apple demo, then picture questions
 - GitHub Actions 自动构建和 Pages 部署 / Automated CI and GitHub Pages deployment
 
 ## 快速开始 / Quick start
@@ -172,6 +172,7 @@ The recommendation rule prioritizes topics that are new or need gentle practice 
 │   ├── app.js               # 主页两大玩法、共享答题 UI、家长设置 / hub UI + parent settings
 │   ├── listening.js         # 听力测试题与 JPEG 词卡映射 / listening seeds + JPEG cards
 │   ├── wordbank.js          # Starters 词库引擎：主题干扰项 / same-theme distractors
+│   ├── hub-ui.js            # 孩子主页两大入口 / kid home hub
 │   ├── play-ui.js           # 全屏听力作答台 / fullscreen listening stage
 │   ├── animation-quiz.js    # GIF/图片动画理解书架 / GIF animation comprehension shelf
 │   ├── quiz-ui.js           # A–D 大图选项共享渲染 / shared picture-choice cards

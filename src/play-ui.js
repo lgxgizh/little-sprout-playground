@@ -22,10 +22,10 @@ export function playStageMarkup({
   );
   const prompt = question?.prompt || "Listen, then tap a picture";
   const title = state.animationMode
-    ? "Animation Q&A"
+    ? "看视频提问"
     : state.baselineTest
-      ? "Listening check"
-      : "Listening test";
+      ? "听力图片测评"
+      : "英语听力测试";
   const board = watching
     ? `<div class="play-watch">${watchMediaHtml}<div class="play-watch-actions"><p>When the animation ends, tap Ready.</p><button class="primary-btn" id="animationReady" type="button"><span>Ready to answer</span><span class="arrow">→</span></button></div></div>`
     : `<h1 class="play-prompt vis-hidden">${escapeHtml(prompt)}</h1>
