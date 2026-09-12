@@ -194,13 +194,13 @@ The recommendation rule prioritizes topics that are new or need gentle practice 
 
 - 图片或封面放入 `public/assets/`。 / Put images in `public/assets/`.
 - 听力词卡用 JPEG（不要 PNG）：新卡 `public/assets/flashcards/{theme}/{slug}.jpg`，旧 8 个键仍可在 `public/assets/choices/`。Grok Imagine 出的是位图，做不成真 SVG；白底词卡也不需要 PNG 透明通道。 / Listening cards are JPEG, not PNG. New cards live in `public/assets/flashcards/`.
-- 听力可选手动 **单词库**：目录 `public/content/wordbanks.json` 按剑桥 YLE 系列列出 Pre A1 Starters / A1 Movers / A2 Flyers（公开词表精选可看图名词，非官方考题），另有对比概念技能包与 Starters 主题包。家长在听力页先选单词库再选题量；每轮用 `pickListeningRound` 随机抽题且不重复。题目引擎按主题抽干扰项，按孩子 ID 打乱选项；**不要在做题时现场生图**。 / Listening picks a concrete word bank from `wordbanks.json` (YLE Starters/Movers/Flyers curated noun packs, concepts, and Starters theme packs). Never generate images during a quiz.
+- 听力可选手动 **单词库**：目录 `public/content/wordbanks.json` 按剑桥 YLE 系列列出 Pre A1 Starters / A1 Movers / A2 Flyers（公开词表精选可看图名词，非官方考题），另有对比概念、心情表情、动作动词、常见形容词等技能包与 Starters 主题包（精选可看图词，仍非官方完整词表）。家长在听力页先选单词库再选题量；每轮用 `pickListeningRound` 随机抽题且不重复。题目引擎按主题抽干扰项，按孩子 ID 打乱选项；**不要在做题时现场生图**。 / Listening picks a concrete word bank from `wordbanks.json` (YLE Starters/Movers/Flyers curated noun packs, concepts/feelings/actions/adjectives skill packs, and Starters theme packs — curated picture subsets, not full official lists). Never generate images during a quiz.
 - 四宫格生图脚本：`scripts/flashcards/`（Grok Imagine 一次 4 词，再切成 JPEG）。 / Batch 2×2 Grok Imagine grids, then split to JPEG.
 - 演示动画为 `public/assets/stories/fox-apple.gif`；家长可在设置中登记其它本地 GIF/图片。 / Demo animation is `public/assets/stories/fox-apple.gif`; parents can register other local GIFs/images.
 - 可选本地音频模型才读取 `public/assets/audio/{questionId}.mp3`；词库本身不带 mp3 路径。 / Optional local-audio model may play `public/assets/audio/{questionId}.mp3`; word banks do not store mp3 paths.
 - 动画主演示只用 `public/assets/stories/fox-apple.gif`。 / Animation demo is fox-apple.gif only.
 - 自定义题目可以抽取为 JSON，由本地题库适配器加载。 / Store custom questions as JSON and load them through a local question-bank adapter.
-- 听力题来自 `public/content/wordbanks.json` 与词库 JSON（Pre A1 Starters / A1 Movers / A2 Flyers / Concepts 等），用 `speech` / `prompt_en` 或对比题提示走浏览器朗读。 / Listening comes from the word-bank catalog (Starters, Movers, Flyers, Concepts, …) via browser TTS.
+- 听力题来自 `public/content/wordbanks.json` 与词库 JSON（Pre A1 Starters / A1 Movers / A2 Flyers / Concepts / Feelings / Actions / Adjectives 等），用 `speech` / `prompt_en` 或对比题提示走浏览器朗读。 / Listening comes from the word-bank catalog (Starters, Movers, Flyers, Concepts, Feelings, Actions, Adjectives, …) via browser TTS.
 - 每道题可用 `stage`、`ageMin`、`ageMax` 和 `concept` 控制阶段、适龄范围与复习归类；应用会在本地自动过滤不适合当前孩子的题目。 / Use `stage`, `ageMin`, `ageMax`, and `concept` to control level, age fit, and review grouping; the app filters unsuitable questions locally.
 - 远程模型应由后端保存密钥并提供受控 API。 / Keep provider secrets on a backend and expose a controlled API.
 

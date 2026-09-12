@@ -300,6 +300,9 @@ export const THEME_LABELS = {
   transport: "交通",
   school: "学习用品",
   world: "自然",
+  feelings: "心情表情",
+  actions: "动作动词",
+  adjectives: "常见形容词",
 };
 
 export const LISTENING_COUNTS = [5, 8, 10, 12];

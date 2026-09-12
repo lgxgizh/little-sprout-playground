@@ -1320,6 +1320,250 @@
       "color": "#6db6e8",
       "emoji": "💦",
       "status": "approved"
+    },
+    {
+      "id": "movers_snake",
+      "lemma": "snake",
+      "slug": "snake",
+      "pos": "noun",
+      "level": "movers",
+      "theme": "animals",
+      "type": "animal",
+      "age_min": 3,
+      "age_max": 6,
+      "prompt_en": "Which one is the snake?",
+      "speech": "Which one is the snake?",
+      "imageable": true,
+      "distractor_pool": [
+        "rabbit",
+        "crocodile",
+        "giraffe",
+        "elephant",
+        "hippo",
+        "zebra"
+      ],
+      "adjacent_types": [
+        "animal"
+      ],
+      "image_id": "img_snake_v1",
+      "image": "assets/flashcards/movers/snake.jpg",
+      "fallback_image": "assets/flashcards/movers/snake.jpg",
+      "object_prompt": "one friendly cartoon snake, not scary",
+      "color": "#7dcc6b",
+      "emoji": "🐍",
+      "status": "approved"
+    },
+    {
+      "id": "movers_spider",
+      "lemma": "spider",
+      "slug": "spider",
+      "pos": "noun",
+      "level": "movers",
+      "theme": "animals",
+      "type": "animal",
+      "age_min": 3,
+      "age_max": 6,
+      "prompt_en": "Which one is the spider?",
+      "speech": "Which one is the spider?",
+      "imageable": true,
+      "distractor_pool": [
+        "rabbit",
+        "crocodile",
+        "giraffe",
+        "elephant",
+        "hippo",
+        "zebra"
+      ],
+      "adjacent_types": [
+        "animal"
+      ],
+      "image_id": "img_spider_v1",
+      "image": "assets/flashcards/movers/spider.jpg",
+      "fallback_image": "assets/flashcards/movers/spider.jpg",
+      "object_prompt": "one friendly cartoon spider, not scary",
+      "color": "#9aa4b2",
+      "emoji": "🕷️",
+      "status": "approved"
+    },
+    {
+      "id": "movers_bat",
+      "lemma": "bat",
+      "slug": "bat",
+      "pos": "noun",
+      "level": "movers",
+      "theme": "animals",
+      "type": "animal",
+      "age_min": 3,
+      "age_max": 6,
+      "prompt_en": "Which one is the bat?",
+      "speech": "Which one is the bat?",
+      "imageable": true,
+      "distractor_pool": [
+        "rabbit",
+        "crocodile",
+        "giraffe",
+        "elephant",
+        "hippo",
+        "zebra"
+      ],
+      "adjacent_types": [
+        "animal"
+      ],
+      "image_id": "img_bat_v1",
+      "image": "assets/flashcards/movers/bat.jpg",
+      "fallback_image": "assets/flashcards/movers/bat.jpg",
+      "object_prompt": "one friendly cartoon bat, not scary",
+      "color": "#7e57c2",
+      "emoji": "🦇",
+      "status": "approved"
+    },
+    {
+      "id": "movers_fox",
+      "lemma": "fox",
+      "slug": "fox",
+      "pos": "noun",
+      "level": "movers",
+      "theme": "animals",
+      "type": "animal",
+      "age_min": 3,
+      "age_max": 6,
+      "prompt_en": "Which one is the fox?",
+      "speech": "Which one is the fox?",
+      "imageable": true,
+      "distractor_pool": [
+        "rabbit",
+        "crocodile",
+        "giraffe",
+        "elephant",
+        "hippo",
+        "zebra"
+      ],
+      "adjacent_types": [
+        "animal"
+      ],
+      "image_id": "img_fox_v1",
+      "image": "assets/flashcards/movers/fox.jpg",
+      "fallback_image": "assets/flashcards/movers/fox.jpg",
+      "object_prompt": "one cute orange fox sitting",
+      "color": "#f08a3a",
+      "emoji": "🦊",
+      "status": "approved"
+    },
+    {
+      "id": "movers_lighthouse",
+      "lemma": "lighthouse",
+      "slug": "lighthouse",
+      "pos": "noun",
+      "level": "movers",
+      "theme": "world",
+      "type": "place",
+      "age_min": 3,
+      "age_max": 6,
+      "prompt_en": "Which one is the lighthouse?",
+      "speech": "Which one is the lighthouse?",
+      "imageable": true,
+      "distractor_pool": [
+        "rainbow",
+        "moon",
+        "waterfall"
+      ],
+      "adjacent_types": [
+        "place"
+      ],
+      "image_id": "img_lighthouse_v1",
+      "image": "assets/flashcards/movers/lighthouse.jpg",
+      "fallback_image": "assets/flashcards/movers/lighthouse.jpg",
+      "object_prompt": "one lighthouse by the sea",
+      "color": "#6db6e8",
+      "emoji": "🗼",
+      "status": "approved"
+    },
+    {
+      "id": "movers_bridge",
+      "lemma": "bridge",
+      "slug": "bridge",
+      "pos": "noun",
+      "level": "movers",
+      "theme": "world",
+      "type": "place",
+      "age_min": 3,
+      "age_max": 6,
+      "prompt_en": "Which one is the bridge?",
+      "speech": "Which one is the bridge?",
+      "imageable": true,
+      "distractor_pool": [
+        "rainbow",
+        "moon",
+        "waterfall"
+      ],
+      "adjacent_types": [
+        "place"
+      ],
+      "image_id": "img_bridge_v1",
+      "image": "assets/flashcards/movers/bridge.jpg",
+      "fallback_image": "assets/flashcards/movers/bridge.jpg",
+      "object_prompt": "one simple bridge over water",
+      "color": "#90a4ae",
+      "emoji": "🌉",
+      "status": "approved"
+    },
+    {
+      "id": "movers_island",
+      "lemma": "island",
+      "slug": "island",
+      "pos": "noun",
+      "level": "movers",
+      "theme": "world",
+      "type": "place",
+      "age_min": 3,
+      "age_max": 6,
+      "prompt_en": "Which one is the island?",
+      "speech": "Which one is the island?",
+      "imageable": true,
+      "distractor_pool": [
+        "rainbow",
+        "moon",
+        "waterfall"
+      ],
+      "adjacent_types": [
+        "place"
+      ],
+      "image_id": "img_island_v1",
+      "image": "assets/flashcards/movers/island.jpg",
+      "fallback_image": "assets/flashcards/movers/island.jpg",
+      "object_prompt": "one small island with a palm tree",
+      "color": "#4db6ac",
+      "emoji": "🏝️",
+      "status": "approved"
+    },
+    {
+      "id": "movers_cave",
+      "lemma": "cave",
+      "slug": "cave",
+      "pos": "noun",
+      "level": "movers",
+      "theme": "world",
+      "type": "place",
+      "age_min": 3,
+      "age_max": 6,
+      "prompt_en": "Which one is the cave?",
+      "speech": "Which one is the cave?",
+      "imageable": true,
+      "distractor_pool": [
+        "rainbow",
+        "moon",
+        "waterfall"
+      ],
+      "adjacent_types": [
+        "place"
+      ],
+      "image_id": "img_cave_v1",
+      "image": "assets/flashcards/movers/cave.jpg",
+      "fallback_image": "assets/flashcards/movers/cave.jpg",
+      "object_prompt": "one cave entrance in a rock",
+      "color": "#78909c",
+      "emoji": "🕳️",
+      "status": "approved"
     }
   ],
   "batches": [

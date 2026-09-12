@@ -27,6 +27,24 @@
       "description": "听属性：大/小、高/矮、满/空，还有颜色对比（技能包，非考试级别）"
     },
     {
+      "id": "feelings",
+      "label": "心情表情 · Feelings",
+      "file": "wordbank.feelings.json",
+      "description": "可看图心情/表情词（精选，非官方考题）"
+    },
+    {
+      "id": "actions",
+      "label": "动作动词 · Actions",
+      "file": "wordbank.actions.json",
+      "description": "可看图动作动词（精选，非官方考题）"
+    },
+    {
+      "id": "adjectives",
+      "label": "常见形容词 · Adjectives",
+      "file": "wordbank.adjectives.json",
+      "description": "常见可看图形容词：热/冷/干净/脏（技能包，非考试级别）"
+    },
+    {
       "id": "starters-food",
       "label": "食物",
       "file": "wordbank.starters.json",

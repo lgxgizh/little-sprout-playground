@@ -12,13 +12,26 @@ test("word bank catalog and packs stay image-backed", async () => {
   assert.ok(catalog.banks.some((bank) => bank.id === "movers"));
   assert.ok(catalog.banks.some((bank) => bank.id === "flyers"));
   assert.ok(catalog.banks.some((bank) => bank.id === "concepts"));
+  assert.ok(catalog.banks.some((bank) => bank.id === "feelings"));
+  assert.ok(catalog.banks.some((bank) => bank.id === "actions"));
+  assert.ok(catalog.banks.some((bank) => bank.id === "adjectives"));
   assert.ok(!catalog.banks.some((bank) => bank.id === "movers-lite"));
+
+  const minWordsByFile = {
+    "wordbank.flyers.json": 12,
+    "wordbank.feelings.json": 8,
+    "wordbank.actions.json": 12,
+    "wordbank.adjectives.json": 4,
+  };
 
   for (const fileName of [
     "wordbank.starters.json",
     "wordbank.movers.json",
     "wordbank.flyers.json",
     "wordbank.concepts.json",
+    "wordbank.feelings.json",
+    "wordbank.actions.json",
+    "wordbank.adjectives.json",
   ]) {
     const pack = JSON.parse(
       await readFile(`public/content/${fileName}`, "utf8"),
@@ -37,7 +50,7 @@ test("word bank catalog and packs stay image-backed", async () => {
       continue;
     }
     assert.ok(Array.isArray(pack.words));
-    const minWords = fileName === "wordbank.flyers.json" ? 12 : 20;
+    const minWords = minWordsByFile[fileName] ?? 20;
     assert.ok(pack.words.length >= minWords, fileName);
     for (const word of pack.words) {
       assert.equal(typeof word.prompt_en, "string");

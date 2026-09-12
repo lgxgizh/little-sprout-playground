@@ -41,6 +41,15 @@ const flyers = JSON.parse(
 const concepts = JSON.parse(
   await readFile("public/content/wordbank.concepts.json", "utf8"),
 );
+const feelings = JSON.parse(
+  await readFile("public/content/wordbank.feelings.json", "utf8"),
+);
+const actions = JSON.parse(
+  await readFile("public/content/wordbank.actions.json", "utf8"),
+);
+const adjectives = JSON.parse(
+  await readFile("public/content/wordbank.adjectives.json", "utf8"),
+);
 const loadedBanks = {
   "wordbank.starters.json": wordbank,
   starters: wordbank,
@@ -50,6 +59,12 @@ const loadedBanks = {
   flyers: flyers,
   "wordbank.concepts.json": concepts,
   concepts: concepts,
+  "wordbank.feelings.json": feelings,
+  feelings: feelings,
+  "wordbank.actions.json": actions,
+  actions: actions,
+  "wordbank.adjectives.json": adjectives,
+  adjectives: adjectives,
 };
 
 test("starters wordbank only keeps imageable nouns", () => {
@@ -72,6 +87,9 @@ test("wordbank catalog lists full pack and theme packs", () => {
     "wordbank.movers.json",
     "wordbank.flyers.json",
     "wordbank.concepts.json",
+    "wordbank.feelings.json",
+    "wordbank.actions.json",
+    "wordbank.adjectives.json",
   ]);
   const banks = listListeningBanks(catalog, loadedBanks);
   const full = banks.find((bank) => bank.id === "starters");
@@ -201,7 +219,7 @@ test("recommended listening counts hide oversized chips", () => {
 });
 
 test("movers bank is registered and image-backed", () => {
-  assert.ok(movers.words.length >= 20);
+  assert.ok(movers.words.length >= 48);
   assert.ok(movers.words.every((word) => word.level === "movers"));
   for (const slug of ["rabbit", "crocodile", "dolphin", "panda"]) {
     assert.ok(
@@ -221,7 +239,7 @@ test("movers bank is registered and image-backed", () => {
 });
 
 test("flyers bank is registered and image-backed", () => {
-  assert.ok(flyers.words.length >= 12);
+  assert.ok(flyers.words.length >= 20);
   assert.ok(flyers.words.every((word) => word.level === "flyers"));
   for (const slug of ["camel", "butterfly", "strawberry", "castle"]) {
     assert.ok(
@@ -328,3 +346,56 @@ test("resolveLoadedBank accepts pairs-only banks", () => {
     null,
   );
 });
+
+test("feelings/actions/adjectives skill banks use natural prompts", () => {
+  assert.ok(feelings.words.length >= 8);
+  assert.ok(actions.words.length >= 20);
+  assert.ok(adjectives.words.length >= 12);
+  const happy = feelings.words.find((word) => word.slug === "happy");
+  const run = actions.words.find((word) => word.slug === "run");
+  const hot = adjectives.words.find((word) => word.slug === "hot");
+  assert.match(happy.prompt_en, /happy/i);
+  assert.doesNotMatch(happy.prompt_en, /the happy/i);
+  assert.match(run.prompt_en, /running|Who is run/i);
+  assert.match(hot.prompt_en, /hot/i);
+
+  const banks = listListeningBanks(catalog, loadedBanks);
+  for (const id of ["feelings", "actions", "adjectives"]) {
+    const entry = banks.find((bank) => bank.id === id);
+    assert.ok(entry, id);
+    const pool = listeningPoolForBank(entry, loadedBanks, { assetBase: "/" });
+    assert.equal(pool.length, entry.count);
+    assert.ok(pool[0].choices.length === 4);
+  }
+
+  const happyQ = buildListeningQuestion(happy, feelings.words, {
+    assetBase: "/",
+  });
+  assert.equal(happyQ.answer, "happy");
+  assert.ok(
+    happyQ.choices.every((choice) =>
+      feelings.words.some((word) => word.slug === choice.value),
+    ),
+  );
+  const picked = pickDistractors(happy, feelings.words, () => 0.2, 3);
+  assert.ok(picked.every((word) => word.theme === "feelings"));
+});
+
+test("expanded movers and flyers include new picture nouns", () => {
+  for (const slug of ["snake", "spider", "bat", "fox", "bridge", "island", "cave", "lighthouse"]) {
+    assert.ok(movers.words.some((word) => word.slug === slug), slug);
+  }
+  for (const slug of [
+    "firefighter",
+    "pirate",
+    "clown",
+    "dancer",
+    "volcano",
+    "desert",
+    "jungle",
+    "snowman",
+  ]) {
+    assert.ok(flyers.words.some((word) => word.slug === slug), slug);
+  }
+});
+
