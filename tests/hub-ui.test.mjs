@@ -83,6 +83,11 @@ test("listening hub lets you pick a concrete word bank and question count", () =
   assert.match(html, /开始 8 题/);
   assert.match(html, /随机抽/);
   assert.match(html, /flashcards\/food\/apple\.jpg/);
+  assert.match(html, /listen-preview/);
+  assert.match(html, /loading="eager"/);
+  assert.doesNotMatch(html, /loading="lazy"/);
+  assert.match(html, /listen-preview-fallback/);
+  assert.doesNotMatch(html, /visibility='hidden'/);
   assert.doesNotMatch(html, /data-listening-bank=/);
   assert.doesNotMatch(html, /Try one now/);
 });

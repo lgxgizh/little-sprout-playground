@@ -400,7 +400,10 @@ test("expanded movers and flyers include new picture nouns", () => {
     "scooter",
     "sledge",
   ]) {
-    assert.ok(movers.words.some((word) => word.slug === slug), slug);
+    assert.ok(
+      movers.words.some((word) => word.slug === slug),
+      slug,
+    );
   }
   for (const slug of [
     "firefighter",
@@ -420,7 +423,10 @@ test("expanded movers and flyers include new picture nouns", () => {
     "map",
     "tent",
   ]) {
-    assert.ok(flyers.words.some((word) => word.slug === slug), slug);
+    assert.ok(
+      flyers.words.some((word) => word.slug === slug),
+      slug,
+    );
   }
 });
 
@@ -435,7 +441,10 @@ test("batch2 feelings/actions/adjectives expansions are present", () => {
     "worried",
     "funny",
   ]) {
-    assert.ok(feelings.words.some((word) => word.slug === slug), slug);
+    assert.ok(
+      feelings.words.some((word) => word.slug === slug),
+      slug,
+    );
   }
   for (const slug of [
     "catch",
@@ -447,13 +456,18 @@ test("batch2 feelings/actions/adjectives expansions are present", () => {
     "carry",
     "give",
   ]) {
-    assert.ok(actions.words.some((word) => word.slug === slug), slug);
+    assert.ok(
+      actions.words.some((word) => word.slug === slug),
+      slug,
+    );
   }
   for (const slug of ["new", "old", "light", "dark"]) {
-    assert.ok(adjectives.words.some((word) => word.slug === slug), slug);
+    assert.ok(
+      adjectives.words.some((word) => word.slug === slug),
+      slug,
+    );
   }
   assert.ok(feelings.words.length >= 16);
   assert.ok(actions.words.length >= 28);
   assert.ok(adjectives.words.length >= 16);
 });
-

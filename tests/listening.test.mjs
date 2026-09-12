@@ -32,6 +32,9 @@ test("listening cards hide written answers until after a tap", () => {
     showLabels: false,
   });
   assert.match(waiting, /choice-letter/);
+  assert.match(waiting, /loading="eager"/);
+  assert.doesNotMatch(waiting, /loading="lazy"/);
+  assert.match(waiting, /onerror=/);
   assert.doesNotMatch(waiting, />Apple</);
   assert.doesNotMatch(waiting, /class="correct"/);
   const done = choiceGridMarkup(apple.choices, {

@@ -147,7 +147,7 @@ export function listeningHubMarkup({
     ? `<div class="listen-preview">${previews
         .map(
           (item) =>
-            `<img src="${escapeHtml(item.src)}" alt="${escapeHtml(item.lemma || "")}" />`,
+            `<img src="${escapeHtml(item.src)}" alt="${escapeHtml(item.lemma || "")}" loading="eager" onerror="this.onerror=null;this.replaceWith(Object.assign(document.createElement('span'),{className:'listen-preview-fallback',textContent:'🖼️'}))" />`,
         )
         .join("")}</div>`
     : "";

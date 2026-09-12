@@ -20,14 +20,8 @@
       "prompt_en": "Which one is the rabbit?",
       "speech": "Which one is the rabbit?",
       "imageable": true,
-      "distractor_pool": [
-        "cat",
-        "dog",
-        "mouse"
-      ],
-      "adjacent_types": [
-        "insect"
-      ],
+      "distractor_pool": ["cat", "dog", "mouse"],
+      "adjacent_types": ["insect"],
       "image_id": "img_rabbit_v1",
       "image": "assets/flashcards/movers/rabbit.jpg",
       "fallback_image": "assets/flashcards/movers/rabbit.jpg",
@@ -49,14 +43,8 @@
       "prompt_en": "Which one is the crocodile?",
       "speech": "Which one is the crocodile?",
       "imageable": true,
-      "distractor_pool": [
-        "hippo",
-        "frog",
-        "fish"
-      ],
-      "adjacent_types": [
-        "insect"
-      ],
+      "distractor_pool": ["hippo", "frog", "fish"],
+      "adjacent_types": ["insect"],
       "image_id": "img_crocodile_v1",
       "image": "assets/flashcards/movers/crocodile.jpg",
       "fallback_image": "assets/flashcards/movers/crocodile.jpg",
@@ -86,10 +74,7 @@
         "tiger",
         "zebra"
       ],
-      "adjacent_types": [
-        "farm",
-        "pet"
-      ],
+      "adjacent_types": ["farm", "pet"],
       "image_id": "img_giraffe_v1",
       "image": "assets/flashcards/movers/giraffe.jpg",
       "fallback_image": "assets/flashcards/movers/giraffe.jpg",
@@ -119,10 +104,7 @@
         "tiger",
         "zebra"
       ],
-      "adjacent_types": [
-        "farm",
-        "pet"
-      ],
+      "adjacent_types": ["farm", "pet"],
       "image_id": "img_elephant_v1",
       "image": "assets/flashcards/movers/elephant.jpg",
       "fallback_image": "assets/flashcards/movers/elephant.jpg",
@@ -152,10 +134,7 @@
         "tiger",
         "zebra"
       ],
-      "adjacent_types": [
-        "farm",
-        "pet"
-      ],
+      "adjacent_types": ["farm", "pet"],
       "image_id": "img_hippo_v1",
       "image": "assets/flashcards/movers/hippo.jpg",
       "fallback_image": "assets/flashcards/movers/hippo.jpg",
@@ -185,10 +164,7 @@
         "hippo",
         "tiger"
       ],
-      "adjacent_types": [
-        "farm",
-        "pet"
-      ],
+      "adjacent_types": ["farm", "pet"],
       "image_id": "img_zebra_v1",
       "image": "assets/flashcards/movers/zebra.jpg",
       "fallback_image": "assets/flashcards/movers/zebra.jpg",
@@ -218,10 +194,7 @@
         "tiger",
         "zebra"
       ],
-      "adjacent_types": [
-        "farm",
-        "pet"
-      ],
+      "adjacent_types": ["farm", "pet"],
       "image_id": "img_monkey_v1",
       "image": "assets/flashcards/movers/monkey.jpg",
       "fallback_image": "assets/flashcards/movers/monkey.jpg",
@@ -251,10 +224,7 @@
         "hippo",
         "zebra"
       ],
-      "adjacent_types": [
-        "farm",
-        "pet"
-      ],
+      "adjacent_types": ["farm", "pet"],
       "image_id": "img_tiger_v1",
       "image": "assets/flashcards/movers/tiger.jpg",
       "fallback_image": "assets/flashcards/movers/tiger.jpg",
@@ -284,10 +254,7 @@
         "hippo",
         "tiger"
       ],
-      "adjacent_types": [
-        "farm",
-        "pet"
-      ],
+      "adjacent_types": ["farm", "pet"],
       "image_id": "img_polar-bear_v1",
       "image": "assets/flashcards/movers/polar-bear.jpg",
       "fallback_image": "assets/flashcards/movers/polar-bear.jpg",
@@ -309,17 +276,8 @@
       "prompt_en": "Which one is the helicopter?",
       "speech": "Which one is the helicopter?",
       "imageable": true,
-      "distractor_pool": [
-        "train",
-        "bike",
-        "boat",
-        "plane",
-        "car",
-        "bus"
-      ],
-      "adjacent_types": [
-        "play"
-      ],
+      "distractor_pool": ["train", "bike", "boat", "plane", "car", "bus"],
+      "adjacent_types": ["play"],
       "image_id": "img_helicopter_v1",
       "image": "assets/flashcards/movers/helicopter.jpg",
       "fallback_image": "assets/flashcards/movers/helicopter.jpg",
@@ -349,9 +307,7 @@
         "helicopter",
         "car"
       ],
-      "adjacent_types": [
-        "play"
-      ],
+      "adjacent_types": ["play"],
       "image_id": "img_motorbike_v1",
       "image": "assets/flashcards/movers/motorbike.jpg",
       "fallback_image": "assets/flashcards/movers/motorbike.jpg",
@@ -381,9 +337,7 @@
         "helicopter",
         "car"
       ],
-      "adjacent_types": [
-        "play"
-      ],
+      "adjacent_types": ["play"],
       "image_id": "img_truck_v1",
       "image": "assets/flashcards/movers/truck.jpg",
       "fallback_image": "assets/flashcards/movers/truck.jpg",
@@ -413,11 +367,7 @@
         "grape",
         "lemon"
       ],
-      "adjacent_types": [
-        "vegetable",
-        "meal",
-        "drink"
-      ],
+      "adjacent_types": ["vegetable", "meal", "drink"],
       "image_id": "img_pineapple_v1",
       "image": "assets/flashcards/movers/pineapple.jpg",
       "fallback_image": "assets/flashcards/movers/pineapple.jpg",
@@ -447,11 +397,7 @@
         "grape",
         "lemon"
       ],
-      "adjacent_types": [
-        "vegetable",
-        "meal",
-        "drink"
-      ],
+      "adjacent_types": ["vegetable", "meal", "drink"],
       "image_id": "img_watermelon_v1",
       "image": "assets/flashcards/movers/watermelon.jpg",
       "fallback_image": "assets/flashcards/movers/watermelon.jpg",
@@ -481,11 +427,7 @@
         "grape",
         "lemon"
       ],
-      "adjacent_types": [
-        "vegetable",
-        "meal",
-        "drink"
-      ],
+      "adjacent_types": ["vegetable", "meal", "drink"],
       "image_id": "img_mango_v1",
       "image": "assets/flashcards/movers/mango.jpg",
       "fallback_image": "assets/flashcards/movers/mango.jpg",
@@ -515,11 +457,7 @@
         "grape",
         "lemon"
       ],
-      "adjacent_types": [
-        "vegetable",
-        "meal",
-        "drink"
-      ],
+      "adjacent_types": ["vegetable", "meal", "drink"],
       "image_id": "img_coconut_v1",
       "image": "assets/flashcards/movers/coconut.jpg",
       "fallback_image": "assets/flashcards/movers/coconut.jpg",
@@ -549,11 +487,7 @@
         "grape",
         "lemon"
       ],
-      "adjacent_types": [
-        "vegetable",
-        "meal",
-        "drink"
-      ],
+      "adjacent_types": ["vegetable", "meal", "drink"],
       "image_id": "img_kiwi_v1",
       "image": "assets/flashcards/movers/kiwi.jpg",
       "fallback_image": "assets/flashcards/movers/kiwi.jpg",
@@ -575,14 +509,7 @@
       "prompt_en": "Which one is the glasses?",
       "speech": "Which one is the glasses?",
       "imageable": true,
-      "distractor_pool": [
-        "hat",
-        "dress",
-        "shirt",
-        "t-shirt",
-        "shoe",
-        "sock"
-      ],
+      "distractor_pool": ["hat", "dress", "shirt", "t-shirt", "shoe", "sock"],
       "adjacent_types": [],
       "image_id": "img_glasses_v1",
       "image": "assets/flashcards/movers/glasses.jpg",
@@ -605,14 +532,7 @@
       "prompt_en": "Which one is the jeans?",
       "speech": "Which one is the jeans?",
       "imageable": true,
-      "distractor_pool": [
-        "hat",
-        "dress",
-        "shirt",
-        "t-shirt",
-        "shoe",
-        "sock"
-      ],
+      "distractor_pool": ["hat", "dress", "shirt", "t-shirt", "shoe", "sock"],
       "adjacent_types": [],
       "image_id": "img_jeans_v1",
       "image": "assets/flashcards/movers/jeans.jpg",
@@ -635,14 +555,7 @@
       "prompt_en": "Which one is the jacket?",
       "speech": "Which one is the jacket?",
       "imageable": true,
-      "distractor_pool": [
-        "hat",
-        "dress",
-        "shirt",
-        "t-shirt",
-        "shoe",
-        "sock"
-      ],
+      "distractor_pool": ["hat", "dress", "shirt", "t-shirt", "shoe", "sock"],
       "adjacent_types": [],
       "image_id": "img_jacket_v1",
       "image": "assets/flashcards/movers/jacket.jpg",
@@ -665,17 +578,8 @@
       "prompt_en": "Which one is the computer?",
       "speech": "Which one is the computer?",
       "imageable": true,
-      "distractor_pool": [
-        "lamp",
-        "clock",
-        "door",
-        "window",
-        "bath",
-        "box"
-      ],
-      "adjacent_types": [
-        "furniture"
-      ],
+      "distractor_pool": ["lamp", "clock", "door", "window", "bath", "box"],
+      "adjacent_types": ["furniture"],
       "image_id": "img_computer_v1",
       "image": "assets/flashcards/movers/computer.jpg",
       "fallback_image": "assets/flashcards/movers/computer.jpg",
@@ -697,17 +601,8 @@
       "prompt_en": "Which one is the television?",
       "speech": "Which one is the television?",
       "imageable": true,
-      "distractor_pool": [
-        "lamp",
-        "clock",
-        "door",
-        "window",
-        "bath",
-        "box"
-      ],
-      "adjacent_types": [
-        "furniture"
-      ],
+      "distractor_pool": ["lamp", "clock", "door", "window", "bath", "box"],
+      "adjacent_types": ["furniture"],
       "image_id": "img_television_v1",
       "image": "assets/flashcards/movers/television.jpg",
       "fallback_image": "assets/flashcards/movers/television.jpg",
@@ -729,17 +624,8 @@
       "prompt_en": "Which one is the guitar?",
       "speech": "Which one is the guitar?",
       "imageable": true,
-      "distractor_pool": [
-        "book",
-        "pencil",
-        "pen",
-        "crayon",
-        "ruler",
-        "eraser"
-      ],
-      "adjacent_types": [
-        "object"
-      ],
+      "distractor_pool": ["book", "pencil", "pen", "crayon", "ruler", "eraser"],
+      "adjacent_types": ["object"],
       "image_id": "img_guitar_v1",
       "image": "assets/flashcards/movers/guitar.jpg",
       "fallback_image": "assets/flashcards/movers/guitar.jpg",
@@ -761,18 +647,8 @@
       "prompt_en": "Which one is the camera?",
       "speech": "Which one is the camera?",
       "imageable": true,
-      "distractor_pool": [
-        "ball",
-        "balloon",
-        "doll",
-        "kite",
-        "robot",
-        "teddy"
-      ],
-      "adjacent_types": [
-        "sport",
-        "vehicle"
-      ],
+      "distractor_pool": ["ball", "balloon", "doll", "kite", "robot", "teddy"],
+      "adjacent_types": ["sport", "vehicle"],
       "image_id": "img_camera_v1",
       "image": "assets/flashcards/movers/camera.jpg",
       "fallback_image": "assets/flashcards/movers/camera.jpg",
@@ -794,18 +670,8 @@
       "prompt_en": "Which one is the robot?",
       "speech": "Which one is the robot?",
       "imageable": true,
-      "distractor_pool": [
-        "ball",
-        "balloon",
-        "doll",
-        "kite",
-        "teddy",
-        "camera"
-      ],
-      "adjacent_types": [
-        "sport",
-        "vehicle"
-      ],
+      "distractor_pool": ["ball", "balloon", "doll", "kite", "teddy", "camera"],
+      "adjacent_types": ["sport", "vehicle"],
       "image_id": "img_robot_v1",
       "image": "assets/flashcards/movers/robot.jpg",
       "fallback_image": "assets/flashcards/movers/robot.jpg",
@@ -827,16 +693,8 @@
       "prompt_en": "Which one is the armchair?",
       "speech": "Which one is the armchair?",
       "imageable": true,
-      "distractor_pool": [
-        "bed",
-        "chair",
-        "table",
-        "sofa",
-        "desk"
-      ],
-      "adjacent_types": [
-        "object"
-      ],
+      "distractor_pool": ["bed", "chair", "table", "sofa", "desk"],
+      "adjacent_types": ["object"],
       "image_id": "img_armchair_v1",
       "image": "assets/flashcards/movers/armchair.jpg",
       "fallback_image": "assets/flashcards/movers/armchair.jpg",
@@ -858,15 +716,8 @@
       "prompt_en": "Which one is the dolphin?",
       "speech": "Which one is the dolphin?",
       "imageable": true,
-      "distractor_pool": [
-        "whale",
-        "shark",
-        "penguin",
-        "panda"
-      ],
-      "adjacent_types": [
-        "zoo"
-      ],
+      "distractor_pool": ["whale", "shark", "penguin", "panda"],
+      "adjacent_types": ["zoo"],
       "image_id": "img_dolphin_v1",
       "image": "assets/flashcards/movers/dolphin.jpg",
       "fallback_image": "assets/flashcards/movers/dolphin.jpg",
@@ -888,16 +739,8 @@
       "prompt_en": "Which one is the panda?",
       "speech": "Which one is the panda?",
       "imageable": true,
-      "distractor_pool": [
-        "penguin",
-        "lion",
-        "kangaroo",
-        "rabbit"
-      ],
-      "adjacent_types": [
-        "animal",
-        "pet"
-      ],
+      "distractor_pool": ["penguin", "lion", "kangaroo", "rabbit"],
+      "adjacent_types": ["animal", "pet"],
       "image_id": "img_panda_v1",
       "image": "assets/flashcards/movers/panda.jpg",
       "fallback_image": "assets/flashcards/movers/panda.jpg",
@@ -919,15 +762,8 @@
       "prompt_en": "Which one is the parrot?",
       "speech": "Which one is the parrot?",
       "imageable": true,
-      "distractor_pool": [
-        "penguin",
-        "dolphin",
-        "panda",
-        "rabbit"
-      ],
-      "adjacent_types": [
-        "zoo"
-      ],
+      "distractor_pool": ["penguin", "dolphin", "panda", "rabbit"],
+      "adjacent_types": ["zoo"],
       "image_id": "img_parrot_v1",
       "image": "assets/flashcards/movers/parrot.jpg",
       "fallback_image": "assets/flashcards/movers/parrot.jpg",
@@ -949,15 +785,8 @@
       "prompt_en": "Which one is the penguin?",
       "speech": "Which one is the penguin?",
       "imageable": true,
-      "distractor_pool": [
-        "dolphin",
-        "panda",
-        "polar-bear",
-        "whale"
-      ],
-      "adjacent_types": [
-        "zoo"
-      ],
+      "distractor_pool": ["dolphin", "panda", "polar-bear", "whale"],
+      "adjacent_types": ["zoo"],
       "image_id": "img_penguin_v1",
       "image": "assets/flashcards/movers/penguin.jpg",
       "fallback_image": "assets/flashcards/movers/penguin.jpg",
@@ -979,15 +808,8 @@
       "prompt_en": "Which one is the shark?",
       "speech": "Which one is the shark?",
       "imageable": true,
-      "distractor_pool": [
-        "dolphin",
-        "whale",
-        "penguin",
-        "fish"
-      ],
-      "adjacent_types": [
-        "zoo"
-      ],
+      "distractor_pool": ["dolphin", "whale", "penguin", "fish"],
+      "adjacent_types": ["zoo"],
       "image_id": "img_shark_v1",
       "image": "assets/flashcards/movers/shark.jpg",
       "fallback_image": "assets/flashcards/movers/shark.jpg",
@@ -1009,15 +831,8 @@
       "prompt_en": "Which one is the whale?",
       "speech": "Which one is the whale?",
       "imageable": true,
-      "distractor_pool": [
-        "dolphin",
-        "shark",
-        "penguin",
-        "panda"
-      ],
-      "adjacent_types": [
-        "zoo"
-      ],
+      "distractor_pool": ["dolphin", "shark", "penguin", "panda"],
+      "adjacent_types": ["zoo"],
       "image_id": "img_whale_v1",
       "image": "assets/flashcards/movers/whale.jpg",
       "fallback_image": "assets/flashcards/movers/whale.jpg",
@@ -1039,16 +854,8 @@
       "prompt_en": "Which one is the kangaroo?",
       "speech": "Which one is the kangaroo?",
       "imageable": true,
-      "distractor_pool": [
-        "lion",
-        "panda",
-        "rabbit",
-        "zebra"
-      ],
-      "adjacent_types": [
-        "animal",
-        "pet"
-      ],
+      "distractor_pool": ["lion", "panda", "rabbit", "zebra"],
+      "adjacent_types": ["animal", "pet"],
       "image_id": "img_kangaroo_v1",
       "image": "assets/flashcards/movers/kangaroo.jpg",
       "fallback_image": "assets/flashcards/movers/kangaroo.jpg",
@@ -1070,16 +877,8 @@
       "prompt_en": "Which one is the lion?",
       "speech": "Which one is the lion?",
       "imageable": true,
-      "distractor_pool": [
-        "tiger",
-        "kangaroo",
-        "panda",
-        "zebra"
-      ],
-      "adjacent_types": [
-        "animal",
-        "pet"
-      ],
+      "distractor_pool": ["tiger", "kangaroo", "panda", "zebra"],
+      "adjacent_types": ["animal", "pet"],
       "image_id": "img_lion_v1",
       "image": "assets/flashcards/movers/lion.jpg",
       "fallback_image": "assets/flashcards/movers/lion.jpg",
@@ -1101,15 +900,8 @@
       "prompt_en": "Which one is the kitten?",
       "speech": "Which one is the kitten?",
       "imageable": true,
-      "distractor_pool": [
-        "puppy",
-        "rabbit",
-        "cat",
-        "panda"
-      ],
-      "adjacent_types": [
-        "animal"
-      ],
+      "distractor_pool": ["puppy", "rabbit", "cat", "panda"],
+      "adjacent_types": ["animal"],
       "image_id": "img_kitten_v1",
       "image": "assets/flashcards/movers/kitten.jpg",
       "fallback_image": "assets/flashcards/movers/kitten.jpg",
@@ -1131,15 +923,8 @@
       "prompt_en": "Which one is the puppy?",
       "speech": "Which one is the puppy?",
       "imageable": true,
-      "distractor_pool": [
-        "kitten",
-        "rabbit",
-        "dog",
-        "panda"
-      ],
-      "adjacent_types": [
-        "animal"
-      ],
+      "distractor_pool": ["kitten", "rabbit", "dog", "panda"],
+      "adjacent_types": ["animal"],
       "image_id": "img_puppy_v1",
       "image": "assets/flashcards/movers/puppy.jpg",
       "fallback_image": "assets/flashcards/movers/puppy.jpg",
@@ -1161,16 +946,8 @@
       "prompt_en": "Which one is the sandwich?",
       "speech": "Which one is the sandwich?",
       "imageable": true,
-      "distractor_pool": [
-        "pineapple",
-        "watermelon",
-        "mango",
-        "coconut"
-      ],
-      "adjacent_types": [
-        "fruit",
-        "drink"
-      ],
+      "distractor_pool": ["pineapple", "watermelon", "mango", "coconut"],
+      "adjacent_types": ["fruit", "drink"],
       "image_id": "img_sandwich_v1",
       "image": "assets/flashcards/movers/sandwich.jpg",
       "fallback_image": "assets/flashcards/movers/sandwich.jpg",
@@ -1192,12 +969,7 @@
       "prompt_en": "Which one is the scarf?",
       "speech": "Which one is the scarf?",
       "imageable": true,
-      "distractor_pool": [
-        "jacket",
-        "jeans",
-        "glasses",
-        "hat"
-      ],
+      "distractor_pool": ["jacket", "jeans", "glasses", "hat"],
       "adjacent_types": [],
       "image_id": "img_scarf_v1",
       "image": "assets/flashcards/movers/scarf.jpg",
@@ -1220,15 +992,8 @@
       "prompt_en": "Which one is the toothbrush?",
       "speech": "Which one is the toothbrush?",
       "imageable": true,
-      "distractor_pool": [
-        "computer",
-        "television",
-        "armchair",
-        "lamp"
-      ],
-      "adjacent_types": [
-        "furniture"
-      ],
+      "distractor_pool": ["computer", "television", "armchair", "lamp"],
+      "adjacent_types": ["furniture"],
       "image_id": "img_toothbrush_v1",
       "image": "assets/flashcards/movers/toothbrush.jpg",
       "fallback_image": "assets/flashcards/movers/toothbrush.jpg",
@@ -1250,12 +1015,7 @@
       "prompt_en": "Which one is the rainbow?",
       "speech": "Which one is the rainbow?",
       "imageable": true,
-      "distractor_pool": [
-        "moon",
-        "waterfall",
-        "star",
-        "cloud"
-      ],
+      "distractor_pool": ["moon", "waterfall", "star", "cloud"],
       "adjacent_types": [],
       "image_id": "img_rainbow_v1",
       "image": "assets/flashcards/movers/rainbow.jpg",
@@ -1278,12 +1038,7 @@
       "prompt_en": "Which one is the moon?",
       "speech": "Which one is the moon?",
       "imageable": true,
-      "distractor_pool": [
-        "rainbow",
-        "waterfall",
-        "star",
-        "sun"
-      ],
+      "distractor_pool": ["rainbow", "waterfall", "star", "sun"],
       "adjacent_types": [],
       "image_id": "img_moon_v1",
       "image": "assets/flashcards/movers/moon.jpg",
@@ -1306,12 +1061,7 @@
       "prompt_en": "Which one is the waterfall?",
       "speech": "Which one is the waterfall?",
       "imageable": true,
-      "distractor_pool": [
-        "rainbow",
-        "moon",
-        "river",
-        "tree"
-      ],
+      "distractor_pool": ["rainbow", "moon", "river", "tree"],
       "adjacent_types": [],
       "image_id": "img_waterfall_v1",
       "image": "assets/flashcards/movers/waterfall.jpg",
@@ -1344,9 +1094,7 @@
         "monkey",
         "tiger"
       ],
-      "adjacent_types": [
-        "animal"
-      ],
+      "adjacent_types": ["animal"],
       "image_id": "img_snake_v1",
       "image": "assets/flashcards/movers/snake.jpg",
       "fallback_image": "assets/flashcards/movers/snake.jpg",
@@ -1378,9 +1126,7 @@
         "monkey",
         "tiger"
       ],
-      "adjacent_types": [
-        "animal"
-      ],
+      "adjacent_types": ["animal"],
       "image_id": "img_spider_v1",
       "image": "assets/flashcards/movers/spider.jpg",
       "fallback_image": "assets/flashcards/movers/spider.jpg",
@@ -1412,9 +1158,7 @@
         "monkey",
         "tiger"
       ],
-      "adjacent_types": [
-        "animal"
-      ],
+      "adjacent_types": ["animal"],
       "image_id": "img_bat_v1",
       "image": "assets/flashcards/movers/bat.jpg",
       "fallback_image": "assets/flashcards/movers/bat.jpg",
@@ -1446,9 +1190,7 @@
         "monkey",
         "tiger"
       ],
-      "adjacent_types": [
-        "animal"
-      ],
+      "adjacent_types": ["animal"],
       "image_id": "img_fox_v1",
       "image": "assets/flashcards/movers/fox.jpg",
       "fallback_image": "assets/flashcards/movers/fox.jpg",
@@ -1470,14 +1212,8 @@
       "prompt_en": "Which one is the lighthouse?",
       "speech": "Which one is the lighthouse?",
       "imageable": true,
-      "distractor_pool": [
-        "rainbow",
-        "moon",
-        "waterfall"
-      ],
-      "adjacent_types": [
-        "place"
-      ],
+      "distractor_pool": ["rainbow", "moon", "waterfall"],
+      "adjacent_types": ["place"],
       "image_id": "img_lighthouse_v1",
       "image": "assets/flashcards/movers/lighthouse.jpg",
       "fallback_image": "assets/flashcards/movers/lighthouse.jpg",
@@ -1499,14 +1235,8 @@
       "prompt_en": "Which one is the bridge?",
       "speech": "Which one is the bridge?",
       "imageable": true,
-      "distractor_pool": [
-        "rainbow",
-        "moon",
-        "waterfall"
-      ],
-      "adjacent_types": [
-        "place"
-      ],
+      "distractor_pool": ["rainbow", "moon", "waterfall"],
+      "adjacent_types": ["place"],
       "image_id": "img_bridge_v1",
       "image": "assets/flashcards/movers/bridge.jpg",
       "fallback_image": "assets/flashcards/movers/bridge.jpg",
@@ -1528,14 +1258,8 @@
       "prompt_en": "Which one is the island?",
       "speech": "Which one is the island?",
       "imageable": true,
-      "distractor_pool": [
-        "rainbow",
-        "moon",
-        "waterfall"
-      ],
-      "adjacent_types": [
-        "place"
-      ],
+      "distractor_pool": ["rainbow", "moon", "waterfall"],
+      "adjacent_types": ["place"],
       "image_id": "img_island_v1",
       "image": "assets/flashcards/movers/island.jpg",
       "fallback_image": "assets/flashcards/movers/island.jpg",
@@ -1557,14 +1281,8 @@
       "prompt_en": "Which one is the cave?",
       "speech": "Which one is the cave?",
       "imageable": true,
-      "distractor_pool": [
-        "rainbow",
-        "moon",
-        "waterfall"
-      ],
-      "adjacent_types": [
-        "place"
-      ],
+      "distractor_pool": ["rainbow", "moon", "waterfall"],
+      "adjacent_types": ["place"],
       "image_id": "img_cave_v1",
       "image": "assets/flashcards/movers/cave.jpg",
       "fallback_image": "assets/flashcards/movers/cave.jpg",
@@ -1596,9 +1314,7 @@
         "monkey",
         "tiger"
       ],
-      "adjacent_types": [
-        "insect"
-      ],
+      "adjacent_types": ["insect"],
       "image_id": "img_owl_v1",
       "image": "assets/flashcards/movers/owl.jpg",
       "fallback_image": "assets/flashcards/movers/owl.jpg",
@@ -1630,9 +1346,7 @@
         "monkey",
         "tiger"
       ],
-      "adjacent_types": [
-        "insect"
-      ],
+      "adjacent_types": ["insect"],
       "image_id": "img_squirrel_v1",
       "image": "assets/flashcards/movers/squirrel.jpg",
       "fallback_image": "assets/flashcards/movers/squirrel.jpg",
@@ -1664,9 +1378,7 @@
         "monkey",
         "tiger"
       ],
-      "adjacent_types": [
-        "insect"
-      ],
+      "adjacent_types": ["insect"],
       "image_id": "img_hedgehog_v1",
       "image": "assets/flashcards/movers/hedgehog.jpg",
       "fallback_image": "assets/flashcards/movers/hedgehog.jpg",
@@ -1698,9 +1410,7 @@
         "monkey",
         "tiger"
       ],
-      "adjacent_types": [
-        "insect"
-      ],
+      "adjacent_types": ["insect"],
       "image_id": "img_lobster_v1",
       "image": "assets/flashcards/movers/lobster.jpg",
       "fallback_image": "assets/flashcards/movers/lobster.jpg",
@@ -1732,9 +1442,7 @@
         "scooter",
         "sledge"
       ],
-      "adjacent_types": [
-        "vehicle"
-      ],
+      "adjacent_types": ["vehicle"],
       "image_id": "img_skate_v1",
       "image": "assets/flashcards/movers/skate.jpg",
       "fallback_image": "assets/flashcards/movers/skate.jpg",
@@ -1766,9 +1474,7 @@
         "scooter",
         "sledge"
       ],
-      "adjacent_types": [
-        "vehicle"
-      ],
+      "adjacent_types": ["vehicle"],
       "image_id": "img_skateboard_v1",
       "image": "assets/flashcards/movers/skateboard.jpg",
       "fallback_image": "assets/flashcards/movers/skateboard.jpg",
@@ -1800,9 +1506,7 @@
         "skateboard",
         "sledge"
       ],
-      "adjacent_types": [
-        "vehicle"
-      ],
+      "adjacent_types": ["vehicle"],
       "image_id": "img_scooter_v1",
       "image": "assets/flashcards/movers/scooter.jpg",
       "fallback_image": "assets/flashcards/movers/scooter.jpg",
@@ -1834,9 +1538,7 @@
         "skateboard",
         "scooter"
       ],
-      "adjacent_types": [
-        "vehicle"
-      ],
+      "adjacent_types": ["vehicle"],
       "image_id": "img_sledge_v1",
       "image": "assets/flashcards/movers/sledge.jpg",
       "fallback_image": "assets/flashcards/movers/sledge.jpg",
@@ -1849,100 +1551,47 @@
   "batches": [
     {
       "id": "movers-grid-02",
-      "slugs": [
-        "giraffe",
-        "elephant",
-        "hippo",
-        "zebra"
-      ]
+      "slugs": ["giraffe", "elephant", "hippo", "zebra"]
     },
     {
       "id": "movers-grid-03",
-      "slugs": [
-        "monkey",
-        "tiger",
-        "polar-bear",
-        "helicopter"
-      ]
+      "slugs": ["monkey", "tiger", "polar-bear", "helicopter"]
     },
     {
       "id": "movers-grid-04",
-      "slugs": [
-        "motorbike",
-        "truck",
-        "pineapple",
-        "watermelon"
-      ]
+      "slugs": ["motorbike", "truck", "pineapple", "watermelon"]
     },
     {
       "id": "movers-grid-05",
-      "slugs": [
-        "mango",
-        "coconut",
-        "kiwi",
-        "glasses"
-      ]
+      "slugs": ["mango", "coconut", "kiwi", "glasses"]
     },
     {
       "id": "movers-grid-06",
-      "slugs": [
-        "jeans",
-        "jacket",
-        "computer",
-        "television"
-      ]
+      "slugs": ["jeans", "jacket", "computer", "television"]
     },
     {
       "id": "movers-grid-07",
-      "slugs": [
-        "guitar",
-        "camera",
-        "robot",
-        "armchair"
-      ]
+      "slugs": ["guitar", "camera", "robot", "armchair"]
     },
     {
       "id": "movers-grid-01-kept",
-      "slugs": [
-        "rabbit",
-        "crocodile"
-      ]
+      "slugs": ["rabbit", "crocodile"]
     },
     {
       "id": "movers-extra-01",
-      "slugs": [
-        "dolphin",
-        "panda",
-        "parrot",
-        "penguin"
-      ]
+      "slugs": ["dolphin", "panda", "parrot", "penguin"]
     },
     {
       "id": "movers-extra-02",
-      "slugs": [
-        "shark",
-        "whale",
-        "kangaroo",
-        "lion"
-      ]
+      "slugs": ["shark", "whale", "kangaroo", "lion"]
     },
     {
       "id": "movers-extra-03",
-      "slugs": [
-        "kitten",
-        "puppy",
-        "sandwich",
-        "scarf"
-      ]
+      "slugs": ["kitten", "puppy", "sandwich", "scarf"]
     },
     {
       "id": "movers-extra-04",
-      "slugs": [
-        "toothbrush",
-        "rainbow",
-        "moon",
-        "waterfall"
-      ]
+      "slugs": ["toothbrush", "rainbow", "moon", "waterfall"]
     }
   ]
 }

@@ -40,9 +40,10 @@ export function choiceGridMarkup(
       const isWrong =
         answered && selectedChoice === choice.value && choice.value !== answer;
       const letter = choiceLetter(index);
+      const emoji = escapeHtml(choice.emoji || "🖼️");
       const media = choice.imageSrc
-        ? `<img class="choice-image" src="${escapeHtml(choice.imageSrc)}" alt="" loading="lazy" />`
-        : `<span class="choice-emoji">${escapeHtml(choice.emoji || "⭐")}</span>`;
+        ? `<img class="choice-image" src="${escapeHtml(choice.imageSrc)}" alt="" loading="eager" data-emoji="${emoji}" onerror="this.onerror=null;this.replaceWith(Object.assign(document.createElement('span'),{className:'choice-emoji',textContent:this.dataset.emoji||'🖼️'}))" />`
+        : `<span class="choice-emoji">${emoji}</span>`;
       const label = showLabels
         ? `<span class="choice-label">${escapeHtml(choice.label || letter)}</span>`
         : "";

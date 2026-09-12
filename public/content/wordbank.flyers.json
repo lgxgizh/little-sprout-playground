@@ -20,15 +20,8 @@
       "prompt_en": "Which one is the camel?",
       "speech": "Which one is the camel?",
       "imageable": true,
-      "distractor_pool": [
-        "dinosaur",
-        "eagle",
-        "octopus",
-        "tortoise"
-      ],
-      "adjacent_types": [
-        "animal"
-      ],
+      "distractor_pool": ["dinosaur", "eagle", "octopus", "tortoise"],
+      "adjacent_types": ["animal"],
       "image_id": "img_camel_v1",
       "image": "assets/flashcards/flyers/camel.jpg",
       "fallback_image": "assets/flashcards/flyers/camel.jpg",
@@ -50,15 +43,8 @@
       "prompt_en": "Which one is the dinosaur?",
       "speech": "Which one is the dinosaur?",
       "imageable": true,
-      "distractor_pool": [
-        "camel",
-        "eagle",
-        "octopus",
-        "tortoise"
-      ],
-      "adjacent_types": [
-        "zoo"
-      ],
+      "distractor_pool": ["camel", "eagle", "octopus", "tortoise"],
+      "adjacent_types": ["zoo"],
       "image_id": "img_dinosaur_v1",
       "image": "assets/flashcards/flyers/dinosaur.jpg",
       "fallback_image": "assets/flashcards/flyers/dinosaur.jpg",
@@ -80,15 +66,8 @@
       "prompt_en": "Which one is the eagle?",
       "speech": "Which one is the eagle?",
       "imageable": true,
-      "distractor_pool": [
-        "swan",
-        "butterfly",
-        "parrot",
-        "octopus"
-      ],
-      "adjacent_types": [
-        "zoo"
-      ],
+      "distractor_pool": ["swan", "butterfly", "parrot", "octopus"],
+      "adjacent_types": ["zoo"],
       "image_id": "img_eagle_v1",
       "image": "assets/flashcards/flyers/eagle.jpg",
       "fallback_image": "assets/flashcards/flyers/eagle.jpg",
@@ -110,15 +89,8 @@
       "prompt_en": "Which one is the octopus?",
       "speech": "Which one is the octopus?",
       "imageable": true,
-      "distractor_pool": [
-        "swan",
-        "tortoise",
-        "camel",
-        "dinosaur"
-      ],
-      "adjacent_types": [
-        "zoo"
-      ],
+      "distractor_pool": ["swan", "tortoise", "camel", "dinosaur"],
+      "adjacent_types": ["zoo"],
       "image_id": "img_octopus_v1",
       "image": "assets/flashcards/flyers/octopus.jpg",
       "fallback_image": "assets/flashcards/flyers/octopus.jpg",
@@ -140,15 +112,8 @@
       "prompt_en": "Which one is the swan?",
       "speech": "Which one is the swan?",
       "imageable": true,
-      "distractor_pool": [
-        "eagle",
-        "tortoise",
-        "butterfly",
-        "octopus"
-      ],
-      "adjacent_types": [
-        "zoo"
-      ],
+      "distractor_pool": ["eagle", "tortoise", "butterfly", "octopus"],
+      "adjacent_types": ["zoo"],
       "image_id": "img_swan_v1",
       "image": "assets/flashcards/flyers/swan.jpg",
       "fallback_image": "assets/flashcards/flyers/swan.jpg",
@@ -170,15 +135,8 @@
       "prompt_en": "Which one is the tortoise?",
       "speech": "Which one is the tortoise?",
       "imageable": true,
-      "distractor_pool": [
-        "swan",
-        "camel",
-        "beetle",
-        "octopus"
-      ],
-      "adjacent_types": [
-        "zoo"
-      ],
+      "distractor_pool": ["swan", "camel", "beetle", "octopus"],
+      "adjacent_types": ["zoo"],
       "image_id": "img_tortoise_v1",
       "image": "assets/flashcards/flyers/tortoise.jpg",
       "fallback_image": "assets/flashcards/flyers/tortoise.jpg",
@@ -200,15 +158,8 @@
       "prompt_en": "Which one is the ambulance?",
       "speech": "Which one is the ambulance?",
       "imageable": true,
-      "distractor_pool": [
-        "rocket",
-        "car",
-        "bus",
-        "train"
-      ],
-      "adjacent_types": [
-        "play"
-      ],
+      "distractor_pool": ["rocket", "car", "bus", "train"],
+      "adjacent_types": ["play"],
       "image_id": "img_ambulance_v1",
       "image": "assets/flashcards/flyers/ambulance.jpg",
       "fallback_image": "assets/flashcards/flyers/ambulance.jpg",
@@ -230,15 +181,8 @@
       "prompt_en": "Which one is the rocket?",
       "speech": "Which one is the rocket?",
       "imageable": true,
-      "distractor_pool": [
-        "ambulance",
-        "plane",
-        "helicopter",
-        "bus"
-      ],
-      "adjacent_types": [
-        "play"
-      ],
+      "distractor_pool": ["ambulance", "plane", "helicopter", "bus"],
+      "adjacent_types": ["play"],
       "image_id": "img_rocket_v1",
       "image": "assets/flashcards/flyers/rocket.jpg",
       "fallback_image": "assets/flashcards/flyers/rocket.jpg",
@@ -260,15 +204,8 @@
       "prompt_en": "Which one is the butterfly?",
       "speech": "Which one is the butterfly?",
       "imageable": true,
-      "distractor_pool": [
-        "beetle",
-        "eagle",
-        "swan",
-        "strawberry"
-      ],
-      "adjacent_types": [
-        "animal"
-      ],
+      "distractor_pool": ["beetle", "eagle", "swan", "strawberry"],
+      "adjacent_types": ["animal"],
       "image_id": "img_butterfly_v1",
       "image": "assets/flashcards/flyers/butterfly.jpg",
       "fallback_image": "assets/flashcards/flyers/butterfly.jpg",
@@ -290,16 +227,8 @@
       "prompt_en": "Which one is the strawberry?",
       "speech": "Which one is the strawberry?",
       "imageable": true,
-      "distractor_pool": [
-        "apple",
-        "banana",
-        "grape",
-        "orange"
-      ],
-      "adjacent_types": [
-        "vegetable",
-        "meal"
-      ],
+      "distractor_pool": ["apple", "banana", "grape", "orange"],
+      "adjacent_types": ["vegetable", "meal"],
       "image_id": "img_strawberry_v1",
       "image": "assets/flashcards/flyers/strawberry.jpg",
       "fallback_image": "assets/flashcards/flyers/strawberry.jpg",
@@ -321,15 +250,8 @@
       "prompt_en": "Which one is the beetle?",
       "speech": "Which one is the beetle?",
       "imageable": true,
-      "distractor_pool": [
-        "butterfly",
-        "tortoise",
-        "octopus",
-        "eagle"
-      ],
-      "adjacent_types": [
-        "animal"
-      ],
+      "distractor_pool": ["butterfly", "tortoise", "octopus", "eagle"],
+      "adjacent_types": ["animal"],
       "image_id": "img_beetle_v1",
       "image": "assets/flashcards/flyers/beetle.jpg",
       "fallback_image": "assets/flashcards/flyers/beetle.jpg",
@@ -351,15 +273,8 @@
       "prompt_en": "Which one is the violin?",
       "speech": "Which one is the violin?",
       "imageable": true,
-      "distractor_pool": [
-        "guitar",
-        "book",
-        "pencil",
-        "ruler"
-      ],
-      "adjacent_types": [
-        "object"
-      ],
+      "distractor_pool": ["guitar", "book", "pencil", "ruler"],
+      "adjacent_types": ["object"],
       "image_id": "img_violin_v1",
       "image": "assets/flashcards/flyers/violin.jpg",
       "fallback_image": "assets/flashcards/flyers/violin.jpg",
@@ -445,12 +360,7 @@
       "prompt_en": "Which one is the umbrella?",
       "speech": "Which one is the umbrella?",
       "imageable": true,
-      "distractor_pool": [
-        "necklace",
-        "scarf",
-        "hat",
-        "jacket"
-      ],
+      "distractor_pool": ["necklace", "scarf", "hat", "jacket"],
       "adjacent_types": [],
       "image_id": "img_umbrella_v1",
       "image": "assets/flashcards/flyers/umbrella.jpg",
@@ -473,12 +383,7 @@
       "prompt_en": "Which one is the necklace?",
       "speech": "Which one is the necklace?",
       "imageable": true,
-      "distractor_pool": [
-        "umbrella",
-        "scarf",
-        "glasses",
-        "jacket"
-      ],
+      "distractor_pool": ["umbrella", "scarf", "glasses", "jacket"],
       "adjacent_types": [],
       "image_id": "img_necklace_v1",
       "image": "assets/flashcards/flyers/necklace.jpg",
@@ -1004,39 +909,19 @@
   "batches": [
     {
       "id": "flyers-01",
-      "slugs": [
-        "camel",
-        "dinosaur",
-        "eagle",
-        "octopus"
-      ]
+      "slugs": ["camel", "dinosaur", "eagle", "octopus"]
     },
     {
       "id": "flyers-02",
-      "slugs": [
-        "swan",
-        "tortoise",
-        "ambulance",
-        "rocket"
-      ]
+      "slugs": ["swan", "tortoise", "ambulance", "rocket"]
     },
     {
       "id": "flyers-03",
-      "slugs": [
-        "butterfly",
-        "strawberry",
-        "beetle",
-        "violin"
-      ]
+      "slugs": ["butterfly", "strawberry", "beetle", "violin"]
     },
     {
       "id": "flyers-04",
-      "slugs": [
-        "castle",
-        "pyramid",
-        "umbrella",
-        "necklace"
-      ]
+      "slugs": ["castle", "pyramid", "umbrella", "necklace"]
     }
   ]
 }
